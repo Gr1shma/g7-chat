@@ -1,23 +1,6 @@
 "use client";
 
 import { Copy as CopyIcon } from "lucide-react";
-import Prism from "prismjs";
-import LoadLanguages from "prismjs/components/";
-LoadLanguages([
-    "bash",
-    "css",
-    "html",
-    "python",
-    "java",
-    "csharp",
-    "php",
-    "r",
-    "ruby",
-    "perl",
-    "zig",
-    "dart",
-    "elixir",
-]);
 import { Highlight, themes } from "prism-react-renderer";
 
 interface CodeBlockProps {
