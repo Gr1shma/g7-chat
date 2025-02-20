@@ -1,4 +1,5 @@
 import type { Message } from "ai";
+import { Markdown } from "~/components/markdown";
 
 interface ChatMessagesProps {
     chatId: string;
@@ -19,7 +20,7 @@ export function ChatMessages({ chatId, messages }: ChatMessagesProps) {
                 ) : (
                     <div className="flex justify-start" key={m.id}>
                         <div className="group relative w-full max-w-full break-words">
-                            <div>{m.content}</div>
+                            <Markdown>{m.content}</Markdown>
                         </div>
                     </div>
                 )
