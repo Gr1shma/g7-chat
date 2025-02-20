@@ -12,7 +12,6 @@ interface ChatViewProps {
     chatId: string;
 }
 
-
 export function ChatView({ chatId }: ChatViewProps) {
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -21,7 +20,8 @@ export function ChatView({ chatId }: ChatViewProps) {
 
     const handleScroll = () => {
         if (chatContainerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+            const { scrollTop, scrollHeight, clientHeight } =
+                chatContainerRef.current;
             setShowScrollButton(scrollTop + clientHeight < scrollHeight - 50);
         }
     };
@@ -46,15 +46,16 @@ export function ChatView({ chatId }: ChatViewProps) {
                         {showScrollButton ? (
                             <Button
                                 variant="default"
-                                className="h-8 px-3 text-xs flex items-center gap-2 rounded-full bg-[#404040] text-white opacity-90 hover:opacity-100"
+                                className="flex h-8 items-center gap-2 rounded-full bg-[#404040] px-3 text-xs text-white opacity-90 hover:opacity-100"
                                 onClick={() => {
                                     console.log(bottomRef.current);
                                     bottomRef.current?.scrollIntoView({
-                                        behavior: "smooth"
-                                    })
+                                        behavior: "smooth",
+                                    });
                                 }}
                             >
-                                Scroll to bottom <ChevronDownIcon className="size-4" />
+                                Scroll to bottom{" "}
+                                <ChevronDownIcon className="size-4" />
                             </Button>
                         ) : null}
                     </div>
