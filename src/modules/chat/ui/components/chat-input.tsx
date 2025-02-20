@@ -5,6 +5,7 @@ import type { ChatRequestOptions } from "ai";
 import { Button } from "~/components/ui/button";
 import { Send as SendIcon } from "lucide-react";
 import { useCallback } from "react";
+import { PromptTextarea } from "~/components/pormpt-textare";
 
 interface ChatInputProps {
     chatId: string;
@@ -37,8 +38,8 @@ export function ChatInputForm({
 
     return (
         <div>
-            <textarea
-                className="text-black outline-none disabled:opacity-0"
+            <PromptTextarea
+                className="text-neutral-100 outline-none disabled:opacity-0"
                 value={input}
                 onChange={handleInput}
                 onKeyDown={(event) => {
