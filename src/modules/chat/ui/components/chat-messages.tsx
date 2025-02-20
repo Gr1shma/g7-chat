@@ -9,7 +9,6 @@ interface ChatMessagesProps {
 export function ChatMessages({ chatId, messages }: ChatMessagesProps) {
     return (
         <div className="mx-auto flex w-full max-w-3xl flex-col space-y-12 p-4 pb-8">
-            <div>{chatId}</div>
             {messages.map((m) =>
                 m.role === "user" ? (
                     <div className="flex justify-end" key={m.id}>

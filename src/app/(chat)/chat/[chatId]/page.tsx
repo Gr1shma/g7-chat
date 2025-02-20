@@ -1,5 +1,7 @@
 import { ChatView } from "~/modules/chat/ui/views/chat-view";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page({
     params,
 }: {
