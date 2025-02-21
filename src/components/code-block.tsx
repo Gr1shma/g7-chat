@@ -52,7 +52,6 @@ export function CodeBlock({
                 </div>
             )}
             <Highlight
-                prism={Prism}
                 theme={themes.vsDark}
                 code={code}
                 language={language || "text"}
