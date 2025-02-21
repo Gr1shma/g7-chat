@@ -4,7 +4,7 @@ import "server-only";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from ".";
 
-import { chats_table, messages_table} from "./schema";
+import { chats_table, messages_table } from "./schema";
 
 export const QUERIES = {
     chatQueries: {
@@ -20,7 +20,11 @@ export const QUERIES = {
                 throw error;
             }
         },
-        getChatsByUserId: async function getChatsByUserId({ id }: { id: string }) {
+        getChatsByUserId: async function getChatsByUserId({
+            id,
+        }: {
+            id: string;
+        }) {
             try {
                 return await db
                     .select()
@@ -31,10 +35,14 @@ export const QUERIES = {
                 console.error("Failed to get chat by user from database");
                 throw error;
             }
-        }
+        },
     },
     messageQueries: {
-        getMessageByChatId: async function getMessagesByChatId({ id }: { id: string }) {
+        getMessageByChatId: async function getMessagesByChatId({
+            id,
+        }: {
+            id: string;
+        }) {
             try {
                 return await db
                     .select()
@@ -42,7 +50,10 @@ export const QUERIES = {
                     .where(eq(messages_table.chatId, id))
                     .orderBy(asc(messages_table.createdAt));
             } catch (error) {
-                console.error("Failed to get messages by chat id from database", error);
+                console.error(
+                    "Failed to get messages by chat id from database",
+                    error
+                );
                 throw error;
             }
         },
@@ -56,6 +67,6 @@ export const QUERIES = {
                 console.error("Failed to get message by id from database");
                 throw error;
             }
-        }
-    }
-}
+        },
+    },
+};

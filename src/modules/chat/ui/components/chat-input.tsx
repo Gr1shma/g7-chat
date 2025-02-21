@@ -1,18 +1,12 @@
 "use client";
 
-import type { ChatRequestOptions } from "ai";
-
-import { Button } from "~/components/ui/button";
-import { Send as SendIcon } from "lucide-react";
-import { useCallback } from "react";
-import { PromptTextarea } from "~/components/pormpt-textare";
-
 interface ChatInputProps {
     chatId: string;
     input: string;
+    setInput: (value: string) => void;
     isLoading: boolean;
-    setInputAction: (value: string) => void;
-    handleSubmitAction: (
+    stop: () => void;
+    handleSubmit: (
         event?: {
             preventDefault?: () => void;
         },
@@ -20,33 +14,72 @@ interface ChatInputProps {
     ) => void;
 }
 
-export function ChatInputForm({
+import type { ChatRequestOptions } from "ai";
+
+import type React from "react";
+
+import { useRef, useEffect, useCallback, memo } from "react";
+
+import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
+import { SendIcon } from "lucide-react";
+
+function PureChatInput({
     chatId,
     input,
+    setInput,
     isLoading,
-    setInputAction,
-    handleSubmitAction,
+    handleSubmit,
 }: ChatInputProps) {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            adjustHeight();
+        }
+    }, []);
+
+    const adjustHeight = () => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
+        }
+    };
+
+    const resetHeight = () => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = "48px";
+        }
+    };
+
     const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setInputAction(event.target.value);
+        setInput(event.target.value);
+        adjustHeight();
     };
 
     const submitForm = useCallback(() => {
-        // window.history.replaceState({}, "", `/chat/${chatId}`);
-        handleSubmitAction();
-    }, [handleSubmitAction, chatId]);
+        // window.history.replaceState({}, '', `/chat/${chatId}`);
+        handleSubmit();
+        resetHeight();
+    }, [handleSubmit, chatId]);
 
     return (
         <div>
-            <PromptTextarea
-                className="text-neutral-100 outline-none disabled:opacity-0"
+            <textarea
+                ref={textareaRef}
+                placeholder="Type your message here..."
                 value={input}
                 onChange={handleInput}
+                className="h-auto max-h-[240px] min-h-[48px] w-full resize-none overflow-y-auto bg-transparent text-base leading-6 text-neutral-100 outline-none disabled:opacity-0"
+                rows={2}
+                autoFocus
                 onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
                         event.preventDefault();
+
                         if (isLoading) {
-                            console.error(
+                            toast.error(
                                 "Please wait for the model to finish its response!"
                             );
                         } else {
@@ -56,7 +89,9 @@ export function ChatInputForm({
                 }}
             />
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                <div className="flex items-center gap-0.5"></div>
+                <div className="flex items-center gap-0.5">
+                    {/* Modal Select | Link | Image */}
+                </div>
                 <Button
                     type="submit"
                     variant="ghost"
@@ -73,3 +108,9 @@ export function ChatInputForm({
         </div>
     );
 }
+
+export const ChatInputForm = memo(PureChatInput, (prevProps, nextProps) => {
+    if (prevProps.input !== nextProps.input) return false;
+    if (prevProps.isLoading !== nextProps.isLoading) return false;
+    return true;
+});

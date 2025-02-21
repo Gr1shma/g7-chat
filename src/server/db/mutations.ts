@@ -27,7 +27,6 @@ export const MUTATIONS = {
                 throw error;
             }
         },
-
     },
     messageMutations: {
         sageMessage: async function saveMessages({
@@ -41,6 +40,6 @@ export const MUTATIONS = {
                 console.error("Failed to save messages in database", error);
                 throw error;
             }
-        }
+        },
     },
-}
+};

@@ -26,17 +26,18 @@ export function ChatView({ chatId }: ChatViewProps) {
         }
     };
 
-    const { input, setInput, isLoading, messages, handleSubmit } = useChat({
-        id: chatId,
-        experimental_throttle: 100,
-        sendExtraMessageFields: true,
-        onFinish: (message) => {
-            console.log(message);
-        },
-        onError: (error) => {
-            console.error("Error", error);
-        },
-    });
+    const { input, setInput, isLoading, messages, handleSubmit, stop } =
+        useChat({
+            id: chatId,
+            experimental_throttle: 100,
+            sendExtraMessageFields: true,
+            onFinish: (message) => {
+                console.log(message);
+            },
+            onError: (error) => {
+                console.error("Error", error);
+            },
+        });
 
     return (
         <>
@@ -64,8 +65,9 @@ export function ChatView({ chatId }: ChatViewProps) {
                             isLoading={isLoading}
                             input={input}
                             chatId={chatId}
-                            handleSubmitAction={handleSubmit}
-                            setInputAction={setInput}
+                            setInput={setInput}
+                            handleSubmit={handleSubmit}
+                            stop={stop}
                         />
                     </form>
                 </div>
