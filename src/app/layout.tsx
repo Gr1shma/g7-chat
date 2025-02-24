@@ -1,7 +1,8 @@
-import "~/styles/globals.css";
-
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+
+import "~/styles/globals.css";
+import { ThemeProvider } from "~/components/theme-provider";
 
 export const metadata: Metadata = {
     title: "g7-chat",
@@ -18,7 +19,16 @@ export default function RootLayout({
             className={`${GeistSans.variable}`}
             suppressHydrationWarning
         >
-            <body className="bg-[#1a1a1a] text-white">{children}</body>
+            <body className="">
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    {children}
+                </ThemeProvider>
+            </body>
         </html>
     );
 }

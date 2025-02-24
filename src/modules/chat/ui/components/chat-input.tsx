@@ -95,7 +95,7 @@ function PureChatInput({
                 <Button
                     type="submit"
                     variant="ghost"
-                    className="hover:text-whilte absolute bottom-3 right-3 h-10 w-10 rounded-full bg-[#1a1a1a] p-2 text-white hover:bg-primary/30"
+                    className="hover:text-whilte absolute bottom-3 right-3 h-10 w-10 rounded-full bg-secondary p-2 text-white hover:bg-secondary/80"
                     aria-label="Send Message"
                     onClick={(event) => {
                         event.preventDefault();

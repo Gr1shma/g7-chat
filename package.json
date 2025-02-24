@@ -16,14 +16,17 @@
         "preview": "next build && next start",
         "start": "next start",
         "typecheck": "tsc --noEmit",
-        "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx,json}\" --cache",
-        "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx,json}\" --cache"
+        "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx,json,css}\" --cache",
+        "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx,json,css}\" --cache"
     },
     "dependencies": {
         "@ai-sdk/google": "^1.1.16",
         "@auth/drizzle-adapter": "^1.7.2",
         "@neondatabase/serverless": "^0.10.4",
+        "@radix-ui/react-dialog": "^1.1.6",
+        "@radix-ui/react-separator": "^1.1.2",
         "@radix-ui/react-slot": "^1.1.2",
+        "@radix-ui/react-tooltip": "^1.1.8",
         "@t3-oss/env-nextjs": "^0.10.1",
         "ai": "^4.1.44",
         "class-variance-authority": "^0.7.1",
