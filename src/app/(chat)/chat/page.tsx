@@ -12,5 +12,5 @@ export default async function ChatPage() {
     }
     const chatId = crypto.randomUUID();
 
-    return <ChatView chatId={chatId} />;
+    return <ChatView chatId={chatId} initialMessages={[]} />;
 }

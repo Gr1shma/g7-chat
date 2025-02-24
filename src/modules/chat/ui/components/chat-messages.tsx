@@ -2,11 +2,10 @@ import type { Message } from "ai";
 import { Markdown } from "~/components/markdown";
 
 interface ChatMessagesProps {
-    chatId: string;
     messages: Message[];
 }
 
-export function ChatMessages({ chatId, messages }: ChatMessagesProps) {
+export function ChatMessages({ messages }: ChatMessagesProps) {
     return (
         <div className="mx-auto flex w-full max-w-3xl flex-col space-y-12 p-4 pb-8">
             {messages.map((m) =>

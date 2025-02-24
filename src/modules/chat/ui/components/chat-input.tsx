@@ -59,7 +59,7 @@ function PureChatInput({
     };
 
     const submitForm = useCallback(() => {
-        // window.history.replaceState({}, '', `/chat/${chatId}`);
+        window.history.replaceState({}, "", `/chat/${chatId}`);
         handleSubmit();
         resetHeight();
     }, [handleSubmit, chatId]);

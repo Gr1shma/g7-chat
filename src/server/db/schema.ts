@@ -104,10 +104,13 @@ export const verificationTokens = createTable(
 );
 
 export const chats_table = createTable("chats", {
-    id: uuid("id").primaryKey().notNull().defaultRandom(),
-    createdAt: timestamp("createdAt").notNull(),
+    id: varchar("id", { length: 255 })
+        .notNull()
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    createdAt: timestamp("created_at").notNull(),
     title: text("title").notNull(),
-    userId: uuid("userId")
+    userId: varchar("user_id", { length: 255 })
         .notNull()
         .references(() => users.id),
 });
@@ -115,8 +118,11 @@ export const chats_table = createTable("chats", {
 export type DB_CHAT_TYPE = InferSelectModel<typeof chats_table>;
 
 export const messages_table = createTable("messages", {
-    id: uuid("id").primaryKey().notNull().defaultRandom(),
-    chatId: uuid("chatId")
+    id: varchar("id", { length: 255 })
+        .notNull()
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    chatId: varchar("chat_id", { length: 255 })
         .notNull()
         .references(() => chats_table.id),
     role: varchar("role").notNull(),

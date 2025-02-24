@@ -1,13 +1,16 @@
 import { Button } from "~/components/ui/button";
 import { providerMap } from "~/server/auth/config";
 import { AuthError } from "next-auth";
-import { signIn } from "~/server/auth";
+import { auth, signIn } from "~/server/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-export default function Page(props: {
-    searchParams: { callbackUrl: string | undefined };
-}) {
+export default async function Page() {
+    const session = await auth();
+    if (session) {
+        redirect("/");
+    }
+
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-8">
             <div className="mb-8 text-center">
@@ -23,10 +26,7 @@ export default function Page(props: {
                         action={async () => {
                             "use server";
                             try {
-                                await signIn(provider.id, {
-                                    redirectTo:
-                                        props.searchParams?.callbackUrl ?? "",
-                                });
+                                await signIn(provider.id);
                             } catch (error) {
                                 if (error instanceof AuthError) {
                                     return redirect("/");

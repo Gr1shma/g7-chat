@@ -29,7 +29,7 @@ export const MUTATIONS = {
         },
     },
     messageMutations: {
-        sageMessage: async function saveMessages({
+        saveMessages: async function saveMessages({
             messages,
         }: {
             messages: Array<DB_MESSAGE_TYPE>;

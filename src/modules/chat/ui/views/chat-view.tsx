@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import { useState, useRef } from "react";
 
 import { ChatInputForm } from "../components/chat-input";
@@ -10,9 +10,10 @@ import { ChevronDown as ChevronDownIcon } from "lucide-react";
 
 interface ChatViewProps {
     chatId: string;
+    initialMessages: Array<Message>;
 }
 
-export function ChatView({ chatId }: ChatViewProps) {
+export function ChatView({ chatId, initialMessages }: ChatViewProps) {
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -29,6 +30,7 @@ export function ChatView({ chatId }: ChatViewProps) {
     const { input, setInput, isLoading, messages, handleSubmit, stop } =
         useChat({
             id: chatId,
+            initialMessages,
             experimental_throttle: 100,
             sendExtraMessageFields: true,
             onFinish: (message) => {
@@ -78,7 +80,7 @@ export function ChatView({ chatId }: ChatViewProps) {
                     onScroll={handleScroll}
                     ref={chatContainerRef}
                 >
-                    <ChatMessages chatId={chatId} messages={messages} />
+                    <ChatMessages messages={messages} />
                     <div ref={bottomRef}></div>
                 </div>
             </div>

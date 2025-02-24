@@ -38,16 +38,16 @@ export const QUERIES = {
         },
     },
     messageQueries: {
-        getMessageByChatId: async function getMessagesByChatId({
-            id,
+        getMessagesByChatId: async function getMessagesByChatId({
+            chatId,
         }: {
-            id: string;
+            chatId: string;
         }) {
             try {
                 return await db
                     .select()
                     .from(messages_table)
-                    .where(eq(messages_table.chatId, id))
+                    .where(eq(messages_table.chatId, chatId))
                     .orderBy(asc(messages_table.createdAt));
             } catch (error) {
                 console.error(

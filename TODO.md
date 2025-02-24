@@ -4,10 +4,12 @@
 - [ ] Saving the input to local storage to use it
 
 # Backend
-- [ ] All Queries and Mutations
-    - [ ] Chat
-    - [ ] Message
-- [ ] Auth
+- [x] Api routes -> (not fully checked DELETE ones)
+- [x] All Queries and Mutations
+    - [x] Chat
+    - [x] Message
+    ( Have to probably update in the future )
+- [x] Auth
 
 # NEXT TODO
 - [ ] Upload image and ask
