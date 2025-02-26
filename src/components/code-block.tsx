@@ -1,7 +1,21 @@
 "use client";
 
 import { Copy as CopyIcon } from "lucide-react";
-import { Highlight, themes } from "prism-react-renderer";
+import { Highlight, themes, Prism } from "prism-react-renderer";
+
+(typeof global !== "undefined" ? global : window).Prism = Prism;
+
+require("prismjs/components/prism-bash");
+require("prismjs/components/prism-css");
+require("prismjs/components/prism-python");
+require("prismjs/components/prism-java");
+require("prismjs/components/prism-csharp");
+require("prismjs/components/prism-r");
+require("prismjs/components/prism-ruby");
+require("prismjs/components/prism-perl");
+require("prismjs/components/prism-zig");
+require("prismjs/components/prism-dart");
+require("prismjs/components/prism-elixir");
 
 interface CodeBlockProps {
     node: any;
