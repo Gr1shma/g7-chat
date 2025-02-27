@@ -16,7 +16,6 @@ export const QUERIES = {
                     .where(eq(chats_table.id, id));
                 return selectedChat;
             } catch (error) {
-                console.error("Failed to get chat by id from database");
                 throw error;
             }
         },
@@ -32,7 +31,6 @@ export const QUERIES = {
                     .where(eq(chats_table.userId, id))
                     .orderBy(desc(chats_table.createdAt));
             } catch (error) {
-                console.error("Failed to get chat by user from database");
                 throw error;
             }
         },
@@ -50,10 +48,6 @@ export const QUERIES = {
                     .where(eq(messages_table.chatId, chatId))
                     .orderBy(asc(messages_table.createdAt));
             } catch (error) {
-                console.error(
-                    "Failed to get messages by chat id from database",
-                    error
-                );
                 throw error;
             }
         },
@@ -64,7 +58,6 @@ export const QUERIES = {
                     .from(messages_table)
                     .where(eq(messages_table.id, id));
             } catch (error) {
-                console.error("Failed to get message by id from database");
                 throw error;
             }
         },

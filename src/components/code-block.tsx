@@ -16,6 +16,9 @@ require("prismjs/components/prism-perl");
 require("prismjs/components/prism-zig");
 require("prismjs/components/prism-dart");
 require("prismjs/components/prism-elixir");
+require("prismjs/components/prism-lua");
+require("prismjs/components/prism-erlang");
+require("prismjs/components/prism-pascal");
 
 interface CodeBlockProps {
     node: any;
@@ -66,6 +69,7 @@ export function CodeBlock({
                 </div>
             )}
             <Highlight
+                prism={Prism}
                 theme={themes.vsDark}
                 code={code}
                 language={language || "text"}

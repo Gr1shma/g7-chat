@@ -23,7 +23,6 @@ export const MUTATIONS = {
                     title,
                 });
             } catch (error) {
-                console.error("Failed to save chat in database");
                 throw error;
             }
         },
@@ -37,7 +36,6 @@ export const MUTATIONS = {
             try {
                 return await db.insert(messages_table).values(messages);
             } catch (error) {
-                console.error("Failed to save messages in database", error);
                 throw error;
             }
         },

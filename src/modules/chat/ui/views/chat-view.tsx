@@ -33,12 +33,6 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
             initialMessages,
             experimental_throttle: 100,
             sendExtraMessageFields: true,
-            onFinish: (message) => {
-                console.log(message);
-            },
-            onError: (error) => {
-                console.error("Error", error);
-            },
         });
 
     return (
@@ -51,7 +45,6 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                                 variant="default"
                                 className="bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-8 px-3 text-xs flex items-center gap-2 rounded-full opacity-90 hover:opacity-100"
                                 onClick={() => {
-                                    console.log(bottomRef.current);
                                     bottomRef.current?.scrollIntoView({
                                         behavior: "smooth",
                                     });
