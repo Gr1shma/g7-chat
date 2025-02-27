@@ -10,7 +10,7 @@ export default async function ChatPage() {
     if (!session) {
         redirect("/auth");
     }
-    const chatId = crypto.randomUUID();
+    const threadId = crypto.randomUUID();
 
-    return <ChatView chatId={chatId} initialMessages={[]} />;
+    return <ChatView threadId={threadId} initialMessages={[]} />;
 }

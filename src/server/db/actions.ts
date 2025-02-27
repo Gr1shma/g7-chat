@@ -3,12 +3,12 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from ".";
 
-import { chats_table, messages_table } from "./schema";
+import { threads_table, messages_table } from "./schema";
 
-export async function deleteChatById({ id }: { id: string }) {
+export async function deleteThreadById({ id }: { id: string }) {
     try {
-        await db.delete(messages_table).where(eq(messages_table.chatId, id));
-        return await db.delete(chats_table).where(eq(chats_table.id, id));
+        await db.delete(messages_table).where(eq(messages_table.threadId, id));
+        return await db.delete(threads_table).where(eq(threads_table.id, id));
     } catch (error) {
         throw error;
     }

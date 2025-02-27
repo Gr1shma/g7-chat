@@ -9,11 +9,11 @@ import { Button } from "~/components/ui/button";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
 
 interface ChatViewProps {
-    chatId: string;
+    threadId: string;
     initialMessages: Array<Message>;
 }
 
-export function ChatView({ chatId, initialMessages }: ChatViewProps) {
+export function ChatView({ threadId, initialMessages }: ChatViewProps) {
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -29,7 +29,7 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
 
     const { input, setInput, isLoading, messages, handleSubmit, stop } =
         useChat({
-            id: chatId,
+            id: threadId,
             initialMessages,
             experimental_throttle: 100,
             sendExtraMessageFields: true,
@@ -59,7 +59,7 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                         <ChatInputForm
                             isLoading={isLoading}
                             input={input}
-                            chatId={chatId}
+                            threadId={threadId}
                             setInput={setInput}
                             handleSubmit={handleSubmit}
                             stop={stop}

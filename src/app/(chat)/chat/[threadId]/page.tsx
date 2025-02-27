@@ -10,25 +10,25 @@ export const dynamic = "force-dynamic";
 export default async function Page({
     params,
 }: {
-    params: Promise<{ chatId: string }>;
+    params: Promise<{ threadId: string }>;
 }) {
     const session = await auth();
     if (!session) {
         redirect("/auth");
     }
 
-    const { chatId } = await params;
-    const chat = await QUERIES.chatQueries.getChatById({ id: chatId });
+    const { threadId } = await params;
+    const chat = await QUERIES.thread.getById({ id: threadId });
     if (!chat) {
         notFound();
     }
-    const messagesFromDb = await QUERIES.messageQueries.getMessagesByChatId({
-        chatId,
+    const messagesFromDb = await QUERIES.message.getByThreadId({
+        threadId,
     });
 
     return (
         <ChatView
-            chatId={chatId}
+            threadId={threadId}
             initialMessages={convertToUIMessages(messagesFromDb)}
         />
     );

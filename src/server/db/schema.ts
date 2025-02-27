@@ -1,4 +1,4 @@
-import { InferSelectModel, relations, sql } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
     index,
     integer,
@@ -7,10 +7,10 @@ import {
     primaryKey,
     text,
     timestamp,
-    uuid,
     varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { threadId } from "worker_threads";
 
 export const createTable = pgTableCreator((name) => `g7-chat_${name}`);
 
@@ -21,10 +21,6 @@ export const users = createTable("user", {
         .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name", { length: 255 }),
     email: varchar("email", { length: 255 }).notNull(),
-    emailVerified: timestamp("email_verified", {
-        mode: "date",
-        withTimezone: true,
-    }).default(sql`CURRENT_TIMESTAMP`),
     image: varchar("image", { length: 255 }),
 });
 
@@ -103,7 +99,7 @@ export const verificationTokens = createTable(
     })
 );
 
-export const chats_table = createTable("chats", {
+export const threads_table = createTable("threads", {
     id: varchar("id", { length: 255 })
         .notNull()
         .primaryKey()
@@ -115,16 +111,16 @@ export const chats_table = createTable("chats", {
         .references(() => users.id),
 });
 
-export type DB_CHAT_TYPE = InferSelectModel<typeof chats_table>;
+export type DB_THREAD_TYPE = InferSelectModel<typeof threads_table>;
 
 export const messages_table = createTable("messages", {
     id: varchar("id", { length: 255 })
         .notNull()
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
-    chatId: varchar("chat_id", { length: 255 })
+    threadId: varchar("thread_id", { length: 255 })
         .notNull()
-        .references(() => chats_table.id),
+        .references(() => threads_table.id),
     role: varchar("role").notNull(),
     content: json("content").notNull(),
     createdAt: timestamp("createdAt").notNull(),
