@@ -43,7 +43,7 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                         {showScrollButton ? (
                             <Button
                                 variant="default"
-                                className="bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-8 px-3 text-xs flex items-center gap-2 rounded-full opacity-90 hover:opacity-100"
+                                className="flex h-8 items-center gap-2 rounded-full bg-secondary px-3 text-xs text-secondary-foreground opacity-90 shadow-sm hover:bg-secondary/80 hover:opacity-100"
                                 onClick={() => {
                                     bottomRef.current?.scrollIntoView({
                                         behavior: "smooth",

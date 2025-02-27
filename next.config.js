@@ -12,6 +12,16 @@ const config = {
     typescript: {
         ignoreBuildErrors: true,
     },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "*.googleusercontent.com",
+                port: "",
+                pathname: "**",
+            },
+        ],
+    },
 };
 
 export default config;

@@ -1,17 +1,12 @@
 # Ui
-- [ ] Sidebar
+- [x] Sidebar
+    - [ ] Chat deletion
+    - [ ] Sidebar search functions
 - [ ] User All management area
 - [ ] Saving the input to local storage to use it
 
-# Backend
-- [x] Api routes -> (not fully checked DELETE ones)
-- [x] All Queries and Mutations
-    - [x] Chat
-    - [x] Message
-    ( Have to probably update in the future )
-- [x] Auth
-
 # NEXT TODO
-- [ ] Upload image and ask
-- [ ] User management both backend and frontend
-- [ ] Localstorage for faster load and sync (api for sync with database)
+- [ ] User management(user change name if possible image) both backend and frontend
+- [ ] Chat Pin unpin
+- [ ] Using the sync ststem to sync the data from the client to server
+- [ ] Export the data in json
