@@ -7,7 +7,7 @@ export async function GET() {
     if (!session || !session.user) {
         return Response.json("Unauthorized!", { status: 401 });
     }
-    const chats = await QUERIES.thread.getByUserId({
+    const chats = await QUERIES.chatQueries.getChatsByUserId({
         id: session.user.id!,
     });
     return Response.json(chats);

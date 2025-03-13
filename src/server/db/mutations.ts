@@ -2,11 +2,11 @@ import "server-only";
 
 import { db } from ".";
 
-import { threads_table, messages_table, type DB_MESSAGE_TYPE } from "./schema";
+import { chats_table, messages_table, type DB_MESSAGE_TYPE } from "./schema";
 
 export const MUTATIONS = {
-    thread: {
-        save: async function saveChat({
+    chatMutations: {
+        saveChat: async function saveChat({
             id,
             userId,
             title,
@@ -16,7 +16,7 @@ export const MUTATIONS = {
             title: string;
         }) {
             try {
-                return await db.insert(threads_table).values({
+                return await db.insert(chats_table).values({
                     id,
                     createdAt: new Date(),
                     userId,
@@ -27,8 +27,8 @@ export const MUTATIONS = {
             }
         },
     },
-    message: {
-        save: async function saveMessages({
+    messageMutations: {
+        saveMessages: async function saveMessages({
             messages,
         }: {
             messages: Array<DB_MESSAGE_TYPE>;

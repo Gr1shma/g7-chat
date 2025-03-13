@@ -14,7 +14,7 @@ import {
     sanitizeResponseMessages,
 } from "~/lib/utils";
 import { google } from "@ai-sdk/google";
-import { deleteThreadById } from "~/server/db/actions";
+import { deleteChatById } from "~/server/db/actions";
 
 export const maxDuration = 60;
 
@@ -34,21 +34,21 @@ export async function POST(request: Request) {
         return new Response("No user message found", { status: 400 });
     }
 
-    const chat = await QUERIES.thread.getById({ id });
+    const chat = await QUERIES.chatQueries.getChatById({ id });
 
     if (!chat) {
         const title = await generateTitleFromUserMessage({
             message: userMessage,
         });
-        await MUTATIONS.thread.save({
+        await MUTATIONS.chatMutations.saveChat({
             id,
             userId: session.user.id,
             title,
         });
     }
 
-    await MUTATIONS.message.save({
-        messages: [{ ...userMessage, createdAt: new Date(), threadId: id }],
+    await MUTATIONS.messageMutations.saveMessages({
+        messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
     });
 
     return createDataStreamResponse({
@@ -68,12 +68,12 @@ export async function POST(request: Request) {
                                     reasoning,
                                 });
 
-                            await MUTATIONS.message.save({
+                            await MUTATIONS.messageMutations.saveMessages({
                                 messages: sanitizedResponseMessages.map(
                                     (message) => {
                                         return {
                                             id: message.id,
-                                            threadId: id,
+                                            chatId: id,
                                             role: message.role,
                                             content: message.content,
                                             createdAt: new Date(),
@@ -117,7 +117,7 @@ export async function DELETE(request: Request) {
     }
 
     try {
-        const chat = await QUERIES.thread.getById({ id });
+        const chat = await QUERIES.chatQueries.getChatById({ id });
         if (!chat) {
             return new Response("Not Found", { status: 404 });
         }
@@ -126,7 +126,7 @@ export async function DELETE(request: Request) {
             return new Response("Unauthorized", { status: 401 });
         }
 
-        await deleteThreadById({ id });
+        await deleteChatById({ id });
 
         return new Response("Chat deleted", { status: 200 });
     } catch (error) {

@@ -1,7 +1,7 @@
 "use client";
 
 interface ChatInputProps {
-    threadId: string;
+    chatId: string;
     input: string;
     setInput: (value: string) => void;
     isLoading: boolean;
@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { SendIcon } from "lucide-react";
 
 function PureChatInput({
-    threadId,
+    chatId,
     input,
     setInput,
     isLoading,
@@ -59,10 +59,10 @@ function PureChatInput({
     };
 
     const submitForm = useCallback(() => {
-        window.history.replaceState({}, "", `/chat/${threadId}`);
+        window.history.replaceState({}, "", `/chat/${chatId}`);
         handleSubmit();
         resetHeight();
-    }, [handleSubmit, threadId]);
+    }, [handleSubmit, chatId]);
 
     return (
         <div>
