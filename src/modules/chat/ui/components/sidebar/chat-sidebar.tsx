@@ -18,6 +18,7 @@ interface ChatSidebarProps {
 }
 
 export function ChatSideBar({ user }: ChatSidebarProps) {
+    console.log("Chat Side bar rendered");
     return (
         <Sidebar>
             <SidebarHeader>

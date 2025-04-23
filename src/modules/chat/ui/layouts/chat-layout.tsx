@@ -10,6 +10,7 @@ export async function ChatLayout({
     if (!session) {
         redirect("/auth");
     }
+    console.log("Chat layout rendered");
     return (
         <div className="relative flex h-[100dvh] text-gray-100">
             <SidebarProvider>

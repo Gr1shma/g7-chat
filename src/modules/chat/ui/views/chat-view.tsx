@@ -7,6 +7,9 @@ import { ChatInputForm } from "../components/chat-input";
 import { ChatMessages } from "../components/chat-messages";
 import { Button } from "~/components/ui/button";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
+import { mutate, unstable_serialize } from "swr";
+import { getChatHistoryPaginationKey } from "../components/sidebar/history-sidebar";
+import { toast } from "sonner";
 
 interface ChatViewProps {
     chatId: string;
@@ -27,13 +30,26 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         }
     };
 
-    const { input, setInput, isLoading, messages, handleSubmit, stop } =
-        useChat({
-            id: chatId,
-            initialMessages,
-            experimental_throttle: 100,
-            sendExtraMessageFields: true,
-        });
+    const {
+        input,
+        setInput,
+        isLoading,
+        messages,
+        setMessages,
+        handleSubmit,
+        stop,
+    } = useChat({
+        id: chatId,
+        initialMessages,
+        experimental_throttle: 100,
+        sendExtraMessageFields: true,
+        onFinish: () => {
+            mutate(unstable_serialize(getChatHistoryPaginationKey));
+        },
+        onError: () => {
+            toast("An error occured");
+        },
+    });
 
     return (
         <>
@@ -63,6 +79,8 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                             setInput={setInput}
                             handleSubmit={handleSubmit}
                             stop={stop}
+                            messages={messages}
+                            setMessages={setMessages}
                         />
                     </form>
                 </div>

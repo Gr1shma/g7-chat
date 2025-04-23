@@ -1,11 +1,22 @@
 "use client";
 
+import type { ChatRequestOptions, Message } from "ai";
+import type React from "react";
+import { useRef, useEffect, useCallback, memo } from "react";
+import { toast } from "sonner";
+import { UseChatHelpers } from "ai/react";
+
+import { Button } from "~/components/ui/button";
+import { SendIcon } from "lucide-react";
+
 interface ChatInputProps {
     chatId: string;
     input: string;
     setInput: (value: string) => void;
     isLoading: boolean;
     stop: () => void;
+    messages: Message[];
+    setMessages: UseChatHelpers["setMessages"];
     handleSubmit: (
         event?: {
             preventDefault?: () => void;
@@ -14,22 +25,14 @@ interface ChatInputProps {
     ) => void;
 }
 
-import type { ChatRequestOptions } from "ai";
-
-import type React from "react";
-
-import { useRef, useEffect, useCallback, memo } from "react";
-
-import { Button } from "~/components/ui/button";
-import { toast } from "sonner";
-import { SendIcon } from "lucide-react";
-
 function PureChatInput({
     chatId,
     input,
     setInput,
     isLoading,
     handleSubmit,
+    messages,
+    setMessages,
 }: ChatInputProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
