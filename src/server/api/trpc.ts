@@ -13,8 +13,6 @@ import { ZodError } from "zod";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { MUTATIONS } from "../db/mutations";
-import { QUERIES } from "../db/queries";
 
 /**
  * 1. CONTEXT
@@ -32,8 +30,6 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     const session = await auth();
 
     return {
-        MUTATIONS,
-        QUERIES,
         db,
         session,
         ...opts,

@@ -7,20 +7,21 @@ import {
 
 import { generateTitleFromUserMessage } from "~/app/(chat)/actions";
 import { auth } from "~/server/auth";
-import { MUTATIONS } from "~/server/db/mutations";
-import { QUERIES } from "~/server/db/queries";
 import {
     getMostRecentUserMessage,
     sanitizeResponseMessages,
 } from "~/lib/utils";
 import { google } from "@ai-sdk/google";
-import { deleteChatById } from "~/server/db/actions";
+import { appRouter } from "~/server/api/root";
+import { db } from "~/server/db";
+import { messages_table } from "~/server/db/schema";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
     const { id, messages }: { id: string; messages: Array<Message> } =
         await request.json();
+
 
     const session = await auth();
 
@@ -34,22 +35,25 @@ export async function POST(request: Request) {
         return new Response("No user message found", { status: 400 });
     }
 
-    const chat = await QUERIES.chatQueries.getChatById({ id });
+    const caller = appRouter.createCaller({
+        session,
+        db: db,
+        headers: request.headers,
+    });
+
+    const chat = await caller.chat.getChatById(id);
 
     if (!chat) {
         const title = await generateTitleFromUserMessage({
             message: userMessage,
         });
-        await MUTATIONS.chatMutations.saveChat({
-            id,
-            userId: session.user.id,
+        await caller.chat.save({
+            chatId: id,
             title,
-        });
+        })
     }
 
-    await MUTATIONS.messageMutations.saveMessages({
-        messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
-    });
+    await db.insert(messages_table).values([{ ...userMessage, createdAt: new Date(), chatId: id }]);
 
     return createDataStreamResponse({
         execute: (dataStream) => {
@@ -68,8 +72,8 @@ export async function POST(request: Request) {
                                     reasoning,
                                 });
 
-                            await MUTATIONS.messageMutations.saveMessages({
-                                messages: sanitizedResponseMessages.map(
+                            await db.insert(messages_table).values(
+                                sanitizedResponseMessages.map(
                                     (message) => {
                                         return {
                                             id: message.id,
@@ -79,8 +83,8 @@ export async function POST(request: Request) {
                                             createdAt: new Date(),
                                         };
                                     }
-                                ),
-                            });
+                                )
+                            );
                         } catch (error) {
                             throw error;
                         }
@@ -100,69 +104,4 @@ export async function POST(request: Request) {
             return "Oops, an error occured!";
         },
     });
-}
-
-export async function DELETE(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-        return new Response("Not Found", { status: 404 });
-    }
-
-    const session = await auth();
-
-    if (!session || !session.user) {
-        return new Response("Unauthorized", { status: 401 });
-    }
-
-    try {
-        const chat = await QUERIES.chatQueries.getChatById({ id });
-        if (!chat) {
-            return new Response("Not Found", { status: 404 });
-        }
-
-        if (chat.userId !== session.user.id) {
-            return new Response("Unauthorized", { status: 401 });
-        }
-
-        await deleteChatById({ id });
-
-        return new Response("Chat deleted", { status: 200 });
-    } catch {
-        return new Response("An error occurred while processing your request", {
-            status: 500,
-        });
-    }
-}
-
-export async function PATCH(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    const { title } = await request.json();
-
-    if (!id || !title) {
-        return new Response("Missing chat id or title", { status: 404 });
-    }
-
-
-    const session = await auth();
-    if (!session || !session.user) {
-        return new Response("Unauthorized", { status: 404 });
-    }
-
-    try {
-        const chat = await QUERIES.chatQueries.getChatById({ id });
-        if (!chat) {
-            return new Response("Not found", { status: 404 });
-        }
-        await MUTATIONS.chatMutations.changeTitle({
-            id: chat.id,
-            title,
-        })
-    } catch {
-        return new Response("Error while changing the request", {
-            status: 500,
-        })
-    }
 }

@@ -2,13 +2,14 @@
 
 import { Message, useChat } from "ai/react";
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { api } from "~/trpc/react";
 
 import { ChatInputForm } from "../components/chat-input";
 import { ChatMessages } from "../components/chat-messages";
 import { Button } from "~/components/ui/button";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
-
-import { toast } from "sonner";
 
 interface ChatViewProps {
     chatId: string;
@@ -16,15 +17,16 @@ interface ChatViewProps {
 }
 
 export function ChatView({ chatId, initialMessages }: ChatViewProps) {
+    const router = useRouter();
     const bottomRef = useRef<HTMLDivElement | null>(null);
-
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
 
+    const utils = api.useUtils();
+
     const handleScroll = () => {
         if (chatContainerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } =
-                chatContainerRef.current;
+            const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
             setShowScrollButton(scrollTop + clientHeight < scrollHeight - 50);
         }
     };
@@ -43,11 +45,56 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         experimental_throttle: 100,
         sendExtraMessageFields: true,
         onFinish: () => {
+            utils.chat.getInfiniteChats.invalidate();
+            router.refresh();
         },
         onError: () => {
-            toast("An error occured");
+            toast("An error occurred");
         },
     });
+
+    const handleFormSubmit = (event?: { preventDefault?: () => void }, options?: any) => {
+        if (messages.length === 0 && input.trim()) {
+            utils.chat.getInfiniteChats.setInfiniteData(
+                { limit: 20 },
+                // @ts-ignore
+                (oldData) => {
+                    if (!oldData) return oldData;
+
+                    const optimisticChat = {
+                        id: chatId,
+                        title: "New Chat",
+                        createdAt: new Date(),
+                        userId: "current-user",
+                        updatedAt: new Date(),
+                    };
+
+                    if (!oldData.pages || oldData.pages.length === 0) {
+                        return {
+                            ...oldData,
+                            pages: [{
+                                items: [optimisticChat],
+                                nextCursor: null
+                            }]
+                        };
+                    }
+
+                    return {
+                        ...oldData,
+                        pages: [
+                            {
+                                ...oldData.pages[0],
+                                // @ts-ignore
+                                items: [optimisticChat, ...oldData.pages[0].items]
+                            },
+                            ...oldData.pages.slice(1)
+                        ]
+                    };
+                }
+            );
+        }
+        handleSubmit(event, options);
+    };
 
     return (
         <>
@@ -75,7 +122,7 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                             input={input}
                             chatId={chatId}
                             setInput={setInput}
-                            handleSubmit={handleSubmit}
+                            handleSubmit={handleFormSubmit}
                             stop={stop}
                             messages={messages}
                             setMessages={setMessages}

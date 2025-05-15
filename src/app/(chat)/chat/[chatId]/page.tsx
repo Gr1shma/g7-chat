@@ -3,7 +3,7 @@ import { convertToUIMessages } from "~/lib/utils";
 
 import { ChatView } from "~/modules/chat/ui/views/chat-view";
 import { auth } from "~/server/auth";
-import { QUERIES } from "~/server/db/queries";
+import { api } from "~/trpc/server";
 
 export const dynamic = "force-dynamic";
 
@@ -18,14 +18,11 @@ export default async function Page({
     }
 
     const { chatId } = await params;
-    const chat = await QUERIES.chatQueries.getChatById({ id: chatId });
+    const chat = await api.chat.getChatById(chatId);
     if (!chat) {
         notFound();
     }
-    const messagesFromDb = await QUERIES.messageQueries.getMessagesByChatId({
-        chatId,
-    });
-
+    const messagesFromDb = await api.message.getMessagesByChatId(chatId);
     return (
         <ChatView
             chatId={chatId}
