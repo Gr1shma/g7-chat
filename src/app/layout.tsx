@@ -1,8 +1,9 @@
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-
 import "~/styles/globals.css";
+
 import { ThemeProvider } from "~/components/theme-provider";
+import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
     title: "g7-chat",
@@ -26,7 +27,9 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    {children}
+                    <TRPCReactProvider>
+                        {children}
+                    </TRPCReactProvider>
                 </ThemeProvider>
             </body>
         </html>

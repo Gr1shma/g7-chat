@@ -129,9 +129,40 @@ export async function DELETE(request: Request) {
         await deleteChatById({ id });
 
         return new Response("Chat deleted", { status: 200 });
-    } catch (error) {
+    } catch {
         return new Response("An error occurred while processing your request", {
             status: 500,
         });
+    }
+}
+
+export async function PATCH(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const { title } = await request.json();
+
+    if (!id || !title) {
+        return new Response("Missing chat id or title", { status: 404 });
+    }
+
+
+    const session = await auth();
+    if (!session || !session.user) {
+        return new Response("Unauthorized", { status: 404 });
+    }
+
+    try {
+        const chat = await QUERIES.chatQueries.getChatById({ id });
+        if (!chat) {
+            return new Response("Not found", { status: 404 });
+        }
+        await MUTATIONS.chatMutations.changeTitle({
+            id: chat.id,
+            title,
+        })
+    } catch {
+        return new Response("Error while changing the request", {
+            status: 500,
+        })
     }
 }

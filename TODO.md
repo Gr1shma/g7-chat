@@ -1,5 +1,6 @@
 # Ui
 - [x] Sidebar
+    - [x] Chat title edit
     - [ ] Chat deletion
     - [ ] Sidebar search functions
 - [ ] User All management area

@@ -108,7 +108,8 @@ export const chats_table = createTable("chats", {
         .notNull()
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
     title: text("title").notNull(),
     userId: varchar("user_id", { length: 255 })
         .notNull()

@@ -3,6 +3,7 @@ import "server-only";
 import { db } from ".";
 
 import { chats_table, messages_table, type DB_MESSAGE_TYPE } from "./schema";
+import { and, eq } from "drizzle-orm";
 
 export const MUTATIONS = {
     chatMutations: {
@@ -22,6 +23,23 @@ export const MUTATIONS = {
                     userId,
                     title,
                 });
+            } catch (error) {
+                throw error;
+            }
+        },
+        changeTitle: async function changeTitle({
+            id,
+            title,
+        }: {
+            id: string;
+            title: string;
+        }) {
+            try {
+                await db.update(chats_table).set({ title }).where(
+                    and(
+                        eq(chats_table.id, id),
+                    )
+                )
             } catch (error) {
                 throw error;
             }
