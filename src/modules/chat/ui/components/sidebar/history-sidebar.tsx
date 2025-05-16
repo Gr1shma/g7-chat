@@ -18,6 +18,7 @@ import { api } from "~/trpc/react";
 import { InfinitScroll } from "~/components/infinite-scroll";
 
 type GroupedChats = {
+    pinned: DB_CHAT_TYPE[];
     today: DB_CHAT_TYPE[];
     yesterday: DB_CHAT_TYPE[];
     lastWeek: DB_CHAT_TYPE[];
@@ -38,8 +39,9 @@ const groupChatsByDate = (chats: DB_CHAT_TYPE[]): GroupedChats => {
     return chats.reduce(
         (groups, chat) => {
             const chatDate = new Date(chat.createdAt);
-
-            if (isToday(chatDate)) {
+            if (chat.isPinned === true) {
+                groups.pinned.push(chat);
+            } else if (isToday(chatDate)) {
                 groups.today.push(chat);
             } else if (isYesterday(chatDate)) {
                 groups.yesterday.push(chat);
@@ -54,6 +56,7 @@ const groupChatsByDate = (chats: DB_CHAT_TYPE[]): GroupedChats => {
             return groups;
         },
         {
+            pinned: [],
             today: [],
             yesterday: [],
             lastWeek: [],
@@ -155,6 +158,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 
                             const labelMap: Record<keyof GroupedChats, string> =
                                 {
+                                    pinned: "Pinned Chat",
                                     today: "Today",
                                     yesterday: "Yesterday",
                                     lastWeek: "Last 7 days",

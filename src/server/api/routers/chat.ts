@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, or } from "drizzle-orm";
+import { and, desc, eq, lt, not, or } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -37,7 +37,6 @@ export const chatRouter = createTRPCRouter({
                 });
             }
         }),
-
     getInfiniteChats: protectedProcedure
         .input(
             z.object({
@@ -178,7 +177,45 @@ export const chatRouter = createTRPCRouter({
                 });
             }
         }),
+    tooglePinById: protectedProcedure
+        .input(z.string())
+        .mutation(async ({ ctx, input }) => {
+            const { db, session } = ctx;
+            const userId = session.user?.id;
 
+            if (!userId) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "Not authenticated",
+                });
+            }
+
+            try {
+                const result = await db
+                    .update(chats_table)
+                    .set({
+                        isPinned: not(chats_table.isPinned),
+                    })
+                    .where(
+                        and(
+                            eq(chats_table.id, input),
+                            eq(chats_table.userId, userId)
+                        )
+                    );
+
+                if (result.rowCount === 0) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Chat not found or unauthorized",
+                    });
+                }
+            } catch (error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to toggle pin of chat",
+                });
+            }
+        }),
     deleteById: protectedProcedure
         .input(z.string())
         .mutation(async ({ ctx, input }) => {

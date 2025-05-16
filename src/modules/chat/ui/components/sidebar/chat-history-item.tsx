@@ -4,7 +4,7 @@ import type { DB_CHAT_TYPE } from "~/server/db/schema";
 import Link from "next/link";
 import { memo, useState, useRef, useEffect } from "react";
 import { SidebarMenuItem, SidebarMenuButton } from "~/components/ui/sidebar";
-import { PinIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
+import { PinIcon, TrashIcon, CheckIcon, XIcon, PinOffIcon } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 
 const PureChatItem = ({
     chat,
@@ -118,6 +119,42 @@ const PureChatItem = ({
         }
     };
 
+    const togglePin = api.chat.tooglePinById.useMutation({
+        onMutate: async (chatId: string) => {
+            await utils.chat.getInfiniteChats.cancel(input);
+            const prevData = utils.chat.getInfiniteChats.getInfiniteData(input);
+
+            utils.chat.getInfiniteChats.setInfiniteData(input, (oldData) => {
+                if (!oldData) return oldData;
+                return {
+                    ...oldData,
+                    pages: oldData.pages.map((page) => ({
+                        ...page,
+                        items: page.items.map((c) =>
+                            c.id === chatId
+                                ? { ...c, isPinned: !c.isPinned }
+                                : c
+                        ),
+                    })),
+                };
+            });
+
+            return { prevData };
+        },
+        onError: (_err, chatId, context) => {
+            toast.error("Failed to pin chat");
+            if (context?.prevData) {
+                utils.chat.getInfiniteChats.setInfiniteData(
+                    input,
+                    context.prevData
+                );
+            }
+        },
+        onSettled: () => {
+            utils.chat.getInfiniteChats.invalidate(input);
+        },
+    });
+
     const deleteChat = api.chat.deleteById.useMutation({
         onMutate: async (chatId) => {
             await utils.chat.getInfiniteChats.cancel(input);
@@ -186,24 +223,32 @@ const PureChatItem = ({
                             </span>
                         </Link>
 
-                        <div className="pointer-events-auto absolute -right-1 bottom-0 top-0 z-50 flex items-center justify-end space-x-1 text-muted-foreground opacity-0 transition-opacity group-hover/link:opacity-100">
-                            <button
-                                className="rounded-sm p-1.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        <div className="pointer-events-auto absolute -right-1 bottom-0 top-0 z-50 flex translate-x-full items-center justify-end pr-1 text-muted-foreground transition-transform group-hover/link:translate-x-0 group-hover/link:bg-sidebar-accent">
+                            <div className="pointer-events-none absolute bottom-0 right-[100%] top-0 h-12 w-8 bg-gradient-to-l from-sidebar-accent to-transparent opacity-0 group-hover/link:opacity-100" />
+                            <Button
+                                variant="ghost"
+                                className="rounded-md p-1.5 text-muted-foreground hover:bg-muted/40"
                                 tabIndex={-1}
                                 aria-label="Pin chat"
+                                onClick={() => togglePin.mutate(chat.id)}
                             >
-                                <PinIcon className="size-4" />
-                            </button>
+                                {chat.isPinned ? (
+                                    <PinOffIcon className="size-4" />
+                                ) : (
+                                    <PinIcon className="size-4" />
+                                )}
+                            </Button>
 
                             <AlertDialog open={open} onOpenChange={setOpen}>
                                 <AlertDialogTrigger asChild>
-                                    <button
-                                        className="rounded-sm p-1.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                                    <Button
+                                        variant="ghost"
+                                        className="rounded-md p-1.5 text-destructive hover:bg-destructive/50 hover:text-destructive-foreground"
                                         tabIndex={-1}
                                         aria-label="Delete chat"
                                     >
                                         <TrashIcon className="size-4" />
-                                    </button>
+                                    </Button>
                                 </AlertDialogTrigger>
 
                                 <AlertDialogContent>

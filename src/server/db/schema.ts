@@ -1,5 +1,6 @@
 import { type InferSelectModel, relations, sql } from "drizzle-orm";
 import {
+    boolean,
     index,
     integer,
     json,
@@ -110,6 +111,7 @@ export const chats_table = createTable("chats", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     title: text("title").notNull(),
+    isPinned: boolean("is_pinned").default(false),
     userId: varchar("user_id", { length: 255 })
         .notNull()
         .references(() => users.id),
