@@ -1,7 +1,7 @@
 "use server";
 
 import { google } from "@ai-sdk/google";
-import { generateText, Message } from "ai";
+import { generateText, type Message } from "ai";
 
 export async function generateTitleFromUserMessage({
     message,

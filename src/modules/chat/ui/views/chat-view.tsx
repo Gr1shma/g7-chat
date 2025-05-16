@@ -1,6 +1,6 @@
 "use client";
 
-import { Message, useChat } from "ai/react";
+import { type Message, useChat } from "ai/react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

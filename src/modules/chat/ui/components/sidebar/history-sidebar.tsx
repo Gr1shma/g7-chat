@@ -11,7 +11,7 @@ import {
     useSidebar,
 } from "~/components/ui/sidebar";
 
-import { DB_CHAT_TYPE } from "~/server/db/schema";
+import { type DB_CHAT_TYPE } from "~/server/db/schema";
 import { ChatItem } from "./chat-history-item";
 import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";

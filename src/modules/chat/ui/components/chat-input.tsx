@@ -4,7 +4,7 @@ import type { ChatRequestOptions, Message } from "ai";
 import type React from "react";
 import { useRef, useEffect, useCallback, memo } from "react";
 import { toast } from "sonner";
-import { UseChatHelpers } from "ai/react";
+import { type UseChatHelpers } from "ai/react";
 
 import { Button } from "~/components/ui/button";
 import { SendIcon } from "lucide-react";
