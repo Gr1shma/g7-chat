@@ -90,14 +90,23 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     if (query.isLoading) {
         return (
             <SidebarGroup>
-                <div className="px-2 py-1 text-xs text-sidebar-foreground/50">Today</div>
+                <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
+                    Today
+                </div>
                 <SidebarGroupContent>
                     <div className="flex flex-col">
                         {[44, 32, 28, 64, 52].map((item) => (
-                            <div key={item} className="flex h-8 items-center gap-2 rounded-md px-2">
+                            <div
+                                key={item}
+                                className="flex h-8 items-center gap-2 rounded-md px-2"
+                            >
                                 <Skeleton
                                     className="h-4 max-w-[--skeleton-width] flex-1 rounded-md bg-sidebar-accent-foreground/10"
-                                    style={{ "--skeleton-width": `${item}%` } as React.CSSProperties}
+                                    style={
+                                        {
+                                            "--skeleton-width": `${item}%`,
+                                        } as React.CSSProperties
+                                    }
                                 />
                             </div>
                         ))}
@@ -126,7 +135,8 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
             <SidebarGroup>
                 <SidebarGroupContent>
                     <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-                        Your conversations will appear here once you start chatting!
+                        Your conversations will appear here once you start
+                        chatting!
                     </div>
                 </SidebarGroupContent>
             </SidebarGroup>
@@ -143,13 +153,14 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                         {Object.entries(groupedChats).map(([label, chats]) => {
                             if (chats.length === 0) return null;
 
-                            const labelMap: Record<keyof GroupedChats, string> = {
-                                today: "Today",
-                                yesterday: "Yesterday",
-                                lastWeek: "Last 7 days",
-                                lastMonth: "Last 30 days",
-                                older: "Older than last month",
-                            };
+                            const labelMap: Record<keyof GroupedChats, string> =
+                                {
+                                    today: "Today",
+                                    yesterday: "Yesterday",
+                                    lastWeek: "Last 7 days",
+                                    lastMonth: "Last 30 days",
+                                    older: "Older than last month",
+                                };
 
                             return (
                                 <div key={label}>

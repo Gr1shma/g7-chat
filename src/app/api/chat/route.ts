@@ -22,7 +22,6 @@ export async function POST(request: Request) {
     const { id, messages }: { id: string; messages: Array<Message> } =
         await request.json();
 
-
     const session = await auth();
 
     if (!session || !session.user || !session.user.id) {
@@ -50,10 +49,12 @@ export async function POST(request: Request) {
         await caller.chat.save({
             chatId: id,
             title,
-        })
+        });
     }
 
-    await db.insert(messages_table).values([{ ...userMessage, createdAt: new Date(), chatId: id }]);
+    await db
+        .insert(messages_table)
+        .values([{ ...userMessage, createdAt: new Date(), chatId: id }]);
 
     return createDataStreamResponse({
         execute: (dataStream) => {
@@ -73,17 +74,15 @@ export async function POST(request: Request) {
                                 });
 
                             await db.insert(messages_table).values(
-                                sanitizedResponseMessages.map(
-                                    (message) => {
-                                        return {
-                                            id: message.id,
-                                            chatId: id,
-                                            role: message.role,
-                                            content: message.content,
-                                            createdAt: new Date(),
-                                        };
-                                    }
-                                )
+                                sanitizedResponseMessages.map((message) => {
+                                    return {
+                                        id: message.id,
+                                        chatId: id,
+                                        role: message.role,
+                                        content: message.content,
+                                        createdAt: new Date(),
+                                    };
+                                })
                             );
                         } catch (error) {
                             throw error;

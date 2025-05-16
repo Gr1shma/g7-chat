@@ -1,26 +1,38 @@
-"use client"
+"use client";
 
-import type { DB_CHAT_TYPE } from "~/server/db/schema"
-import Link from "next/link"
-import { memo, useState, useRef, useEffect } from "react"
-import { SidebarMenuItem, SidebarMenuButton } from "~/components/ui/sidebar"
-import { PinIcon, TrashIcon, CheckIcon, XIcon } from 'lucide-react'
-import { Input } from "~/components/ui/input"
-import { api } from "~/trpc/react"
+import type { DB_CHAT_TYPE } from "~/server/db/schema";
+import Link from "next/link";
+import { memo, useState, useRef, useEffect } from "react";
+import { SidebarMenuItem, SidebarMenuButton } from "~/components/ui/sidebar";
+import { PinIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
+import { Input } from "~/components/ui/input";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 
 const PureChatItem = ({
     chat,
     isActive,
     setOpenMobile,
 }: {
-    chat: DB_CHAT_TYPE
-    isActive: boolean
-    setOpenMobile: (open: boolean) => void
+    chat: DB_CHAT_TYPE;
+    isActive: boolean;
+    setOpenMobile: (open: boolean) => void;
 }) => {
-    const [isEditing, setIsEditing] = useState(false)
-    const [title, setTitle] = useState(chat.title)
-    const inputRef = useRef<HTMLInputElement>(null)
-
+    const [isEditing, setIsEditing] = useState(false);
+    const [title, setTitle] = useState(chat.title);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const utils = api.useUtils();
     const input = { limit: 20 };
@@ -35,9 +47,9 @@ const PureChatItem = ({
                 if (!oldData) return oldData;
                 return {
                     ...oldData,
-                    pages: oldData.pages.map(page => ({
+                    pages: oldData.pages.map((page) => ({
                         ...page,
-                        items: page.items.map(chat =>
+                        items: page.items.map((chat) =>
                             chat.id === chatId ? { ...chat, title } : chat
                         ),
                     })),
@@ -48,7 +60,10 @@ const PureChatItem = ({
         },
         onError: (_err, _variables, context) => {
             if (context?.prevData) {
-                utils.chat.getInfiniteChats.setInfiniteData(input, context.prevData);
+                utils.chat.getInfiniteChats.setInfiniteData(
+                    input,
+                    context.prevData
+                );
             }
         },
         onSettled: () => {
@@ -56,23 +71,22 @@ const PureChatItem = ({
         },
     });
 
-
     useEffect(() => {
         if (isEditing && inputRef.current) {
-            inputRef.current.focus()
-            inputRef.current.select()
+            inputRef.current.focus();
+            inputRef.current.select();
         }
-    }, [isEditing])
+    }, [isEditing]);
 
     const handleTitleClick = (e: React.MouseEvent) => {
-        if (!isActive) return
-        e.preventDefault()
-        setIsEditing(true)
-    }
+        if (!isActive) return;
+        e.preventDefault();
+        setIsEditing(true);
+    };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(e.target.value)
-    }
+        setTitle(e.target.value);
+    };
     const handleTitleSave = async () => {
         const trimmedTitle = title.trim();
         if (trimmedTitle === "") {
@@ -85,7 +99,10 @@ const PureChatItem = ({
             return;
         }
         try {
-            await changeTitle.mutateAsync({ chatId: chat.id, title: trimmedTitle });
+            await changeTitle.mutateAsync({
+                chatId: chat.id,
+                title: trimmedTitle,
+            });
         } catch (error) {
             console.error("Failed to update title:", error);
             setTitle(chat.title);
@@ -95,39 +112,93 @@ const PureChatItem = ({
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
-            handleTitleSave()
+            handleTitleSave();
         } else if (e.key === "Escape") {
-            setTitle(chat.title)
-            setIsEditing(false)
+            setTitle(chat.title);
+            setIsEditing(false);
         }
-    }
+    };
+
+    const deleteChat = api.chat.deleteById.useMutation({
+        onMutate: async (chatId) => {
+            await utils.chat.getInfiniteChats.cancel(input);
+            const prevData = utils.chat.getInfiniteChats.getInfiniteData(input);
+
+            utils.chat.getInfiniteChats.setInfiniteData(input, (oldData) => {
+                if (!oldData) return oldData;
+                return {
+                    ...oldData,
+                    pages: oldData.pages.map((page) => ({
+                        ...page,
+                        items: page.items.filter((chat) => chat.id !== chatId),
+                    })),
+                };
+            });
+
+            return { prevData };
+        },
+        onError: (error, _variables, context) => {
+            toast.error("Failed to delete chat");
+            console.error(error);
+            if (context?.prevData) {
+                utils.chat.getInfiniteChats.setInfiniteData(
+                    input,
+                    context.prevData
+                );
+            }
+        },
+        onSuccess: () => {
+            toast.success("Chat deleted");
+        },
+        onSettled: () => {
+            utils.chat.getInfiniteChats.invalidate(input);
+        },
+    });
+    const router = useRouter();
+
+    const handleDelete = async () => {
+        try {
+            await deleteChat.mutateAsync(chat.id);
+            if (isActive) {
+                router.push("/chat");
+            }
+        } catch (err) {
+            console.error("Deletion failed", err);
+        }
+    };
+
+    const [open, setOpen] = useState(false);
 
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive}>
                 {!isEditing ? (
-                    <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)} className="group/link">
-                        <div className="relative flex w-full items-center">
-                            <button
-                                className="w-full text-left"
+                    <div className="group/link relative flex w-full items-center">
+                        <Link
+                            href={`/chat/${chat.id}`}
+                            onClick={() => setOpenMobile(false)}
+                            className="w-full text-left"
+                        >
+                            <span
+                                className="block overflow-hidden truncate px-1 py-1 text-sm hover:cursor-pointer"
+                                title={chat.title}
                                 onDoubleClick={handleTitleClick}
                             >
-                                <span
-                                    className="block overflow-hidden truncate px-1 py-1 text-sm hover:cursor-pointer"
-                                    title={chat.title}
-                                >
-                                    {title}
-                                </span>
+                                {title}
+                            </span>
+                        </Link>
+
+                        <div className="pointer-events-auto absolute -right-1 bottom-0 top-0 z-50 flex items-center justify-end space-x-1 text-muted-foreground opacity-0 transition-opacity group-hover/link:opacity-100">
+                            <button
+                                className="rounded-sm p-1.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                                tabIndex={-1}
+                                aria-label="Pin chat"
+                            >
+                                <PinIcon className="size-4" />
                             </button>
-                            <div className="pointer-events-auto absolute -right-1 bottom-0 top-0 z-50 flex items-center justify-end text-muted-foreground opacity-0 transition-opacity group-hover/link:opacity-100">
-                                <div className="flex space-x-0.5">
-                                    <button
-                                        className="rounded-sm p-1.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                                        tabIndex={-1}
-                                        aria-label="Pin chat"
-                                    >
-                                        <PinIcon className="size-4" />
-                                    </button>
+
+                            <AlertDialog open={open} onOpenChange={setOpen}>
+                                <AlertDialogTrigger asChild>
                                     <button
                                         className="rounded-sm p-1.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                         tabIndex={-1}
@@ -135,10 +206,42 @@ const PureChatItem = ({
                                     >
                                         <TrashIcon className="size-4" />
                                     </button>
-                                </div>
-                            </div>
+                                </AlertDialogTrigger>
+
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Are you absolutely sure?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This
+                                            will permanently delete this chat
+                                            and all its messages.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={async () => {
+                                                try {
+                                                    handleDelete();
+                                                    setOpen(false);
+                                                } catch (error) {
+                                                    toast(
+                                                        "Error while handling delete"
+                                                    );
+                                                }
+                                            }}
+                                        >
+                                            Delete
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
-                    </Link>
+                    </div>
                 ) : (
                     <div className="relative flex w-full items-center px-1">
                         <Input
@@ -160,8 +263,8 @@ const PureChatItem = ({
                             </button>
                             <button
                                 onClick={() => {
-                                    setTitle(chat.title)
-                                    setIsEditing(false)
+                                    setTitle(chat.title);
+                                    setIsEditing(false);
                                 }}
                                 className="rounded-sm p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                 aria-label="Cancel editing"
@@ -173,8 +276,8 @@ const PureChatItem = ({
                 )}
             </SidebarMenuButton>
         </SidebarMenuItem>
-    )
-}
+    );
+};
 
 export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
     if (prevProps.isActive !== nextProps.isActive) return false;

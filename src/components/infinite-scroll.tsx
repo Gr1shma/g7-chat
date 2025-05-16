@@ -7,7 +7,7 @@ interface InfiniteScrollProps {
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
     fetchNextPage: () => void;
-};
+}
 
 export function InfinitScroll({
     isManual = false,
@@ -24,21 +24,26 @@ export function InfinitScroll({
         if (isIntersecting && hasNextPage && !isFetchingNextPage && !isManual) {
             fetchNextPage();
         }
-    }, [isIntersecting, hasNextPage, isFetchingNextPage, isManual, fetchNextPage]);
+    }, [
+        isIntersecting,
+        hasNextPage,
+        isFetchingNextPage,
+        isManual,
+        fetchNextPage,
+    ]);
 
     return (
         <div className="flex flex-col items-center gap-4">
             <div ref={targetRef} className="h-1" />
-            {hasNextPage
-                ? (
-                    <Button
-                        variant="secondary"
-                        disabled={!hasNextPage || isFetchingNextPage}
-                        onClick={() => fetchNextPage()}
-                    >
-                        {isFetchingNextPage ? "Loading..." : "LoadMore"}
-                    </Button>
-                ) : null }
+            {hasNextPage ? (
+                <Button
+                    variant="secondary"
+                    disabled={!hasNextPage || isFetchingNextPage}
+                    onClick={() => fetchNextPage()}
+                >
+                    {isFetchingNextPage ? "Loading..." : "LoadMore"}
+                </Button>
+            ) : null}
         </div>
-    )
+    );
 }

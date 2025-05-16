@@ -26,7 +26,8 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
 
     const handleScroll = () => {
         if (chatContainerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+            const { scrollTop, scrollHeight, clientHeight } =
+                chatContainerRef.current;
             setShowScrollButton(scrollTop + clientHeight < scrollHeight - 50);
         }
     };
@@ -44,8 +45,8 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         initialMessages,
         experimental_throttle: 100,
         sendExtraMessageFields: true,
-        onFinish: () => {
-            utils.chat.getInfiniteChats.invalidate();
+        onFinish: async () => {
+            await utils.chat.invalidate();
             router.refresh();
         },
         onError: () => {
@@ -53,46 +54,10 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         },
     });
 
-    const handleFormSubmit = (event?: { preventDefault?: () => void }, options?: any) => {
-        if (messages.length === 0 && input.trim()) {
-            utils.chat.getInfiniteChats.setInfiniteData(
-                { limit: 20 },
-                // @ts-ignore
-                (oldData) => {
-                    if (!oldData) return oldData;
-
-                    const optimisticChat = {
-                        id: chatId,
-                        title: "New Chat",
-                        createdAt: new Date(),
-                        userId: "current-user",
-                        updatedAt: new Date(),
-                    };
-
-                    if (!oldData.pages || oldData.pages.length === 0) {
-                        return {
-                            ...oldData,
-                            pages: [{
-                                items: [optimisticChat],
-                                nextCursor: null
-                            }]
-                        };
-                    }
-
-                    return {
-                        ...oldData,
-                        pages: [
-                            {
-                                ...oldData.pages[0],
-                                // @ts-ignore
-                                items: [optimisticChat, ...oldData.pages[0].items]
-                            },
-                            ...oldData.pages.slice(1)
-                        ]
-                    };
-                }
-            );
-        }
+    const handleFormSubmit = async (
+        event?: { preventDefault?: () => void },
+        options?: any
+    ) => {
         handleSubmit(event, options);
     };
 

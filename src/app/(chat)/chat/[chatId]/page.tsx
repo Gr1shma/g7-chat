@@ -18,15 +18,15 @@ export default async function Page({
     }
 
     const { chatId } = await params;
+
+    const initialMessages = convertToUIMessages(
+        await api.message.getMessagesByChatId(chatId)
+    );
     const chat = await api.chat.getChatById(chatId);
+
     if (!chat) {
         notFound();
     }
-    const messagesFromDb = await api.message.getMessagesByChatId(chatId);
-    return (
-        <ChatView
-            chatId={chatId}
-            initialMessages={convertToUIMessages(messagesFromDb)}
-        />
-    );
+
+    return <ChatView chatId={chat.id} initialMessages={initialMessages} />;
 }
