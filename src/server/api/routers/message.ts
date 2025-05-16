@@ -28,7 +28,6 @@ export const messageRouter = createTRPCRouter({
 
                 return messages;
             } catch (error) {
-                console.error("Error fetching messages by chat ID:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to fetch messages for this chat",
@@ -64,7 +63,6 @@ export const messageRouter = createTRPCRouter({
 
                 return message;
             } catch (error) {
-                console.error("Error fetching message by ID:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to fetch message",

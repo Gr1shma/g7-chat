@@ -104,7 +104,6 @@ const PureChatItem = ({
                 title: trimmedTitle,
             });
         } catch (error) {
-            console.error("Failed to update title:", error);
             setTitle(chat.title);
         }
         setIsEditing(false);
@@ -139,7 +138,6 @@ const PureChatItem = ({
         },
         onError: (error, _variables, context) => {
             toast.error("Failed to delete chat");
-            console.error(error);
             if (context?.prevData) {
                 utils.chat.getInfiniteChats.setInfiniteData(
                     input,
@@ -162,8 +160,8 @@ const PureChatItem = ({
             if (isActive) {
                 router.push("/chat");
             }
-        } catch (err) {
-            console.error("Deletion failed", err);
+        } catch {
+            toast("Deletion failed");
         }
     };
 

@@ -29,17 +29,8 @@ export const chatRouter = createTRPCRouter({
                             eq(chats_table.userId, userId)
                         )
                     );
-
-                if (!chat) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Chat not found",
-                    });
-                }
-
                 return chat;
             } catch (error) {
-                console.error("Error in getChatById:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to get chat",
@@ -105,7 +96,6 @@ export const chatRouter = createTRPCRouter({
                             : null,
                 };
             } catch (error) {
-                console.error("Error in getInfiniteChats:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to fetch chats",
@@ -139,7 +129,6 @@ export const chatRouter = createTRPCRouter({
                     title: input.title,
                 });
             } catch (error) {
-                console.error("Error in save:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to save chat",
@@ -183,7 +172,6 @@ export const chatRouter = createTRPCRouter({
                     });
                 }
             } catch (error) {
-                console.error("Error in changeTitle:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to change chat title",
@@ -225,7 +213,6 @@ export const chatRouter = createTRPCRouter({
                     });
                 }
             } catch (error) {
-                console.error("Error in deleteById:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to delete chat",

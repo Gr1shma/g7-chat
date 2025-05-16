@@ -54,13 +54,6 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         },
     });
 
-    const handleFormSubmit = async (
-        event?: { preventDefault?: () => void },
-        options?: any
-    ) => {
-        handleSubmit(event, options);
-    };
-
     return (
         <>
             <div className="absolute bottom-5 w-full pr-2">
@@ -87,7 +80,7 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                             input={input}
                             chatId={chatId}
                             setInput={setInput}
-                            handleSubmit={handleFormSubmit}
+                            handleSubmit={handleSubmit}
                             stop={stop}
                             messages={messages}
                             setMessages={setMessages}
