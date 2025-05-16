@@ -1,5 +1,5 @@
 # Ui
-- [ ] Sidebar search functions
+- [x] Sidebar search functions
 - [ ] Saving the input to local storage to use it
 
 # NEXT TODO

@@ -66,7 +66,13 @@ const groupChatsByDate = (chats: DB_CHAT_TYPE[]): GroupedChats => {
     );
 };
 
-export function SidebarHistory({ user }: { user: User | undefined }) {
+export function SidebarHistory({
+    user,
+    searchQuery,
+}: {
+    user: User | undefined;
+    searchQuery: string;
+}) {
     const { setOpenMobile } = useSidebar();
     const { chatId } = useParams();
 
@@ -146,7 +152,25 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
         );
     }
 
-    const groupedChats = groupChatsByDate(allChats);
+    const normalizedQuery = searchQuery.toLowerCase();
+
+    const filteredChats = allChats.filter((chat) =>
+        chat.title?.toLowerCase().includes(normalizedQuery)
+    );
+
+    const groupedChats = groupChatsByDate(filteredChats);
+
+    if (filteredChats.length === 0) {
+        return (
+            <SidebarGroup>
+                <SidebarGroupContent>
+                    <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
+                        No chats found matching your search.
+                    </div>
+                </SidebarGroupContent>
+            </SidebarGroup>
+        );
+    }
 
     return (
         <SidebarGroup>

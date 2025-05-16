@@ -10,14 +10,7 @@ export const chatRouter = createTRPCRouter({
         .input(z.string())
         .query(async ({ ctx, input }) => {
             const { db, session } = ctx;
-            const userId = session.user?.id;
-
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+            const userId = session.user.id;
 
             try {
                 const [chat] = await db
@@ -51,14 +44,7 @@ export const chatRouter = createTRPCRouter({
         )
         .query(async ({ ctx, input }) => {
             const { db, session } = ctx;
-            const userId = session.user?.id;
-
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+            const userId = session.user.id;
 
             try {
                 const { cursor, limit } = input;
@@ -222,19 +208,12 @@ export const chatRouter = createTRPCRouter({
             const { db, session } = ctx;
             const userId = session.user?.id;
 
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
             try {
                 await db
                     .delete(messages_table)
                     .where(eq(messages_table.chatId, input));
 
-                const result = await db
+                await db
                     .delete(chats_table)
                     .where(
                         and(
@@ -242,13 +221,6 @@ export const chatRouter = createTRPCRouter({
                             eq(chats_table.userId, userId)
                         )
                     );
-
-                if (result.rowCount === 0) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Chat not found or unauthorized",
-                    });
-                }
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",

@@ -9,15 +9,7 @@ export const messageRouter = createTRPCRouter({
     getMessagesByChatId: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
-            const { db, session } = ctx;
-            const userId = session.user?.id;
-
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+            const { db } = ctx;
 
             try {
                 const messages = await db
@@ -38,15 +30,7 @@ export const messageRouter = createTRPCRouter({
     getMessageById: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
-            const { db, session } = ctx;
-            const userId = session.user?.id;
-
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+            const { db } = ctx;
 
             try {
                 const [message] = await db

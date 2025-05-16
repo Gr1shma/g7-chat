@@ -1,4 +1,5 @@
-import { SearchIcon, SquarePen as SquarePenIcon } from "lucide-react";
+"use client";
+import { SearchIcon } from "lucide-react";
 import type { User } from "next-auth";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
@@ -12,40 +13,48 @@ import {
 } from "~/components/ui/sidebar";
 import { SidebarUserNav } from "./user-nav";
 import { SidebarHistory } from "./history-sidebar";
+import { useState } from "react";
 
 interface ChatSidebarProps {
     user: User;
 }
 
 export function ChatSideBar({ user }: ChatSidebarProps) {
+    const [searchQuery, setSearchQuery] = useState("");
     return (
         <Sidebar>
             <SidebarHeader>
-                <div className="flex shrink-0 items-center justify-between text-lg text-neutral-200">
+                <div className="flex h-8 shrink-0 items-center justify-center text-lg text-muted-foreground transition-opacity delay-75 duration-75">
                     <Link href="/chat" className="font-light">
                         g7-chat
                     </Link>
-                    <div className="flex flex-row items-center">
-                        <Button
-                            variant="ghost"
-                            className="h-9 w-9 hover:bg-neutral-800/40 hover:text-white"
-                        >
-                            <SearchIcon />
-                        </Button>
+                </div>
+                <div className="px-1">
+                    <Button
+                        variant="default"
+                        className="w-full bg-pink-600/70 hover:bg-pink-500/70 hover:text-white"
+                        asChild
+                    >
                         <Link href="/chat">
-                            <Button
-                                variant="ghost"
-                                className="h-9 w-9 hover:bg-neutral-800/40 hover:text-white"
-                            >
-                                <SquarePenIcon />
-                            </Button>
+                            <span className="w-full select-none text-center">
+                                New Chat
+                            </span>
                         </Link>
+                    </Button>
+                </div>
+                <div className="border-chat-border border-b px-3">
+                    <div className="flex items-center">
+                        <SearchIcon className="mr-3 size-4" />
+                        <input
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-transparent py-2 text-sm text-foreground placeholder-muted-foreground/50 placeholder:select-none focus:outline-none"
+                            placeholder="Searh your chats..."
+                        />
                     </div>
                 </div>
             </SidebarHeader>
-            <Separator />
             <SidebarContent>
-                <SidebarHistory user={user} />
+                <SidebarHistory user={user} searchQuery={searchQuery} />
             </SidebarContent>
             <Separator />
             <SidebarFooter>
