@@ -8,7 +8,6 @@ import { TRPCReactProvider } from "~/trpc/react";
 export const metadata: Metadata = {
     title: "g7-chat",
     description: "shitty chatbot clone",
-    icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
 export default function RootLayout({

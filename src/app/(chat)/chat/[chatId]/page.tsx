@@ -7,6 +7,22 @@ import { api } from "~/trpc/server";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ chatId: string }>;
+}) {
+    const { chatId } = await params;
+    const chat = await api.chat.getChatById(chatId);
+
+    if (!chat) {
+        notFound();
+    }
+    return {
+        title: `${chat.title} - g7-chat`,
+    };
+}
+
 export default async function Page({
     params,
 }: {
