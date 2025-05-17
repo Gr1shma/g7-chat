@@ -1,5 +1,6 @@
 # Ui
-- [x] Sidebar search functions
+- [x] Made a bit better chat input form
+- [ ] Add models
 - [ ] Saving the input to local storage to use it
 
 # NEXT TODO

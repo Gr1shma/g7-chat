@@ -36,23 +36,31 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         bottomRef.current?.scrollIntoView({ behavior: "auto" });
     }, []);
 
-    const { input, setInput, isLoading, messages, handleSubmit, stop } =
-        useChat({
-            id: chatId,
-            initialMessages,
-            experimental_throttle: 100,
-            sendExtraMessageFields: true,
-            onFinish: async () => {
-                await utils.chat.invalidate();
-            },
-            onError: () => {
-                toast("An error occurred");
-            },
-        });
+    const {
+        input,
+        setInput,
+        isLoading,
+        messages,
+        setMessages,
+        handleSubmit,
+        stop,
+        status,
+    } = useChat({
+        id: chatId,
+        initialMessages,
+        experimental_throttle: 100,
+        sendExtraMessageFields: true,
+        onFinish: async () => {
+            await utils.chat.invalidate();
+        },
+        onError: () => {
+            toast("An error occurred");
+        },
+    });
 
     return (
         <>
-            <div className="absolute bottom-5 w-full pr-2">
+            <div className="absolute bottom-0 w-full pr-2">
                 <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col text-center">
                     <div className="flex justify-center pb-4">
                         {showScrollButton ? (
@@ -70,16 +78,20 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                             </Button>
                         ) : null}
                     </div>
-                    <form className="relative flex w-full flex-col items-stretch gap-2 rounded-xl bg-[#2D2D2D] px-3 py-3 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] sm:max-w-3xl">
-                        <ChatInputForm
-                            isLoading={isLoading}
-                            input={input}
-                            chatId={chatId}
-                            setInput={setInput}
-                            handleSubmit={handleSubmit}
-                            stop={stop}
-                        />
-                    </form>
+                    <div className="border-reflect relative rounded-t-[20px] bg-[--chat-input-background] p-2 pb-0 backdrop-blur-lg ![--c:--chat-input-gradient]">
+                        <form className="dark:outline-chat-background/40 relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[--chat-input-background] px-3 py-3 text-secondary-foreground outline outline-8 outline-[hsl(var(--chat-input-gradient)/0.5)] dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] max-sm:pb-6 sm:max-w-3xl">
+                            <ChatInputForm
+                                setMessages={setMessages}
+                                isLoading={isLoading}
+                                input={input}
+                                chatId={chatId}
+                                setInput={setInput}
+                                handleSubmit={handleSubmit}
+                                stop={stop}
+                                status={status}
+                            />
+                        </form>
+                    </div>
                 </div>
             </div>
             <div className="relative flex-1 overflow-hidden">

@@ -32,7 +32,7 @@ export function ChatSideBar({ user }: ChatSidebarProps) {
                 <div className="px-1">
                     <Button
                         variant="default"
-                        className="w-full bg-pink-600/70 hover:bg-pink-500/70 hover:text-white"
+                        className="w-full hover:text-white"
                         asChild
                     >
                         <Link href="/chat">
@@ -48,7 +48,7 @@ export function ChatSideBar({ user }: ChatSidebarProps) {
                         <input
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full bg-transparent py-2 text-sm text-foreground placeholder-muted-foreground/50 placeholder:select-none focus:outline-none"
-                            placeholder="Searh your chats..."
+                            placeholder="Search your chats..."
                         />
                     </div>
                 </div>
