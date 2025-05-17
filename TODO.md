@@ -1,10 +1,15 @@
-# Ui
-- [x] Made a bit better chat input form
-- [ ] Add models
-- [ ] Saving the input to local storage to use it
+# TODO
+- [ ] Convert the chat to thread in code base
+- [ ] Allow editing messages and retrying responses 
 
-# NEXT TODO
-- [ ] User All management area
-- [ ] User management(user change name if possible image) both backend and frontend
-- [ ] Using the sync ststem to sync the data from the client to server
-- [ ] Export the data in json
+- [ ] Save the input to local storage for later use
+- [ ] Export data in JSON format
+
+
+- [ ] User management
+    - [ ] Change Name
+    - [ ] Delete User Id
+    - [ ] Set chatbot response style and user display name (e.g., unopinionated, factual, friendly, etc.)
+- [ ] Implement sync system to synchronize data between client and server ( use Indexed DB to store locally )
+- [ ] Groupping thread ( Project )
+- [ ] Allow to share the thread or Project
