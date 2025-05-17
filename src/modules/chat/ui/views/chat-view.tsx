@@ -1,7 +1,7 @@
 "use client";
 
 import { type Message, useChat } from "ai/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
@@ -32,27 +32,23 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         }
     };
 
-    const {
-        input,
-        setInput,
-        isLoading,
-        messages,
-        setMessages,
-        handleSubmit,
-        stop,
-    } = useChat({
-        id: chatId,
-        initialMessages,
-        experimental_throttle: 100,
-        sendExtraMessageFields: true,
-        onFinish: async () => {
-            await utils.chat.invalidate();
-            router.refresh();
-        },
-        onError: () => {
-            toast("An error occurred");
-        },
-    });
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "auto" });
+    }, []);
+
+    const { input, setInput, isLoading, messages, handleSubmit, stop } =
+        useChat({
+            id: chatId,
+            initialMessages,
+            experimental_throttle: 100,
+            sendExtraMessageFields: true,
+            onFinish: async () => {
+                await utils.chat.invalidate();
+            },
+            onError: () => {
+                toast("An error occurred");
+            },
+        });
 
     return (
         <>
@@ -82,8 +78,6 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                             setInput={setInput}
                             handleSubmit={handleSubmit}
                             stop={stop}
-                            messages={messages}
-                            setMessages={setMessages}
                         />
                     </form>
                 </div>
@@ -94,7 +88,10 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                     onScroll={handleScroll}
                     ref={chatContainerRef}
                 >
-                    <ChatMessages messages={messages} />
+                    <ChatMessages
+                        messages={messages}
+                        initialMessageLength={initialMessages.length}
+                    />
                     <div ref={bottomRef}></div>
                 </div>
             </div>
