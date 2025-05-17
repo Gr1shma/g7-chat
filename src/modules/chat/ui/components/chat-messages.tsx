@@ -48,6 +48,9 @@ export function ChatMessages({
         (nextAssistantIndex === -1 ||
             messages[nextAssistantIndex]?.content === "");
 
+    const isNotFirstUserMessage =
+        messages.filter((m) => m.role === "user").length > 1;
+
     return (
         <div className="mx-auto flex w-full max-w-3xl flex-col p-4 pb-8">
             {messages.map((m, index) => {
@@ -59,7 +62,7 @@ export function ChatMessages({
                         {m.role === "user" ? (
                             <div
                                 ref={isLatestUser ? userRef : null}
-                                className={`flex justify-end ${isLatestUser ? "mt-[-4rem] pt-4" : ""} mb-12`}
+                                className={`flex justify-end ${isLatestUser ? "pt-4" : ""} mb-12`}
                             >
                                 <div className="group relative inline-block max-w-[80%] break-words rounded-2xl bg-[#2D2D2D] p-4 text-left">
                                     {m.content}
@@ -75,13 +78,15 @@ export function ChatMessages({
                             </div>
                         )}
 
-                        {isLatestUser && showAssistantSpace && (
-                            <div
-                                ref={assistantSpaceRef}
-                                className="mb-12 h-[calc(100vh-20rem)] w-full"
-                                aria-hidden="true"
-                            />
-                        )}
+                        {isLatestUser &&
+                            showAssistantSpace &&
+                            isNotFirstUserMessage && (
+                                <div
+                                    ref={assistantSpaceRef}
+                                    className="mb-10 h-[calc(100vh-20rem)] w-full"
+                                    aria-hidden="true"
+                                />
+                            )}
                     </div>
                 );
             })}
