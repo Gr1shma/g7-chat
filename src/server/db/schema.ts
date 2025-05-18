@@ -103,13 +103,14 @@ export const verificationTokens = createTable(
     })
 );
 
-export const chats_table = createTable("chats", {
+export const threads_table = createTable("threads", {
     id: varchar("id", { length: 255 })
         .notNull()
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
     title: text("title").notNull(),
     isPinned: boolean("is_pinned").default(false),
     userId: varchar("user_id", { length: 255 })
@@ -117,16 +118,16 @@ export const chats_table = createTable("chats", {
         .references(() => users.id),
 });
 
-export type DB_CHAT_TYPE = InferSelectModel<typeof chats_table>;
+export type DB_THREAD_TYPE = InferSelectModel<typeof threads_table>;
 
 export const messages_table = createTable("messages", {
     id: varchar("id", { length: 255 })
         .notNull()
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
-    chatId: varchar("chat_id", { length: 255 })
+    threadId: varchar("thread_id", { length: 255 })
         .notNull()
-        .references(() => chats_table.id),
+        .references(() => threads_table.id),
     role: varchar("role").notNull(),
     content: json("content").notNull(),
     createdAt: timestamp("createdAt").notNull(),

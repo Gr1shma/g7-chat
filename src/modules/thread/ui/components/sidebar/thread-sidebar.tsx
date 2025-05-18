@@ -12,14 +12,14 @@ import {
     SidebarHeader,
 } from "~/components/ui/sidebar";
 import { SidebarUserNav } from "./user-nav";
-import { SidebarHistory } from "./history-sidebar";
+import { SidebarHistory } from "./thread-sidebar-group";
 import { useState } from "react";
 
-interface ChatSidebarProps {
+interface ThreadSidebarProps {
     user: User;
 }
 
-export function ChatSideBar({ user }: ChatSidebarProps) {
+export function ThreadSideBar({ user }: ThreadSidebarProps) {
     const [searchQuery, setSearchQuery] = useState("");
     return (
         <Sidebar>
@@ -42,13 +42,13 @@ export function ChatSideBar({ user }: ChatSidebarProps) {
                         </Link>
                     </Button>
                 </div>
-                <div className="border-chat-border border-b px-3">
+                <div className="border-b px-3">
                     <div className="flex items-center">
                         <SearchIcon className="mr-3 size-4" />
                         <input
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full bg-transparent py-2 text-sm text-foreground placeholder-muted-foreground/50 placeholder:select-none focus:outline-none"
-                            placeholder="Search your chats..."
+                            placeholder="Search your threads..."
                         />
                     </div>
                 </div>

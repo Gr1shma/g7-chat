@@ -8,20 +8,20 @@
 
 ### Features
 
-* **Pin Chats**
+* **Pin Threads**
   Keep important conversations easily accessible by pinning them to the top.
 
-* **Save Chat History**
+* **Save Threads History**
   All past conversations are automatically saved and available for future reference.
 
 * **Responsive Desktop UI**
   Designed for a seamless experience across various desktop environments and window managers.
 
-* **Editable Chat Titles**
-  Rename chats to stay organized and enhance discoverability.
+* **Editable hreads Titles**
+  Rename threads to stay organized and enhance discoverability.
 
 * **Full CRUD Support**
-  Create, read, update, and delete chats with a smooth and intuitive interface.
+  Create, read, update, and delete threads with a smooth and intuitive interface.
 
 ---
 ## Running Locally

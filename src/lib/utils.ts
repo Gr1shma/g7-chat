@@ -14,7 +14,7 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-function addToolMessageToChat({
+function addToolMessageToThread({
     toolMessage,
     messages,
 }: {
@@ -53,11 +53,11 @@ function addToolMessageToChat({
 export function convertToUIMessages(
     messages: Array<DB_MESSAGE_TYPE>
 ): Array<Message> {
-    return messages.reduce((chatMessages: Array<Message>, message) => {
+    return messages.reduce((threadMessages: Array<Message>, message) => {
         if (message.role === "tool") {
-            return addToolMessageToChat({
+            return addToolMessageToThread({
                 toolMessage: message as CoreToolMessage,
-                messages: chatMessages,
+                messages: threadMessages,
             });
         }
 
@@ -84,7 +84,7 @@ export function convertToUIMessages(
             }
         }
 
-        chatMessages.push({
+        threadMessages.push({
             id: message.id,
             role: message.role as Message["role"],
             content: textContent,
@@ -92,7 +92,7 @@ export function convertToUIMessages(
             toolInvocations,
         });
 
-        return chatMessages;
+        return threadMessages;
     }, []);
 }
 

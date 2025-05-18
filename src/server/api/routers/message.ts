@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { messages_table } from "~/server/db/schema";
 
 export const messageRouter = createTRPCRouter({
-    getMessagesByChatId: protectedProcedure
+    getMessagesByThreadId: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
             const { db } = ctx;
@@ -15,14 +15,14 @@ export const messageRouter = createTRPCRouter({
                 const messages = await db
                     .select()
                     .from(messages_table)
-                    .where(eq(messages_table.chatId, input))
+                    .where(eq(messages_table.threadId, input))
                     .orderBy(asc(messages_table.createdAt));
 
                 return messages;
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to fetch messages for this chat",
+                    message: "Failed to fetch messages for this thread",
                 });
             }
         }),

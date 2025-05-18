@@ -3,34 +3,34 @@ import { and, desc, eq, lt, not, or } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { chats_table, messages_table } from "~/server/db/schema";
+import { threads_table, messages_table } from "~/server/db/schema";
 
-export const chatRouter = createTRPCRouter({
-    getChatById: protectedProcedure
+export const threadRouter = createTRPCRouter({
+    getThreadById: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
             const { db, session } = ctx;
             const userId = session.user.id;
 
             try {
-                const [chat] = await db
+                const [thread] = await db
                     .select()
-                    .from(chats_table)
+                    .from(threads_table)
                     .where(
                         and(
-                            eq(chats_table.id, input),
-                            eq(chats_table.userId, userId)
+                            eq(threads_table.id, input),
+                            eq(threads_table.userId, userId)
                         )
                     );
-                return chat;
+                return thread;
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to get chat",
+                    message: "Failed to get thread",
                 });
             }
         }),
-    getInfiniteChats: protectedProcedure
+    getInfiniteThreads: protectedProcedure
         .input(
             z.object({
                 cursor: z
@@ -51,22 +51,25 @@ export const chatRouter = createTRPCRouter({
 
                 const whereClause = cursor
                     ? and(
-                          eq(chats_table.userId, userId),
+                          eq(threads_table.userId, userId),
                           or(
-                              lt(chats_table.updatedAt, cursor.updatedAt),
+                              lt(threads_table.updatedAt, cursor.updatedAt),
                               and(
-                                  eq(chats_table.updatedAt, cursor.updatedAt),
-                                  lt(chats_table.id, cursor.id)
+                                  eq(threads_table.updatedAt, cursor.updatedAt),
+                                  lt(threads_table.id, cursor.id)
                               )
                           )
                       )
-                    : eq(chats_table.userId, userId);
+                    : eq(threads_table.userId, userId);
 
                 const data = await db
                     .select()
-                    .from(chats_table)
+                    .from(threads_table)
                     .where(whereClause)
-                    .orderBy(desc(chats_table.updatedAt), desc(chats_table.id))
+                    .orderBy(
+                        desc(threads_table.updatedAt),
+                        desc(threads_table.id)
+                    )
                     .limit(limit + 1);
 
                 const hasMore = data.length > limit;
@@ -83,15 +86,15 @@ export const chatRouter = createTRPCRouter({
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to fetch chats",
+                    message: "Failed to fetch threads",
                 });
             }
         }),
 
-    save: protectedProcedure
+    saveThread: protectedProcedure
         .input(
             z.object({
-                chatId: z.string(),
+                threadId: z.string(),
                 title: z.string(),
             })
         )
@@ -99,16 +102,9 @@ export const chatRouter = createTRPCRouter({
             const { db, session } = ctx;
             const userId = session.user?.id;
 
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
             try {
-                await db.insert(chats_table).values({
-                    id: input.chatId,
+                await db.insert(threads_table).values({
+                    id: input.threadId,
                     createdAt: new Date(),
                     userId,
                     title: input.title,
@@ -116,15 +112,15 @@ export const chatRouter = createTRPCRouter({
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to save chat",
+                    message: "Failed to save thread",
                 });
             }
         }),
 
-    changeTitle: protectedProcedure
+    changeThreadTitle: protectedProcedure
         .input(
             z.object({
-                chatId: z.string(),
+                threadId: z.string(),
                 title: z.string(),
             })
         )
@@ -132,38 +128,31 @@ export const chatRouter = createTRPCRouter({
             const { db, session } = ctx;
             const userId = session.user?.id;
 
-            if (!userId) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
             try {
                 const result = await db
-                    .update(chats_table)
+                    .update(threads_table)
                     .set({ title: input.title })
                     .where(
                         and(
-                            eq(chats_table.id, input.chatId),
-                            eq(chats_table.userId, userId)
+                            eq(threads_table.id, input.threadId),
+                            eq(threads_table.userId, userId)
                         )
                     );
 
                 if (result.rowCount === 0) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "Chat not found or unauthorized",
+                        message: "Thread not found or unauthorized",
                     });
                 }
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to change chat title",
+                    message: "Failed to change thread title",
                 });
             }
         }),
-    tooglePinById: protectedProcedure
+    toogleThreadPinById: protectedProcedure
         .input(z.string())
         .mutation(async ({ ctx, input }) => {
             const { db, session } = ctx;
@@ -178,31 +167,31 @@ export const chatRouter = createTRPCRouter({
 
             try {
                 const result = await db
-                    .update(chats_table)
+                    .update(threads_table)
                     .set({
-                        isPinned: not(chats_table.isPinned),
+                        isPinned: not(threads_table.isPinned),
                     })
                     .where(
                         and(
-                            eq(chats_table.id, input),
-                            eq(chats_table.userId, userId)
+                            eq(threads_table.id, input),
+                            eq(threads_table.userId, userId)
                         )
                     );
 
                 if (result.rowCount === 0) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "Chat not found or unauthorized",
+                        message: "Thread not found or unauthorized",
                     });
                 }
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to toggle pin of chat",
+                    message: "Failed to toggle pin of thread",
                 });
             }
         }),
-    deleteById: protectedProcedure
+    deleteThreadById: protectedProcedure
         .input(z.string())
         .mutation(async ({ ctx, input }) => {
             const { db, session } = ctx;
@@ -211,20 +200,20 @@ export const chatRouter = createTRPCRouter({
             try {
                 await db
                     .delete(messages_table)
-                    .where(eq(messages_table.chatId, input));
+                    .where(eq(messages_table.threadId, input));
 
                 await db
-                    .delete(chats_table)
+                    .delete(threads_table)
                     .where(
                         and(
-                            eq(chats_table.id, input),
-                            eq(chats_table.userId, userId)
+                            eq(threads_table.id, input),
+                            eq(threads_table.userId, userId)
                         )
                     );
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to delete chat",
+                    message: "Failed to delete thread",
                 });
             }
         }),

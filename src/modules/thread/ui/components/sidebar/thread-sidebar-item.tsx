@@ -1,6 +1,6 @@
 "use client";
 
-import type { DB_CHAT_TYPE } from "~/server/db/schema";
+import type { DB_THREAD_TYPE } from "~/server/db/schema";
 import Link from "next/link";
 import { memo, useState, useRef, useEffect } from "react";
 import { SidebarMenuItem, SidebarMenuButton } from "~/components/ui/sidebar";
@@ -22,53 +22,59 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 
-const PureChatItem = ({
-    chat,
+const PureThreadItem = ({
+    thread,
     isActive,
     setOpenMobile,
 }: {
-    chat: DB_CHAT_TYPE;
+    thread: DB_THREAD_TYPE;
     isActive: boolean;
     setOpenMobile: (open: boolean) => void;
 }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [title, setTitle] = useState(chat.title);
+    const [title, setTitle] = useState(thread.title);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const utils = api.useUtils();
     const input = { limit: 20 };
 
-    const changeTitle = api.chat.changeTitle.useMutation({
-        onMutate: async ({ chatId, title }) => {
-            await utils.chat.getInfiniteChats.cancel(input);
+    const changeTitle = api.thread.changeThreadTitle.useMutation({
+        onMutate: async ({ threadId, title }) => {
+            await utils.thread.getInfiniteThreads.cancel(input);
 
-            const prevData = utils.chat.getInfiniteChats.getInfiniteData(input);
+            const prevData =
+                utils.thread.getInfiniteThreads.getInfiniteData(input);
 
-            utils.chat.getInfiniteChats.setInfiniteData(input, (oldData) => {
-                if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    pages: oldData.pages.map((page) => ({
-                        ...page,
-                        items: page.items.map((chat) =>
-                            chat.id === chatId ? { ...chat, title } : chat
-                        ),
-                    })),
-                };
-            });
+            utils.thread.getInfiniteThreads.setInfiniteData(
+                input,
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page) => ({
+                            ...page,
+                            items: page.items.map((thread) =>
+                                thread.id === threadId
+                                    ? { ...thread, title }
+                                    : thread
+                            ),
+                        })),
+                    };
+                }
+            );
 
             return { prevData };
         },
         onError: (_err, _variables, context) => {
             if (context?.prevData) {
-                utils.chat.getInfiniteChats.setInfiniteData(
+                utils.thread.getInfiniteThreads.setInfiniteData(
                     input,
                     context.prevData
                 );
             }
         },
         onSettled: () => {
-            utils.chat.getInfiniteChats.invalidate(input);
+            utils.thread.getInfiniteThreads.invalidate(input);
         },
     });
 
@@ -84,28 +90,27 @@ const PureChatItem = ({
         e.preventDefault();
         setIsEditing(true);
     };
-
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
     };
     const handleTitleSave = async () => {
         const trimmedTitle = title.trim();
         if (trimmedTitle === "") {
-            setTitle(chat.title);
+            setTitle(thread.title);
             setIsEditing(false);
             return;
         }
-        if (trimmedTitle === chat.title) {
+        if (trimmedTitle === thread.title) {
             setIsEditing(false);
             return;
         }
         try {
             await changeTitle.mutateAsync({
-                chatId: chat.id,
+                threadId: thread.id,
                 title: trimmedTitle,
             });
         } catch (error) {
-            setTitle(chat.title);
+            setTitle(thread.title);
         }
         setIsEditing(false);
     };
@@ -114,88 +119,98 @@ const PureChatItem = ({
         if (e.key === "Enter") {
             handleTitleSave();
         } else if (e.key === "Escape") {
-            setTitle(chat.title);
+            setTitle(thread.title);
             setIsEditing(false);
         }
     };
 
-    const togglePin = api.chat.tooglePinById.useMutation({
-        onMutate: async (chatId: string) => {
-            await utils.chat.getInfiniteChats.cancel(input);
-            const prevData = utils.chat.getInfiniteChats.getInfiniteData(input);
+    const toggleThreadPin = api.thread.toogleThreadPinById.useMutation({
+        onMutate: async (threadId: string) => {
+            await utils.thread.getInfiniteThreads.cancel(input);
+            const prevData =
+                utils.thread.getInfiniteThreads.getInfiniteData(input);
 
-            utils.chat.getInfiniteChats.setInfiniteData(input, (oldData) => {
-                if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    pages: oldData.pages.map((page) => ({
-                        ...page,
-                        items: page.items.map((c) =>
-                            c.id === chatId
-                                ? { ...c, isPinned: !c.isPinned }
-                                : c
-                        ),
-                    })),
-                };
-            });
+            utils.thread.getInfiniteThreads.setInfiniteData(
+                input,
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page) => ({
+                            ...page,
+                            items: page.items.map((c) =>
+                                c.id === threadId
+                                    ? { ...c, isPinned: !c.isPinned }
+                                    : c
+                            ),
+                        })),
+                    };
+                }
+            );
 
             return { prevData };
         },
-        onError: (_err, chatId, context) => {
-            toast.error("Failed to pin chat");
+        onError: (_err, threadId, context) => {
+            toast.error("Failed to pin thread");
             if (context?.prevData) {
-                utils.chat.getInfiniteChats.setInfiniteData(
+                utils.thread.getInfiniteThreads.setInfiniteData(
                     input,
                     context.prevData
                 );
             }
         },
         onSettled: () => {
-            utils.chat.getInfiniteChats.invalidate(input);
+            utils.thread.getInfiniteThreads.invalidate(input);
         },
     });
 
-    const deleteChat = api.chat.deleteById.useMutation({
-        onMutate: async (chatId) => {
-            await utils.chat.getInfiniteChats.cancel(input);
-            const prevData = utils.chat.getInfiniteChats.getInfiniteData(input);
+    const deleteThread = api.thread.deleteThreadById.useMutation({
+        onMutate: async (threadId) => {
+            await utils.thread.getInfiniteThreads.cancel(input);
+            const prevData =
+                utils.thread.getInfiniteThreads.getInfiniteData(input);
 
-            utils.chat.getInfiniteChats.setInfiniteData(input, (oldData) => {
-                if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    pages: oldData.pages.map((page) => ({
-                        ...page,
-                        items: page.items.filter((chat) => chat.id !== chatId),
-                    })),
-                };
-            });
+            utils.thread.getInfiniteThreads.setInfiniteData(
+                input,
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page) => ({
+                            ...page,
+                            items: page.items.filter(
+                                (thread) => thread.id !== threadId
+                            ),
+                        })),
+                    };
+                }
+            );
 
             return { prevData };
         },
-        onError: (error, _variables, context) => {
-            toast.error("Failed to delete chat");
+        onError: (_error, _variables, context) => {
+            toast.error("Failed to delete thread");
             if (context?.prevData) {
-                utils.chat.getInfiniteChats.setInfiniteData(
+                utils.thread.getInfiniteThreads.setInfiniteData(
                     input,
                     context.prevData
                 );
             }
         },
         onSuccess: () => {
-            toast.success("Chat deleted");
+            toast.success("Thread deleted");
         },
         onSettled: () => {
-            utils.chat.getInfiniteChats.invalidate(input);
+            utils.thread.getInfiniteThreads.invalidate(input);
         },
     });
     const router = useRouter();
 
     const handleDelete = async () => {
         try {
-            await deleteChat.mutateAsync(chat.id);
+            await deleteThread.mutateAsync(thread.id);
             if (isActive) {
-                router.push("/chat");
+                router.push("/thread");
             }
         } catch {
             toast("Deletion failed");
@@ -210,13 +225,13 @@ const PureChatItem = ({
                 {!isEditing ? (
                     <div className="group/link relative flex w-full items-center">
                         <Link
-                            href={`/chat/${chat.id}`}
+                            href={`/chat/${thread.id}`}
                             onClick={() => setOpenMobile(false)}
                             className="w-full text-left"
                         >
                             <span
                                 className="block overflow-hidden truncate px-1 py-1 text-sm hover:cursor-pointer"
-                                title={chat.title}
+                                title={thread.title}
                                 onDoubleClick={handleTitleClick}
                             >
                                 {title}
@@ -229,10 +244,12 @@ const PureChatItem = ({
                                 variant="ghost"
                                 className="rounded-md p-1.5 text-muted-foreground hover:bg-muted/40"
                                 tabIndex={-1}
-                                aria-label="Pin chat"
-                                onClick={() => togglePin.mutate(chat.id)}
+                                aria-label="Pin thread"
+                                onClick={() =>
+                                    toggleThreadPin.mutate(thread.id)
+                                }
                             >
-                                {chat.isPinned ? (
+                                {thread.isPinned ? (
                                     <PinOffIcon className="size-4" />
                                 ) : (
                                     <PinIcon className="size-4" />
@@ -245,7 +262,7 @@ const PureChatItem = ({
                                         variant="ghost"
                                         className="rounded-md p-1.5 text-destructive hover:bg-destructive/50 hover:text-destructive-foreground"
                                         tabIndex={-1}
-                                        aria-label="Delete chat"
+                                        aria-label="Delete thread"
                                     >
                                         <TrashIcon className="size-4" />
                                     </Button>
@@ -258,7 +275,7 @@ const PureChatItem = ({
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
                                             This action cannot be undone. This
-                                            will permanently delete this chat
+                                            will permanently delete this thread
                                             and all its messages.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
@@ -294,7 +311,7 @@ const PureChatItem = ({
                             onKeyDown={handleKeyDown}
                             onBlur={handleTitleSave}
                             className="h-7 w-full bg-sidebar-accent text-sm"
-                            aria-label="Edit chat title"
+                            aria-label="Edit thread title"
                         />
                         <div className="absolute right-2 flex space-x-1">
                             <button
@@ -306,7 +323,7 @@ const PureChatItem = ({
                             </button>
                             <button
                                 onClick={() => {
-                                    setTitle(chat.title);
+                                    setTitle(thread.title);
                                     setIsEditing(false);
                                 }}
                                 className="rounded-sm p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -322,8 +339,8 @@ const PureChatItem = ({
     );
 };
 
-export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
+export const ThreadItem = memo(PureThreadItem, (prevProps, nextProps) => {
     if (prevProps.isActive !== nextProps.isActive) return false;
-    if (prevProps.chat.title !== nextProps.chat.title) return false;
+    if (prevProps.thread.title !== nextProps.thread.title) return false;
     return true;
 });

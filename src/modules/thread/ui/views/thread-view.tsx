@@ -1,33 +1,31 @@
 "use client";
 
-import { type Message, useChat } from "ai/react";
+import { type Message, useChat as useThread } from "ai/react";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api } from "~/trpc/react";
-
-import { ChatInputForm } from "../components/chat-input";
-import { ChatMessages } from "../components/chat-messages";
-import { Button } from "~/components/ui/button";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
 
-interface ChatViewProps {
-    chatId: string;
+import { api } from "~/trpc/react";
+import { ThreadInputForm } from "../components/thread-input";
+import { ThreadMessages } from "../components/thread-messages";
+import { Button } from "~/components/ui/button";
+
+interface ThreadViewProps {
+    threadId: string;
     initialMessages: Array<Message>;
 }
 
-export function ChatView({ chatId, initialMessages }: ChatViewProps) {
-    const router = useRouter();
+export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
     const bottomRef = useRef<HTMLDivElement | null>(null);
-    const chatContainerRef = useRef<HTMLDivElement | null>(null);
+    const threadContainerRef = useRef<HTMLDivElement | null>(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
 
     const utils = api.useUtils();
 
     const handleScroll = () => {
-        if (chatContainerRef.current) {
+        if (threadContainerRef.current) {
             const { scrollTop, scrollHeight, clientHeight } =
-                chatContainerRef.current;
+                threadContainerRef.current;
             setShowScrollButton(scrollTop + clientHeight < scrollHeight - 50);
         }
     };
@@ -45,13 +43,13 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
         handleSubmit,
         stop,
         status,
-    } = useChat({
-        id: chatId,
+    } = useThread({
+        id: threadId,
         initialMessages,
         experimental_throttle: 100,
         sendExtraMessageFields: true,
         onFinish: async () => {
-            await utils.chat.invalidate();
+            await utils.thread.invalidate();
         },
         onError: () => {
             toast("An error occurred");
@@ -78,13 +76,13 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                             </Button>
                         ) : null}
                     </div>
-                    <div className="border-reflect relative rounded-t-[20px] bg-[--chat-input-background] p-2 pb-0 backdrop-blur-lg ![--c:--chat-input-gradient]">
-                        <form className="dark:outline-chat-background/40 relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[--chat-input-background] px-3 py-3 text-secondary-foreground outline outline-8 outline-[hsl(var(--chat-input-gradient)/0.5)] dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] max-sm:pb-6 sm:max-w-3xl">
-                            <ChatInputForm
+                    <div className="border-reflect relative rounded-t-[20px] bg-[--thread-input-background] p-2 pb-0 backdrop-blur-lg ![--c:--thread-input-gradient]">
+                        <form className="dark:outline-thread-background/40 relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[--thread-input-background] px-3 py-3 text-secondary-foreground outline outline-8 outline-[hsl(var(--thread-input-gradient)/0.5)] dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] max-sm:pb-6 sm:max-w-3xl">
+                            <ThreadInputForm
                                 setMessages={setMessages}
                                 isLoading={isLoading}
                                 input={input}
-                                chatId={chatId}
+                                threadId={threadId}
                                 setInput={setInput}
                                 handleSubmit={handleSubmit}
                                 stop={stop}
@@ -98,9 +96,9 @@ export function ChatView({ chatId, initialMessages }: ChatViewProps) {
                 <div
                     className="scrollbar scrollbar-w-2 scrollbar-thumb-gray-700 scrollbar-track-transparent hover:scrollbar-thumb-gray-600 h-[100dvh] overflow-y-auto pb-[140px]"
                     onScroll={handleScroll}
-                    ref={chatContainerRef}
+                    ref={threadContainerRef}
                 >
-                    <ChatMessages
+                    <ThreadMessages
                         messages={messages}
                         initialMessageLength={initialMessages.length}
                     />

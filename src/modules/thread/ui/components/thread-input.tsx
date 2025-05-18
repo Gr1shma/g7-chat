@@ -1,16 +1,16 @@
 "use client";
 
-import type { ChatRequestOptions } from "ai";
+import type { ChatRequestOptions as ThreadRequestOptions } from "ai";
 import type React from "react";
 import { useRef, useEffect, useCallback, memo } from "react";
 import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
-import { ArrowUpIcon, SendIcon, Square, StopCircleIcon } from "lucide-react";
-import type { UseChatHelpers } from "ai/react";
+import { ArrowUpIcon, Square } from "lucide-react";
+import type { UseChatHelpers as UseThreadHelpers } from "ai/react";
 
-interface ChatInputProps {
-    chatId: string;
+interface ThreadInputProps {
+    threadId: string;
     input: string;
     setInput: (value: string) => void;
     isLoading: boolean;
@@ -19,14 +19,14 @@ interface ChatInputProps {
         event?: {
             preventDefault?: () => void;
         },
-        chatRequestOptions?: ChatRequestOptions
+        chatRequestOptions?: ThreadRequestOptions
     ) => void;
-    status: UseChatHelpers["status"];
-    setMessages: UseChatHelpers["setMessages"];
+    status: UseThreadHelpers["status"];
+    setMessages: UseThreadHelpers["setMessages"];
 }
 
-function PureChatInput({
-    chatId,
+function PureThreadInput({
+    threadId,
     input,
     setInput,
     isLoading,
@@ -34,7 +34,7 @@ function PureChatInput({
     status,
     setMessages,
     stop,
-}: ChatInputProps) {
+}: ThreadInputProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -63,10 +63,10 @@ function PureChatInput({
     };
 
     const submitForm = useCallback(() => {
-        window.history.replaceState({}, "", `/chat/${chatId}`);
+        window.history.replaceState({}, "", `/chat/${threadId}`);
         handleSubmit();
         resetHeight();
-    }, [handleSubmit, chatId]);
+    }, [handleSubmit, threadId]);
 
     return (
         <div className="flex flex-grow flex-col">
@@ -115,7 +115,7 @@ function PureChatInput({
     );
 }
 
-export const ChatInputForm = memo(PureChatInput, (prevProps, nextProps) => {
+export const ThreadInputForm = memo(PureThreadInput, (prevProps, nextProps) => {
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.isLoading !== nextProps.isLoading) return false;
     return true;
@@ -126,7 +126,7 @@ function PureStopButton({
     setMessages,
 }: {
     stop: () => void;
-    setMessages: UseChatHelpers["setMessages"];
+    setMessages: UseThreadHelpers["setMessages"];
 }) {
     return (
         <Button

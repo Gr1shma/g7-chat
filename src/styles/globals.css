@@ -70,8 +70,13 @@
         --sidebar-accent-foreground: var(--accent-foreground);
         --sidebar-border: var(--broder);
         --sidebar-ring: var(--ring);
-        --chat-input-gradient: 289 23% 30%;
-        --chat-input-background: hsla(270, 10%, 20%, var(--blur-fallback, 0.4));
+        --thread-input-gradient: 289 23% 30%;
+        --thread-input-background: hsla(
+            270,
+            10%,
+            20%,
+            var(--blur-fallback, 0.4)
+        );
     }
 }
 @layer base {

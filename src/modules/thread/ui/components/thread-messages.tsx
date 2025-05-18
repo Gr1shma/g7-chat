@@ -4,15 +4,15 @@ import type { Message } from "ai";
 import { useEffect, useRef } from "react";
 import { Markdown } from "~/components/markdown";
 
-interface ChatMessagesProps {
+interface ThreadMessagesProps {
     messages: Message[];
     initialMessageLength: number;
 }
 
-export function ChatMessages({
+export function ThreadMessages({
     messages,
     initialMessageLength,
-}: ChatMessagesProps) {
+}: ThreadMessagesProps) {
     const latestUserIndex = [...messages]
         .map((m, i) => ({ m, i }))
         .reverse()

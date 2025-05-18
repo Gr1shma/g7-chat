@@ -11,46 +11,46 @@ import {
     useSidebar,
 } from "~/components/ui/sidebar";
 
-import { type DB_CHAT_TYPE } from "~/server/db/schema";
-import { ChatItem } from "./chat-history-item";
-import { Skeleton } from "~/components/ui/skeleton";
+import { type DB_THREAD_TYPE } from "~/server/db/schema";
+import { ThreadItem } from "./thread-sidebar-item";
 import { api } from "~/trpc/react";
 import { InfinitScroll } from "~/components/infinite-scroll";
+import { Skeleton } from "~/components/ui/skeleton";
 
-type GroupedChats = {
-    pinned: DB_CHAT_TYPE[];
-    today: DB_CHAT_TYPE[];
-    yesterday: DB_CHAT_TYPE[];
-    lastWeek: DB_CHAT_TYPE[];
-    lastMonth: DB_CHAT_TYPE[];
-    older: DB_CHAT_TYPE[];
+type GroupedThreads = {
+    pinned: DB_THREAD_TYPE[];
+    today: DB_THREAD_TYPE[];
+    yesterday: DB_THREAD_TYPE[];
+    lastWeek: DB_THREAD_TYPE[];
+    lastMonth: DB_THREAD_TYPE[];
+    older: DB_THREAD_TYPE[];
 };
 
-export interface ChatHistory {
-    chats: DB_CHAT_TYPE[];
+export interface ThreadHistory {
+    threads: DB_THREAD_TYPE[];
     hasMore: boolean;
 }
 
-const groupChatsByDate = (chats: DB_CHAT_TYPE[]): GroupedChats => {
+const groupThreadsByDate = (threads: DB_THREAD_TYPE[]): GroupedThreads => {
     const now = new Date();
     const oneWeekAgo = subWeeks(now, 1);
     const oneMonthAgo = subMonths(now, 1);
 
-    return chats.reduce(
-        (groups, chat) => {
-            const chatDate = new Date(chat.createdAt);
-            if (chat.isPinned === true) {
-                groups.pinned.push(chat);
-            } else if (isToday(chatDate)) {
-                groups.today.push(chat);
-            } else if (isYesterday(chatDate)) {
-                groups.yesterday.push(chat);
-            } else if (chatDate > oneWeekAgo) {
-                groups.lastWeek.push(chat);
-            } else if (chatDate > oneMonthAgo) {
-                groups.lastMonth.push(chat);
+    return threads.reduce(
+        (groups, thread) => {
+            const threadDate = new Date(thread.createdAt);
+            if (thread.isPinned === true) {
+                groups.pinned.push(thread);
+            } else if (isToday(threadDate)) {
+                groups.today.push(thread);
+            } else if (isYesterday(threadDate)) {
+                groups.yesterday.push(thread);
+            } else if (threadDate > oneWeekAgo) {
+                groups.lastWeek.push(thread);
+            } else if (threadDate > oneMonthAgo) {
+                groups.lastMonth.push(thread);
             } else {
-                groups.older.push(chat);
+                groups.older.push(thread);
             }
 
             return groups;
@@ -62,7 +62,7 @@ const groupChatsByDate = (chats: DB_CHAT_TYPE[]): GroupedChats => {
             lastWeek: [],
             lastMonth: [],
             older: [],
-        } as GroupedChats
+        } as GroupedThreads
     );
 };
 
@@ -74,22 +74,23 @@ export function SidebarHistory({
     searchQuery: string;
 }) {
     const { setOpenMobile } = useSidebar();
-    const { chatId } = useParams();
+    const { threadId } = useParams();
 
-    const [data, query] = api.chat.getInfiniteChats.useSuspenseInfiniteQuery(
-        {
-            limit: 20,
-        },
-        {
-            getNextPageParam: (lastPage) => lastPage.nextCursor,
-        }
-    );
+    const [data, query] =
+        api.thread.getInfiniteThreads.useSuspenseInfiniteQuery(
+            {
+                limit: 20,
+            },
+            {
+                getNextPageParam: (lastPage) => lastPage.nextCursor,
+            }
+        );
     if (!user) {
         return (
             <SidebarGroup>
                 <SidebarGroupContent>
                     <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-                        Login to save and revisit previous chats!
+                        Login to save and revisit previous threads!
                     </div>
                 </SidebarGroupContent>
             </SidebarGroup>
@@ -130,16 +131,16 @@ export function SidebarHistory({
             <SidebarGroup>
                 <SidebarGroupContent>
                     <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-red-500">
-                        Failed to load chat history.
+                        Failed to load thread history.
                     </div>
                 </SidebarGroupContent>
             </SidebarGroup>
         );
     }
 
-    const allChats = data?.pages.flatMap((page) => page.items) ?? [];
+    const allThreads = data?.pages.flatMap((page) => page.items) ?? [];
 
-    if (allChats.length === 0) {
+    if (allThreads.length === 0) {
         return (
             <SidebarGroup>
                 <SidebarGroupContent>
@@ -154,18 +155,18 @@ export function SidebarHistory({
 
     const normalizedQuery = searchQuery.toLowerCase();
 
-    const filteredChats = allChats.filter((chat) =>
-        chat.title?.toLowerCase().includes(normalizedQuery)
+    const filteredThreads = allThreads.filter((thread) =>
+        thread.title?.toLowerCase().includes(normalizedQuery)
     );
 
-    const groupedChats = groupChatsByDate(filteredChats);
+    const groupedThreads = groupThreadsByDate(filteredThreads);
 
-    if (filteredChats.length === 0) {
+    if (filteredThreads.length === 0) {
         return (
             <SidebarGroup>
                 <SidebarGroupContent>
                     <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-                        No chats found matching your search.
+                        No threads found matching your search.
                     </div>
                 </SidebarGroupContent>
             </SidebarGroup>
@@ -177,12 +178,15 @@ export function SidebarHistory({
             <SidebarGroupContent>
                 <SidebarMenu>
                     <div className="flex flex-col gap-6">
-                        {Object.entries(groupedChats).map(([label, chats]) => {
-                            if (chats.length === 0) return null;
+                        {Object.entries(groupedThreads).map(
+                            ([label, threads]) => {
+                                if (threads.length === 0) return null;
 
-                            const labelMap: Record<keyof GroupedChats, string> =
-                                {
-                                    pinned: "Pinned Chat",
+                                const labelMap: Record<
+                                    keyof GroupedThreads,
+                                    string
+                                > = {
+                                    pinned: "Pinned Thread",
                                     today: "Today",
                                     yesterday: "Yesterday",
                                     lastWeek: "Last 7 days",
@@ -190,22 +194,29 @@ export function SidebarHistory({
                                     older: "Older than last month",
                                 };
 
-                            return (
-                                <div key={label}>
-                                    <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
-                                        {labelMap[label as keyof GroupedChats]}
+                                return (
+                                    <div key={label}>
+                                        <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
+                                            {
+                                                labelMap[
+                                                    label as keyof GroupedThreads
+                                                ]
+                                            }
+                                        </div>
+                                        {threads.map((thread) => (
+                                            <ThreadItem
+                                                key={thread.id}
+                                                thread={thread}
+                                                isActive={
+                                                    thread.id === threadId
+                                                }
+                                                setOpenMobile={setOpenMobile}
+                                            />
+                                        ))}
                                     </div>
-                                    {chats.map((chat) => (
-                                        <ChatItem
-                                            key={chat.id}
-                                            chat={chat}
-                                            isActive={chat.id === chatId}
-                                            setOpenMobile={setOpenMobile}
-                                        />
-                                    ))}
-                                </div>
-                            );
-                        })}
+                                );
+                            }
+                        )}
                     </div>
                 </SidebarMenu>
                 <InfinitScroll

@@ -5,7 +5,7 @@ import {
     streamText,
 } from "ai";
 
-import { generateTitleFromUserMessage } from "~/app/(chat)/actions";
+import { generateTitleFromUserMessage } from "~/app/(thread)/actions";
 import { auth } from "~/server/auth";
 import {
     getMostRecentUserMessage,
@@ -40,21 +40,21 @@ export async function POST(request: Request) {
         headers: request.headers,
     });
 
-    const chat = await caller.chat.getChatById(id);
+    const thread = await caller.thread.getThreadById(id);
 
-    if (!chat) {
+    if (!thread) {
         const title = await generateTitleFromUserMessage({
             message: userMessage,
         });
-        await caller.chat.save({
-            chatId: id,
+        await caller.thread.saveThread({
+            threadId: id,
             title,
         });
     }
 
     await db
         .insert(messages_table)
-        .values([{ ...userMessage, createdAt: new Date(), chatId: id }]);
+        .values([{ ...userMessage, createdAt: new Date(), threadId: id }]);
 
     return createDataStreamResponse({
         execute: (dataStream) => {
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
                                 sanitizedResponseMessages.map((message) => {
                                     return {
                                         id: message.id,
-                                        chatId: id,
+                                        threadId: id,
                                         role: message.role,
                                         content: message.content,
                                         createdAt: new Date(),
