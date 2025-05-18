@@ -8,7 +8,6 @@ import { PinIcon, TrashIcon, CheckIcon, XIcon, PinOffIcon } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -150,8 +149,7 @@ const PureThreadItem = ({
 
             return { prevData };
         },
-        onError: (_err, threadId, context) => {
-            toast.error("Failed to pin thread");
+        onError: (_err, _threadId, context) => {
             if (context?.prevData) {
                 utils.thread.getInfiniteThreads.setInfiniteData(
                     input,
@@ -189,16 +187,12 @@ const PureThreadItem = ({
             return { prevData };
         },
         onError: (_error, _variables, context) => {
-            toast.error("Failed to delete thread");
             if (context?.prevData) {
                 utils.thread.getInfiniteThreads.setInfiniteData(
                     input,
                     context.prevData
                 );
             }
-        },
-        onSuccess: () => {
-            toast.success("Thread deleted");
         },
         onSettled: () => {
             utils.thread.getInfiniteThreads.invalidate(input);
@@ -207,13 +201,9 @@ const PureThreadItem = ({
     const router = useRouter();
 
     const handleDelete = async () => {
-        try {
-            await deleteThread.mutateAsync(thread.id);
-            if (isActive) {
-                router.push("/thread");
-            }
-        } catch {
-            toast("Deletion failed");
+        await deleteThread.mutateAsync(thread.id);
+        if (isActive) {
+            router.push("/thread");
         }
     };
 
@@ -285,14 +275,8 @@ const PureThreadItem = ({
                                         </AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={async () => {
-                                                try {
-                                                    handleDelete();
-                                                    setOpen(false);
-                                                } catch (error) {
-                                                    toast(
-                                                        "Error while handling delete"
-                                                    );
-                                                }
+                                                handleDelete();
+                                                setOpen(false);
                                             }}
                                         >
                                             Delete

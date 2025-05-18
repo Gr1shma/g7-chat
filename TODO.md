@@ -1,8 +1,4 @@
 # TODO
-- [x] Convert the chat to thread in code base
-- [ ] User management
-    - [ ] Change Name
-    - [ ] Delete User Id
 - [ ] Allow editing messages and retrying responses 
 
 - [ ] Save the input to local storage for later use

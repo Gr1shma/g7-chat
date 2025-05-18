@@ -11,7 +11,7 @@ export default function KeyBoardShortCuts() {
         {
             name: "Toggle Sidebar",
             keysCombination: "Ctrl + B",
-        }
+        },
     ];
 
     return (
@@ -19,14 +19,24 @@ export default function KeyBoardShortCuts() {
             <span className="text-sm font-semibold">Keyboard Shortcuts</span>
             <div className="grid gap-4">
                 {keyBoardShortCuts.map((keyBoardShortcut, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{keyBoardShortcut.name}</span>
+                    <div
+                        key={index}
+                        className="flex items-center justify-between"
+                    >
+                        <span className="text-sm font-medium">
+                            {keyBoardShortcut.name}
+                        </span>
                         <div className="flex gap-1">
-                            {keyBoardShortcut.keysCombination.split(" + ").map((key, keyIndex) => (
-                                <kbd key={keyIndex} className="rounded bg-background px-2 py-1 font-sans text-sm">
-                                    {key}
-                                </kbd>
-                            ))}
+                            {keyBoardShortcut.keysCombination
+                                .split(" + ")
+                                .map((key, keyIndex) => (
+                                    <kbd
+                                        key={keyIndex}
+                                        className="rounded bg-background px-2 py-1 font-sans text-sm"
+                                    >
+                                        {key}
+                                    </kbd>
+                                ))}
                         </div>
                     </div>
                 ))}

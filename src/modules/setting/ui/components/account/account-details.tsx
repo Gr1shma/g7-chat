@@ -2,9 +2,7 @@ import { UserAvatar } from "~/components/user-avatar";
 import KeyBoardShortCuts from "./keyboard-shortcuts";
 import type { User } from "next-auth";
 
-export default function AccountDetails({ user }: {
-    user: User
-}) {
+export default function AccountDetails({ user }: { user: User }) {
     return (
         <div className="hidden space-y-8 md:block md:w-1/4">
             <div className="text-center">
@@ -19,5 +17,5 @@ export default function AccountDetails({ user }: {
             </div>
             <KeyBoardShortCuts />
         </div>
-    )
+    );
 }

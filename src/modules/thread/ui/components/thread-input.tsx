@@ -3,7 +3,6 @@
 import type { ChatRequestOptions as ThreadRequestOptions } from "ai";
 import type React from "react";
 import { useRef, useEffect, useCallback, memo } from "react";
-import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
 import { ArrowUpIcon, Square } from "lucide-react";
@@ -82,12 +81,7 @@ function PureThreadInput({
                     onKeyDown={(event) => {
                         if (event.key === "Enter" && !event.shiftKey) {
                             event.preventDefault();
-
-                            if (isLoading) {
-                                toast.error(
-                                    "Please wait for the model to finish its response!"
-                                );
-                            } else {
+                            if (!isLoading) {
                                 submitForm();
                             }
                         }

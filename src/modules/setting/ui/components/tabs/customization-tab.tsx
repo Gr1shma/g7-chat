@@ -1,5 +1,3 @@
 export default function CustomizationTab() {
-    return (
-        <div>HI</div>
-    )
+    return <div>HI</div>;
 }

@@ -2,7 +2,6 @@
 
 import { type Message, useChat as useThread } from "ai/react";
 import { useState, useRef, useEffect } from "react";
-import { toast } from "sonner";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
 
 import { api } from "~/trpc/react";
@@ -50,9 +49,6 @@ export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
         sendExtraMessageFields: true,
         onFinish: async () => {
             await utils.thread.invalidate();
-        },
-        onError: () => {
-            toast("An error occurred");
         },
     });
 

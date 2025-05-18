@@ -1,5 +1,3 @@
 export default function HistoryAndSyncTab() {
-    return (
-        <div>HI</div>
-    )
+    return <div>HI</div>;
 }
