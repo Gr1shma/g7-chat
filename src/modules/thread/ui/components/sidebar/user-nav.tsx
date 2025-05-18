@@ -1,5 +1,4 @@
 "use client";
-import { SettingsIcon } from "lucide-react";
 import type { User } from "next-auth";
 import Link from "next/link";
 
@@ -11,24 +10,23 @@ export function SidebarUserNav({ user }: { user: User }) {
         redirect("/auth");
     }
     return (
-        <div className="flex w-full flex-row items-center justify-between gap-3 p-2">
-            <div className="flex flex-row items-center gap-3">
-                <UserAvatar
-                    imageUrl={user.image!}
-                    size="default"
-                    name={user.name!}
-                />
-                <div className="flex flex-col">
-                    <span className="text-sm font-medium text-neutral-200">
-                        {user.name}
-                    </span>
-                </div>
-            </div>
+        <div className="flex flex-col gap-2 m-0 p-2 pt-0">
             <Link
-                className="text-neutral-400 hover:text-neutral-200"
                 href="/setting"
+                className="flex select-none flex-row items-center justify-between gap-3 rounded-lg px-3 py-3 hover:bg-sidebar-accent focus:bg-sidebar-accent focus:outline-2"
             >
-                <SettingsIcon className="size-5" />
+                <div className="flex flex-row items-center gap-3">
+                    <UserAvatar
+                        imageUrl={user.image!}
+                        size="default"
+                        name={user.name!}
+                    />
+                    <div className="flex text-foreground">
+                        <span className="text-sm font-medium">
+                            {user.name}
+                        </span>
+                    </div>
+                </div>
             </Link>
         </div>
     );
