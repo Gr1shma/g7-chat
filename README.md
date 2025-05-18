@@ -17,7 +17,7 @@
 * **Responsive Desktop UI**
   Designed for a seamless experience across various desktop environments and window managers.
 
-* **Editable hreads Titles**
+* **Editable Threads Titles**
   Rename threads to stay organized and enhance discoverability.
 
 * **Full CRUD Support**
@@ -46,7 +46,6 @@ Open [localhost:3000](http://localhost:3000) and start breaking the system… or
 * Implement user profile management features:
 
   * Change user display name
-  * Delete user accounts
   * Configure chatbot response styles and user display names (e.g., unopinionated, factual, friendly)
 
 ### Phase 3: Data Synchronization
