@@ -68,43 +68,47 @@ function PureThreadInput({
     }, [handleSubmit, threadId]);
 
     return (
-        <div className="flex flex-grow flex-col">
-            <div className="flex flex-grow flex-row items-start">
-                <textarea
-                    ref={textareaRef}
-                    placeholder="Type your message here..."
-                    value={input}
-                    onChange={handleInput}
-                    className="max-h-32 w-full resize-none bg-transparent text-base leading-6 text-foreground outline-none placeholder:text-secondary-foreground/60 disabled:opacity-0"
-                    rows={2}
-                    autoFocus
-                    onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                            event.preventDefault();
-                            if (!isLoading) {
-                                submitForm();
-                            }
-                        }
-                    }}
-                />
-                <div className="sr-only">
-                    Press Enter to send, Shift + Enter for new line
-                </div>
-            </div>
-            <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
-                <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2">
-                    {status === "submitted" ? (
-                        <StopButton stop={stop} setMessages={setMessages} />
-                    ) : (
-                        <SendButton input={input} submitForm={submitForm} />
-                    )}
-                </div>
-                <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                    <div className="ml-[-7px] flex items-center gap-1">
-                        {/* Modal Select | Link */}
+        <div className="border-reflect relative rounded-t-[20px] bg-[--thread-input-background] p-2 pb-0 backdrop-blur-lg ![--c:--thread-input-gradient]">
+            <form className="dark:outline-thread-background/40 relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[--thread-input-background] px-3 py-3 text-secondary-foreground outline outline-8 outline-[hsl(var(--thread-input-gradient)/0.5)] dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] max-sm:pb-6 sm:max-w-3xl">
+                <div className="flex flex-grow flex-col">
+                    <div className="flex flex-grow flex-row items-start">
+                        <textarea
+                            ref={textareaRef}
+                            placeholder="Type your message here..."
+                            value={input}
+                            onChange={handleInput}
+                            className="max-h-32 w-full resize-none bg-transparent text-base leading-6 text-foreground outline-none placeholder:text-secondary-foreground/60 disabled:opacity-0"
+                            rows={2}
+                            autoFocus
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" && !event.shiftKey) {
+                                    event.preventDefault();
+                                    if (!isLoading) {
+                                        submitForm();
+                                    }
+                                }
+                            }}
+                        />
+                        <div className="sr-only">
+                            Press Enter to send, Shift + Enter for new line
+                        </div>
+                    </div>
+                    <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
+                        <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2">
+                            {status === "submitted" ? (
+                                <StopButton stop={stop} setMessages={setMessages} />
+                            ) : (
+                                <SendButton input={input} submitForm={submitForm} />
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                            <div className="ml-[-7px] flex items-center gap-1">
+                                {/* Modal Select | Link */}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }
