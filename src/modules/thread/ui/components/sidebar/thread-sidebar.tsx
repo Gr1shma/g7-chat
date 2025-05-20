@@ -1,6 +1,5 @@
 "use client";
 import { SearchIcon } from "lucide-react";
-import type { User } from "next-auth";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -14,10 +13,7 @@ import {
 import { SidebarUserNav } from "./user-nav";
 import { SidebarHistory } from "./thread-sidebar-group";
 import { useState } from "react";
-
-interface ThreadSidebarProps {
-    user: User;
-}
+import { ThreadSidebarProps } from "./thread-sidebar.types";
 
 export function ThreadSideBar({ user }: ThreadSidebarProps) {
     const [searchQuery, setSearchQuery] = useState("");

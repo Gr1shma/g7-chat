@@ -1,11 +1,12 @@
 "use client";
-import type { User } from "next-auth";
+
 import Link from "next/link";
 
 import { redirect } from "next/navigation";
 import { UserAvatar } from "~/components/user-avatar";
+import { SidebarUserNavProps } from "./thread-sidebar.types";
 
-export function SidebarUserNav({ user }: { user: User }) {
+export function SidebarUserNav({ user }: SidebarUserNavProps) {
     if (!user) {
         redirect("/auth");
     }

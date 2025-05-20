@@ -1,6 +1,5 @@
 "use client";
 
-import type { DB_THREAD_TYPE } from "~/server/db/schema";
 import Link from "next/link";
 import { memo, useState, useRef, useEffect } from "react";
 import { SidebarMenuItem, SidebarMenuButton } from "~/components/ui/sidebar";
@@ -20,16 +19,13 @@ import {
     AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
+import { ThreadItemProps } from "./thread-sidebar.types";
 
 const PureThreadItem = ({
     thread,
     isActive,
     setOpenMobile,
-}: {
-    thread: DB_THREAD_TYPE;
-    isActive: boolean;
-    setOpenMobile: (open: boolean) => void;
-}) => {
+}: ThreadItemProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(thread.title);
     const inputRef = useRef<HTMLInputElement>(null);
