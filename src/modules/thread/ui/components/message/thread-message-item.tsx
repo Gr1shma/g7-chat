@@ -10,7 +10,7 @@ import type {
     UserMessageItemProps,
     AnimationAndSpaceProps,
     ControlUserMessageProps,
-} from "./types/thread-message-item.types";
+} from "./thread-messages.types";
 
 export default function MessageItem({
     message,

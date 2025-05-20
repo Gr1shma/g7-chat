@@ -35,3 +35,9 @@ export interface ControlUserMessageProps extends WithChatHelpers {
     onEdit: () => void;
     isEditing?: boolean;
 }
+
+export interface ThreadMessagesProps {
+    messages: Message[];
+    initialMessageLength: number;
+    append: UseChatHelpers["append"];
+}

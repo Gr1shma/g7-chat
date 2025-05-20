@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import MessageItem from "./thread-message-item";
-import type { ThreadMessagesProps } from "./types/thread-messages.types";
+import type { ThreadMessagesProps } from "./thread-messages.types";
 
 import {
     getLatestUserMessageIndex,
