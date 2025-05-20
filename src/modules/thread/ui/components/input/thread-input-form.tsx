@@ -1,21 +1,10 @@
 "use client";
 
-import type { UseChatHelpers } from "ai/react";
 import { memo, useCallback } from "react";
 import { InputToolbar } from "./thread-input-toolbar";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
-
-interface ThreadInputProps {
-    threadId: UseChatHelpers["id"];
-    input: UseChatHelpers["input"];
-    setInput: UseChatHelpers["setInput"];
-    isLoading: UseChatHelpers["isLoading"];
-    stop: UseChatHelpers["stop"];
-    handleSubmit: UseChatHelpers["handleSubmit"];
-    status: UseChatHelpers["status"];
-    setMessages: UseChatHelpers["setMessages"];
-}
+import { ThreadInputProps } from "./thread-input.types";
 
 function PureThreadInput({
     threadId,

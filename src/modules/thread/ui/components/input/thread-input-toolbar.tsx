@@ -1,14 +1,6 @@
-import type { UseChatHelpers } from "ai/react";
 import { SendButton } from "~/components/send-button";
 import { StopButton } from "~/components/stop-button";
-
-interface Props {
-    input: UseChatHelpers["input"];
-    status: UseChatHelpers["status"];
-    stop: UseChatHelpers["stop"];
-    submitForm: () => void;
-    setMessages: UseChatHelpers["setMessages"];
-}
+import { InputToolbarProps } from "./thread-input.types";
 
 export function InputToolbar({
     input,
@@ -16,7 +8,7 @@ export function InputToolbar({
     stop,
     submitForm,
     setMessages,
-}: Props) {
+}: InputToolbarProps) {
     return (
         <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
             <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2">

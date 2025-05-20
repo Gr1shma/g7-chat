@@ -37,9 +37,7 @@ Open [localhost:3000](http://localhost:3000) and start breaking the system… or
 
 ### Phase 1: Core Enhancements
 
-* Enable message editing and retrying AI responses
 * Save user input locally to support persistence and recovery
-* Add data export functionality in JSON format
 
 ### Phase 2: User Management
 
@@ -51,6 +49,7 @@ Open [localhost:3000](http://localhost:3000) and start breaking the system… or
 ### Phase 3: Data Synchronization
 
 * Build a robust sync system to keep client and server data in sync
+* Add data export functionality in JSON format
 
 ### Phase 4: Project & Collaboration Features
 

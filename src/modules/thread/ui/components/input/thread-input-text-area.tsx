@@ -1,15 +1,7 @@
-import type { UseChatHelpers } from "ai/react";
 import React, { forwardRef } from "react";
+import { ThreadInputTextareaProps } from "./thread-input.types";
 
-interface Props {
-    input: UseChatHelpers["input"];
-    setInput: UseChatHelpers["setInput"];
-    isLoading: UseChatHelpers["isLoading"];
-    onHeightChange: () => void;
-    onSubmit: () => void;
-}
-
-export const ThreadInputTextarea = forwardRef<HTMLTextAreaElement, Props>(
+export const ThreadInputTextarea = forwardRef<HTMLTextAreaElement, ThreadInputTextareaProps>(
     ({ input, setInput, isLoading, onHeightChange, onSubmit }, ref) => {
         return (
             <textarea
