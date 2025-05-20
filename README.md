@@ -17,7 +17,7 @@
 * **Responsive Desktop UI**
   Designed for a seamless experience across various desktop environments and window managers.
 
-* **Editable Threads Titles**
+* **Editable Treads Titles**
   Rename threads to stay organized and enhance discoverability.
 
 * **Full CRUD Support**
@@ -35,8 +35,9 @@ Open [localhost:3000](http://localhost:3000) and start breaking the system… or
 ---
 ## Roadmap
 
-### Phase 1: Core Enhancements
+### Phase 1: Core Enhancements (Completed ✅)
 
+* Enable message editing and retrying AI responses
 * Save user input locally to support persistence and recovery
 
 ### Phase 2: User Management

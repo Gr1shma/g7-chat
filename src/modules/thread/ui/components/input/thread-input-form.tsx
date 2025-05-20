@@ -1,10 +1,11 @@
 "use client";
 
-import { memo, useCallback } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { InputToolbar } from "./thread-input-toolbar";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
 import { ThreadInputProps } from "./thread-input.types";
+import { useLocalStorage } from "usehooks-ts";
 
 function PureThreadInput({
     threadId,
@@ -19,11 +20,32 @@ function PureThreadInput({
     const { textareaRef, adjustHeight, resetHeight } =
         useTextareaAutosize(input);
 
+    const [localStorageInput, setLocalStorageInput] = useLocalStorage(
+        'input',
+        '',
+    );
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            const domValue = textareaRef.current.value;
+            const finalValue = domValue || localStorageInput || '';
+            setInput(finalValue);
+            adjustHeight();
+        }
+    }, []);
+
+
+    useEffect(() => {
+        setLocalStorageInput(input);
+    }, [input, setLocalStorageInput]);
+
+
     const submitForm = useCallback(() => {
         window.history.replaceState({}, "", `/chat/${threadId}`);
         handleSubmit();
+        setLocalStorageInput('');
         resetHeight();
-    }, [handleSubmit, threadId, resetHeight]);
+    }, [handleSubmit, threadId, resetHeight, setLocalStorageInput]);
 
     return (
         <div className="border-reflect relative rounded-t-[20px] bg-[--thread-input-background] p-2 pb-0 backdrop-blur-lg ![--c:--thread-input-gradient]">
