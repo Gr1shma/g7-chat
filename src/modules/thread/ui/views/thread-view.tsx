@@ -3,10 +3,10 @@
 import { type Message, useChat } from "ai/react";
 import { useRef, useEffect } from "react";
 import { api } from "~/trpc/react";
-import { ThreadInputForm } from "../components/thread-input";
 import { ThreadMessages } from "../components/message/thread-messages";
 import { useScrollToBottomButton } from "~/hooks/use-scroll-button";
 import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
+import { ThreadInputForm } from "../components/input/thread-input-form";
 
 interface ThreadViewProps {
     threadId: string;
