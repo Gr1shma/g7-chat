@@ -10,7 +10,9 @@ export type GroupedThreads = {
     older: DB_THREAD_TYPE[];
 };
 
-export const groupThreadsByDate = (threads: DB_THREAD_TYPE[]): GroupedThreads => {
+export const groupThreadsByDate = (
+    threads: DB_THREAD_TYPE[]
+): GroupedThreads => {
     const now = new Date();
     const oneWeekAgo = subWeeks(now, 1);
     const oneMonthAgo = subMonths(now, 1);

@@ -19,7 +19,7 @@ import {
     AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-import { ThreadItemProps } from "./thread-sidebar.types";
+import { type ThreadItemProps } from "./thread-sidebar.types";
 
 const PureThreadItem = ({
     thread,

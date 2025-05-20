@@ -27,4 +27,4 @@ interface InputToolbarProps {
     setMessages: UseChatHelpers["setMessages"];
 }
 
-export type { ThreadInputProps, ThreadInputTextareaProps, InputToolbarProps }
+export type { ThreadInputProps, ThreadInputTextareaProps, InputToolbarProps };

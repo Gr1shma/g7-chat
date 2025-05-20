@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { redirect } from "next/navigation";
 import { UserAvatar } from "~/components/user-avatar";
-import { SidebarUserNavProps } from "./thread-sidebar.types";
+import { type SidebarUserNavProps } from "./thread-sidebar.types";
 
 export function SidebarUserNav({ user }: SidebarUserNavProps) {
     if (!user) {

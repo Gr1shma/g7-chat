@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect } from "react";
 import { InputToolbar } from "./thread-input-toolbar";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
-import { ThreadInputProps } from "./thread-input.types";
+import { type ThreadInputProps } from "./thread-input.types";
 import { useLocalStorage } from "usehooks-ts";
 
 function PureThreadInput({
@@ -21,29 +21,27 @@ function PureThreadInput({
         useTextareaAutosize(input);
 
     const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-        'input',
-        '',
+        "input",
+        ""
     );
 
     useEffect(() => {
         if (textareaRef.current) {
             const domValue = textareaRef.current.value;
-            const finalValue = domValue || localStorageInput || '';
+            const finalValue = domValue || localStorageInput || "";
             setInput(finalValue);
             adjustHeight();
         }
     }, []);
 
-
     useEffect(() => {
         setLocalStorageInput(input);
     }, [input, setLocalStorageInput]);
 
-
     const submitForm = useCallback(() => {
         window.history.replaceState({}, "", `/chat/${threadId}`);
         handleSubmit();
-        setLocalStorageInput('');
+        setLocalStorageInput("");
         resetHeight();
     }, [handleSubmit, threadId, resetHeight, setLocalStorageInput]);
 

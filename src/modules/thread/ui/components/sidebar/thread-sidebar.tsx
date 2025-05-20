@@ -13,7 +13,7 @@ import {
 import { SidebarUserNav } from "./user-nav";
 import { SidebarHistory } from "./thread-sidebar-group";
 import { useState } from "react";
-import { ThreadSidebarProps } from "./thread-sidebar.types";
+import { type ThreadSidebarProps } from "./thread-sidebar.types";
 
 export function ThreadSideBar({ user }: ThreadSidebarProps) {
     const [searchQuery, setSearchQuery] = useState("");

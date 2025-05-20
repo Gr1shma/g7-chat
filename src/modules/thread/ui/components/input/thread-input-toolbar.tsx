@@ -1,6 +1,6 @@
 import { SendButton } from "~/components/send-button";
 import { StopButton } from "~/components/stop-button";
-import { InputToolbarProps } from "./thread-input.types";
+import { type InputToolbarProps } from "./thread-input.types";
 
 export function InputToolbar({
     input,
