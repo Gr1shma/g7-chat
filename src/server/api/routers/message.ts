@@ -53,4 +53,14 @@ export const messageRouter = createTRPCRouter({
                 });
             }
         }),
+    updateMessageById: protectedProcedure
+        .input(
+            z.object({
+                messageId: z.string(),
+                status: z.string(),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { db } = ctx;
+        }),
 });

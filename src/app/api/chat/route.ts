@@ -64,13 +64,12 @@ export async function POST(request: Request) {
                 maxSteps: 5,
                 experimental_transform: smoothStream({ chunking: "word" }),
                 experimental_generateMessageId: crypto.randomUUID,
-                onFinish: async ({ response, reasoning }) => {
+                onFinish: async ({ response }) => {
                     if (session.user?.id) {
                         try {
                             const sanitizedResponseMessages =
                                 sanitizeResponseMessages({
                                     messages: response.messages,
-                                    reasoning,
                                 });
 
                             await db.insert(messages_table).values(
@@ -81,6 +80,7 @@ export async function POST(request: Request) {
                                         role: message.role,
                                         content: message.content,
                                         createdAt: new Date(),
+                                        status: "done" as const,
                                     };
                                 })
                             );

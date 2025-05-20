@@ -1,12 +1,12 @@
 "use client";
 
-import { type Message, useChat as useThread } from "ai/react";
+import { type Message, useChat } from "ai/react";
 import { useRef, useEffect } from "react";
 import { api } from "~/trpc/react";
+import { ThreadInputForm } from "../components/thread-input";
 import { ThreadMessages } from "../components/message/thread-messages";
 import { useScrollToBottomButton } from "~/hooks/use-scroll-button";
 import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
-import { ThreadInputForm } from "../components/input/thread-input-form";
 
 interface ThreadViewProps {
     threadId: string;
@@ -17,7 +17,8 @@ export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const threadContainerRef = useRef<HTMLDivElement | null>(null);
 
-    const { showScrollButton, handleScroll } = useScrollToBottomButton(threadContainerRef);
+    const { showScrollButton, handleScroll } =
+        useScrollToBottomButton(threadContainerRef);
 
     const utils = api.useUtils();
 
@@ -30,7 +31,8 @@ export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
         handleSubmit,
         stop,
         status,
-    } = useThread({
+        append,
+    } = useChat({
         id: threadId,
         initialMessages,
         experimental_throttle: 100,
@@ -80,6 +82,7 @@ export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
                     <ThreadMessages
                         messages={messages}
                         initialMessageLength={initialMessages.length}
+                        append={append}
                     />
                     <div ref={bottomRef}></div>
                 </div>

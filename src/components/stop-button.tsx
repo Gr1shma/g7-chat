@@ -1,4 +1,4 @@
-import { UseChatHelpers } from "ai/react";
+import type { UseChatHelpers } from "ai/react";
 import { Square } from "lucide-react";
 import { Button } from "./ui/button";
 import { memo } from "react";
@@ -18,7 +18,9 @@ function PureStopButton({
             onClick={(event) => {
                 event.preventDefault();
                 stop();
-                setMessages((messages) => messages);
+                setMessages((messages) => {
+                    return messages;
+                });
             }}
         >
             <Square

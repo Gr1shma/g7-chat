@@ -6,7 +6,7 @@ import { useRef, useEffect, useCallback, memo } from "react";
 
 import { Button } from "~/components/ui/button";
 import { ArrowUpIcon, Square } from "lucide-react";
-import type { UseChatHelpers as UseThreadHelpers } from "ai/react";
+import type { UseChatHelpers } from "ai/react";
 
 interface ThreadInputProps {
     threadId: string;
@@ -20,8 +20,8 @@ interface ThreadInputProps {
         },
         chatRequestOptions?: ThreadRequestOptions
     ) => void;
-    status: UseThreadHelpers["status"];
-    setMessages: UseThreadHelpers["setMessages"];
+    status: UseChatHelpers["status"];
+    setMessages: UseChatHelpers["setMessages"];
 }
 
 function PureThreadInput({
@@ -96,9 +96,15 @@ function PureThreadInput({
                     <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
                         <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2">
                             {status === "submitted" ? (
-                                <StopButton stop={stop} setMessages={setMessages} />
+                                <StopButton
+                                    stop={stop}
+                                    setMessages={setMessages}
+                                />
                             ) : (
-                                <SendButton input={input} submitForm={submitForm} />
+                                <SendButton
+                                    input={input}
+                                    submitForm={submitForm}
+                                />
                             )}
                         </div>
                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
@@ -124,7 +130,7 @@ function PureStopButton({
     setMessages,
 }: {
     stop: () => void;
-    setMessages: UseThreadHelpers["setMessages"];
+    setMessages: UseChatHelpers["setMessages"];
 }) {
     return (
         <Button

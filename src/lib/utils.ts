@@ -50,14 +50,21 @@ function addToolMessageToThread({
     });
 }
 
+export type CustomMessage = Message & { status: "done" | "error" };
+
 export function convertToUIMessages(
     messages: Array<DB_MESSAGE_TYPE>
-): Array<Message> {
-    return messages.reduce((threadMessages: Array<Message>, message) => {
+): Array<CustomMessage> {
+    return messages.reduce((threadMessages: Array<CustomMessage>, message) => {
         if (message.role === "tool") {
-            return addToolMessageToThread({
+            const toolMessages = addToolMessageToThread({
                 toolMessage: message as CoreToolMessage,
                 messages: threadMessages,
+            }) as unknown as Array<CustomMessage>;
+
+            return toolMessages.map((msg) => {
+                if ("status" in msg) return msg;
+                return { ...(msg as Message), status: "done" as const };
             });
         }
 
@@ -90,10 +97,11 @@ export function convertToUIMessages(
             content: textContent,
             reasoning,
             toolInvocations,
+            status: "done",
         });
 
         return threadMessages;
-    }, []);
+    }, [] as Array<CustomMessage>);
 }
 
 type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
@@ -101,10 +109,8 @@ type ResponseMessage = ResponseMessageWithoutId & { id: string };
 
 export function sanitizeResponseMessages({
     messages,
-    reasoning,
 }: {
     messages: Array<ResponseMessage>;
-    reasoning: string | undefined;
 }) {
     const toolResultIds: Array<string> = [];
 
@@ -118,10 +124,14 @@ export function sanitizeResponseMessages({
         }
     }
 
-    const messagesBySanitizedContent = messages.map((message) => {
-        if (message.role !== "assistant") return message;
+    const sanitizedMessages = messages.map((message) => {
+        if (message.role !== "assistant") {
+            return message;
+        }
 
-        if (typeof message.content === "string") return message;
+        if (typeof message.content === "string") {
+            return message;
+        }
 
         const sanitizedContent = message.content.filter((content) =>
             content.type === "tool-call"
@@ -131,52 +141,16 @@ export function sanitizeResponseMessages({
                   : true
         );
 
-        if (reasoning) {
-            // @ts-expect-error: reasoning message parts in sdk is wip
-            sanitizedContent.push({ type: "reasoning", reasoning });
-        }
-
         return {
             ...message,
             content: sanitizedContent,
         };
     });
 
-    return messagesBySanitizedContent.filter(
-        (message) => message.content.length > 0
-    );
-}
-
-export function sanitizeUIMessages(messages: Array<Message>): Array<Message> {
-    const messagesBySanitizedToolInvocations = messages.map((message) => {
-        if (message.role !== "assistant") return message;
-
-        if (!message.toolInvocations) return message;
-
-        const toolResultIds: Array<string> = [];
-
-        for (const toolInvocation of message.toolInvocations) {
-            if (toolInvocation.state === "result") {
-                toolResultIds.push(toolInvocation.toolCallId);
-            }
-        }
-
-        const sanitizedToolInvocations = message.toolInvocations.filter(
-            (toolInvocation) =>
-                toolInvocation.state === "result" ||
-                toolResultIds.includes(toolInvocation.toolCallId)
-        );
-
-        return {
-            ...message,
-            toolInvocations: sanitizedToolInvocations,
-        };
-    });
-
-    return messagesBySanitizedToolInvocations.filter(
-        (message) =>
-            message.content.length > 0 ||
-            (message.toolInvocations && message.toolInvocations.length > 0)
+    return sanitizedMessages.filter((message) =>
+        Array.isArray(message.content)
+            ? message.content.length > 0
+            : !!message.content
     );
 }
 

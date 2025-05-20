@@ -1,16 +1,24 @@
 "use client";
 
-import type { Message } from "ai";
 import { useEffect, useRef } from "react";
 import MessageItem from "./thread-message-item";
+import type { ThreadMessagesProps } from "./types/thread-messages.types";
 
-interface ThreadMessagesProps {
-    messages: Message[];
-    initialMessageLength: number;
-}
+import {
+    getLatestUserMessageIndex,
+    getNextAssistantIndex,
+    shouldShowAssistantSpace,
+} from "./thread-message.utils";
 
-export function ThreadMessages({ messages, initialMessageLength }: ThreadMessagesProps) {
-    const latestUserIndex = getLatestUserMessageIndex(messages, initialMessageLength);
+export function ThreadMessages({
+    append,
+    messages,
+    initialMessageLength,
+}: ThreadMessagesProps) {
+    const latestUserIndex = getLatestUserMessageIndex(
+        messages,
+        initialMessageLength
+    );
     const nextAssistantIndex = getNextAssistantIndex(messages, latestUserIndex);
 
     const userRef = useRef<HTMLDivElement>(null);
@@ -21,21 +29,28 @@ export function ThreadMessages({ messages, initialMessageLength }: ThreadMessage
         nextAssistantIndex,
         messages
     );
-    const isNotFirstUserMessage = messages.filter((m) => m.role === "user").length > 1;
+    const isNotFirstUserMessage =
+        messages.filter((m) => m.role === "user").length > 1;
 
     useEffect(() => {
         if (userRef.current) {
-            userRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+            userRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
             if (assistantSpaceRef.current) {
                 setTimeout(() => {
-                    assistantSpaceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    assistantSpaceRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    });
                 }, 100);
             }
         }
     }, [latestUserIndex]);
 
     return (
-        <div className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 pb-10 pt-safe-offset-10">
+        <div className="pt-safe-offset-10 mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 pb-10">
             {messages.map((m, index) => (
                 <MessageItem
                     key={m.id}
@@ -47,32 +62,9 @@ export function ThreadMessages({ messages, initialMessageLength }: ThreadMessage
                     assistantSpaceRef={assistantSpaceRef}
                     showAssistantSpace={showAssistantSpace}
                     isNotFirstUserMessage={isNotFirstUserMessage}
+                    append={append}
                 />
             ))}
         </div>
-    );
-}
-
-function getLatestUserMessageIndex(messages: Message[], initialLength: number) {
-    return [...messages]
-        .map((m, i) => ({ m, i }))
-        .reverse()
-        .find(({ m, i }) => i >= initialLength && m.role === "user")?.i;
-}
-
-function getNextAssistantIndex(messages: Message[], latestUserIndex?: number) {
-    return messages.findIndex(
-        (m, i) => i > (latestUserIndex ?? -1) && m.role !== "user"
-    );
-}
-
-function shouldShowAssistantSpace(
-    latestUserIndex: number | undefined,
-    nextAssistantIndex: number,
-    messages: Message[]
-) {
-    return (
-        latestUserIndex !== undefined &&
-        (nextAssistantIndex === -1 || messages[nextAssistantIndex]?.content === "")
     );
 }

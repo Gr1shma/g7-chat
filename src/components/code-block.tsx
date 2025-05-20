@@ -1,7 +1,8 @@
 "use client";
 
-import { Copy as CopyIcon } from "lucide-react";
+import { CircleCheck, CopyCheckIcon, Copy as CopyIcon } from "lucide-react";
 import { Highlight, themes, Prism } from "prism-react-renderer";
+import { useToast } from "~/hooks/use-toast";
 
 (typeof global !== "undefined" ? global : window).Prism = Prism;
 
@@ -52,7 +53,7 @@ export function CodeBlock({
     if (language === "") {
         return <code className="font-bold">{code}</code>;
     }
-
+    const { toast } = useToast();
     return (
         <div className="overflow-hidden rounded-lg">
             {language && (
@@ -62,6 +63,9 @@ export function CodeBlock({
                         className="rounded p-1 transition-colors hover:bg-zinc-700"
                         onClick={() => {
                             navigator.clipboard.writeText(code);
+                            toast({
+                                description: "Copied to clipboard!",
+                            });
                         }}
                     >
                         <CopyIcon className="size-4" />

@@ -1,24 +1,20 @@
 "use client";
 
-import type { ChatRequestOptions as ThreadRequestOptions } from "ai";
-import type { UseChatHelpers as UseThreadHelpers } from "ai/react";
+import type { UseChatHelpers } from "ai/react";
 import { memo, useCallback } from "react";
 import { InputToolbar } from "./thread-input-toolbar";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
 
 interface ThreadInputProps {
-    threadId: string;
-    input: string;
-    setInput: (value: string) => void;
-    isLoading: boolean;
-    stop: () => void;
-    handleSubmit: (
-        event?: { preventDefault?: () => void },
-        chatRequestOptions?: ThreadRequestOptions
-    ) => void;
-    status: UseThreadHelpers["status"];
-    setMessages: UseThreadHelpers["setMessages"];
+    threadId: UseChatHelpers["id"];
+    input: UseChatHelpers["input"];
+    setInput: UseChatHelpers["setInput"];
+    isLoading: UseChatHelpers["isLoading"];
+    stop: UseChatHelpers["stop"];
+    handleSubmit: UseChatHelpers["handleSubmit"];
+    status: UseChatHelpers["status"];
+    setMessages: UseChatHelpers["setMessages"];
 }
 
 function PureThreadInput({
@@ -31,7 +27,8 @@ function PureThreadInput({
     status,
     setMessages,
 }: ThreadInputProps) {
-    const { textareaRef, adjustHeight, resetHeight } = useTextareaAutosize(input);
+    const { textareaRef, adjustHeight, resetHeight } =
+        useTextareaAutosize(input);
 
     const submitForm = useCallback(() => {
         window.history.replaceState({}, "", `/chat/${threadId}`);

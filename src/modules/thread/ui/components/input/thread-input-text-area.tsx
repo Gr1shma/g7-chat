@@ -1,9 +1,10 @@
+import type { UseChatHelpers } from "ai/react";
 import React, { forwardRef } from "react";
 
 interface Props {
-    input: string;
-    setInput: (val: string) => void;
-    isLoading: boolean;
+    input: UseChatHelpers["input"];
+    setInput: UseChatHelpers["setInput"];
+    isLoading: UseChatHelpers["isLoading"];
     onHeightChange: () => void;
     onSubmit: () => void;
 }

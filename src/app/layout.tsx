@@ -5,6 +5,7 @@ import "~/styles/globals.css";
 import { ThemeProvider } from "~/components/theme-provider";
 import { TRPCReactProvider } from "~/trpc/react";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "~/components/ui/toaster";
 
 export const metadata: Metadata = {
     title: "g7-chat",
@@ -28,7 +29,10 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     <SessionProvider>
-                        <TRPCReactProvider>{children}</TRPCReactProvider>
+                        <TRPCReactProvider>
+                            {children}
+                            <Toaster />
+                        </TRPCReactProvider>
                     </SessionProvider>
                 </ThemeProvider>
             </body>

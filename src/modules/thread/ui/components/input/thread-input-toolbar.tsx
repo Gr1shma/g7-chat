@@ -1,16 +1,22 @@
-import type { UseChatHelpers as UseThreadHelpers } from "ai/react";
+import type { UseChatHelpers } from "ai/react";
 import { SendButton } from "~/components/send-button";
 import { StopButton } from "~/components/stop-button";
 
 interface Props {
-    input: string;
-    status: UseThreadHelpers["status"];
-    stop: () => void;
+    input: UseChatHelpers["input"];
+    status: UseChatHelpers["status"];
+    stop: UseChatHelpers["stop"];
     submitForm: () => void;
-    setMessages: UseThreadHelpers["setMessages"];
+    setMessages: UseChatHelpers["setMessages"];
 }
 
-export function InputToolbar({ input, status, stop, submitForm, setMessages }: Props) {
+export function InputToolbar({
+    input,
+    status,
+    stop,
+    submitForm,
+    setMessages,
+}: Props) {
     return (
         <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
             <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2">

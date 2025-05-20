@@ -4,6 +4,7 @@ import {
     index,
     integer,
     json,
+    pgEnum,
     pgTableCreator,
     primaryKey,
     text,
@@ -119,6 +120,7 @@ export const threads_table = createTable("threads", {
 });
 
 export type DB_THREAD_TYPE = InferSelectModel<typeof threads_table>;
+export const messageStatusEnum = pgEnum("message_status", ["done", "error"]);
 
 export const messages_table = createTable("messages", {
     id: varchar("id", { length: 255 })
@@ -131,6 +133,7 @@ export const messages_table = createTable("messages", {
     role: varchar("role").notNull(),
     content: json("content").notNull(),
     createdAt: timestamp("createdAt").notNull(),
+    status: messageStatusEnum("status").notNull().default("done"),
 });
 
 export type DB_MESSAGE_TYPE = InferSelectModel<typeof messages_table>;
