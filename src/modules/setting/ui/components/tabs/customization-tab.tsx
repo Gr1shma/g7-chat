@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-import { Button } from "~/components/ui/button"
+import { Button } from "~/components/ui/button";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
-} from "~/components/ui/form"
-import { Input } from "~/components/ui/input"
-import { Textarea } from "~/components/ui/textarea"
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 
 const formSchema = z.object({
     name: z.string().min(1).max(99),
     whatDoYouDo: z.string().min(1),
     chatTraits: z.string().min(1),
     keepInMind: z.string().min(1),
-})
+});
 
 export default function CustomizationTab() {
     const form = useForm<z.infer<typeof formSchema>>({
@@ -31,26 +31,33 @@ export default function CustomizationTab() {
             chatTraits: "",
             keepInMind: "",
         },
-    })
+    });
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        console.log(values);
     }
     return (
         <>
-            <h2 className="text-2xl font-bold">
-                Customize g7-chat
-            </h2>
+            <h2 className="text-2xl font-bold">Customize g7-chat</h2>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" autoComplete="off">
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                    autoComplete="off"
+                >
                     <FormField
                         control={form.control}
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-base">What should g7-chat call you?</FormLabel>
+                                <FormLabel className="text-base">
+                                    What should g7-chat call you?
+                                </FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter your name" {...field} />
+                                    <Input
+                                        placeholder="Enter your name"
+                                        {...field}
+                                    />
                                 </FormControl>
                             </FormItem>
                         )}
@@ -60,9 +67,14 @@ export default function CustomizationTab() {
                         name="whatDoYouDo"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-base">What do you do?</FormLabel>
+                                <FormLabel className="text-base">
+                                    What do you do?
+                                </FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enginner, Student, teacher, etc" {...field} />
+                                    <Input
+                                        placeholder="Enginner, Student, teacher, etc"
+                                        {...field}
+                                    />
                                 </FormControl>
                             </FormItem>
                         )}
@@ -72,9 +84,14 @@ export default function CustomizationTab() {
                         name="chatTraits"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-base">What traits should g7-chat have?</FormLabel>
+                                <FormLabel className="text-base">
+                                    What traits should g7-chat have?
+                                </FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Enter traits separated by commas (e.g. Chatty, Witty, Opinionated)" {...field} />
+                                    <Textarea
+                                        placeholder="Enter traits separated by commas (e.g. Chatty, Witty, Opinionated)"
+                                        {...field}
+                                    />
                                 </FormControl>
                             </FormItem>
                         )}
@@ -84,9 +101,14 @@ export default function CustomizationTab() {
                         name="keepInMind"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-base">Anything else g7-chat should know about you?</FormLabel>
+                                <FormLabel className="text-base">
+                                    Anything else g7-chat should know about you?
+                                </FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Interests, values, or preferences to keep in mind" {...field} />
+                                    <Textarea
+                                        placeholder="Interests, values, or preferences to keep in mind"
+                                        {...field}
+                                    />
                                 </FormControl>
                             </FormItem>
                         )}

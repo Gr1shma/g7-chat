@@ -49,9 +49,7 @@ export default function SettingViews({ tabList }: { tabList: SettingTab[] }) {
                 </div>
                 {tabList.map((tab) => (
                     <TabsContent key={tab.value} value={tab.value}>
-                        <div className="space-y-6">
-                            {tab.component}
-                        </div>
+                        <div className="space-y-6">{tab.component}</div>
                     </TabsContent>
                 ))}
             </Tabs>

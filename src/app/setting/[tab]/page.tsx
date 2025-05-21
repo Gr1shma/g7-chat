@@ -36,7 +36,6 @@ export default async function SettingTabPage({
 }: {
     params: Promise<{ tab: string }>;
 }) {
-
     const session = await auth();
     if (!session) {
         redirect("/auth");
