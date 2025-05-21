@@ -58,11 +58,11 @@ export async function POST(request: Request) {
         .insert(messages_table)
         .values([{ ...userMessage, createdAt: new Date(), threadId: id }]);
 
-
     const regularPrompt = (() => {
         const customization = user?.customization;
 
-        let prompt = "You are a friendly assistant! Keep your responses concise and helpful.";
+        let prompt =
+            "You are a friendly assistant! Keep your responses concise and helpful.";
 
         if (!customization) return prompt;
 
@@ -86,7 +86,6 @@ export async function POST(request: Request) {
 
         return prompt;
     })();
-
 
     return createDataStreamResponse({
         execute: (dataStream) => {

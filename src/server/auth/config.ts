@@ -9,13 +9,13 @@ import {
     users,
     verificationTokens,
 } from "~/server/db/schema";
-import { CustomizationFomSchema } from "../api/routers/user";
+import { type CustomizationFomSchema } from "../api/routers/user";
 
 declare module "next-auth" {
     interface Session extends DefaultSession {
         user: {
             id: string;
-            customization: CustomizationFomSchema,
+            customization: CustomizationFomSchema;
         } & DefaultSession["user"];
     }
 }

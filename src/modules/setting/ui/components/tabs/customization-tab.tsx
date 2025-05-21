@@ -15,7 +15,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
-import { DB_USER_TYPE } from "~/server/db/schema";
+import { type DB_USER_TYPE } from "~/server/db/schema";
 
 const customizationFormSchema = z.object({
     name: z.string(),
@@ -24,7 +24,7 @@ const customizationFormSchema = z.object({
     keepInMind: z.string(),
 });
 
-export default function CustomizationTab({user}: {user: DB_USER_TYPE}) {
+export default function CustomizationTab({ user }: { user: DB_USER_TYPE }) {
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {

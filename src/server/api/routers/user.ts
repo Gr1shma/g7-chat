@@ -18,7 +18,7 @@ const customizationFormSchema = z.object({
     keepInMind: z.string(),
 });
 
-export type CustomizationFomSchema = z.infer<typeof customizationFormSchema>
+export type CustomizationFomSchema = z.infer<typeof customizationFormSchema>;
 
 export const userRouter = createTRPCRouter({
     deleteUserByuserId: protectedProcedure
@@ -68,48 +68,60 @@ export const userRouter = createTRPCRouter({
                 });
             }
         }),
-    addCustomization: protectedProcedure.input(
-        customizationFormSchema
-    ).mutation(async ({ ctx, input }) => {
-        const { session, db } = ctx;
-        try {
-            const [oldUser] = await db.select().from(users).where(eq(
-                users.id, session.user.id
-            ));
-            if (!oldUser) {
+    addCustomization: protectedProcedure
+        .input(customizationFormSchema)
+        .mutation(async ({ ctx, input }) => {
+            const { session, db } = ctx;
+            try {
+                const [oldUser] = await db
+                    .select()
+                    .from(users)
+                    .where(eq(users.id, session.user.id));
+                if (!oldUser) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "Failed to customize user data",
+                    });
+                }
+                const oldCustomization = oldUser.customization;
+
+                const newCustomization = {
+                    name:
+                        input.name === "" ? oldCustomization.name : input.name,
+                    whatDoYouDo:
+                        input.whatDoYouDo === ""
+                            ? oldCustomization.whatDoYouDo
+                            : input.whatDoYouDo,
+                    chatTraits:
+                        input.chatTraits === ""
+                            ? oldCustomization.chatTraits
+                            : input.chatTraits,
+                    keepInMind:
+                        input.keepInMind === ""
+                            ? oldCustomization.keepInMind
+                            : input.keepInMind,
+                };
+
+                await db
+                    .update(users)
+                    .set({
+                        customization: newCustomization,
+                    })
+                    .where(eq(users.id, session.user.id));
+            } catch {
                 throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Failed to customize user data",
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to delete user account",
                 });
             }
-            const oldCustomization = oldUser.customization;
-
-            const newCustomization = {
-                name: (input.name === "" ? oldCustomization.name : input.name),
-                whatDoYouDo: (input.whatDoYouDo === "" ? oldCustomization.whatDoYouDo : input.whatDoYouDo),
-                chatTraits: (input.chatTraits === "" ? oldCustomization.chatTraits : input.chatTraits),
-                keepInMind: (input.keepInMind === "" ? oldCustomization.keepInMind : input.keepInMind),
-            }
-
-            await db.update(users).set({
-                customization: newCustomization
-            }).where(eq(
-                users.id, session.user.id
-            ))
-
-        } catch {
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to delete user account",
-            });
-        }
-    }),
+        }),
     getUserById: protectedProcedure.query(async ({ ctx }) => {
         const { session, db } = ctx;
         try {
-            const [user] = await db.select().from(users).where(eq(
-                users.id, session.user.id
-            ));
+            const [user] = await db
+                .select()
+                .from(users)
+                .where(eq(users.id, session.user.id));
 
             if (!user) {
                 throw new TRPCError({
