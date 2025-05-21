@@ -80,7 +80,7 @@ export const userRouter = createTRPCRouter({
                 if (!oldUser) {
                     throw new TRPCError({
                         code: "UNAUTHORIZED",
-                        message: "Failed to customize user data",
+                        message: "UNAUTHORIZED user can't add customization",
                     });
                 }
                 const oldCustomization = oldUser.customization;
@@ -125,8 +125,8 @@ export const userRouter = createTRPCRouter({
 
             if (!user) {
                 throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Failed to customize user data",
+                    code: "NOT_FOUND",
+                    message: "Users not found",
                 });
             }
 
@@ -134,8 +134,33 @@ export const userRouter = createTRPCRouter({
         } catch {
             throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to delete user account",
+                message: "Failed to get user account",
             });
         }
     }),
+    changeUserName: protectedProcedure.input(z.object({
+        userId: z.string(),
+        userName: z.string(),
+    })).mutation(async ({ ctx, input }) => {
+        const { session, db } = ctx;
+        const { userName } = input;
+
+        if (session.user.id !== input.userId) {
+            throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "You can only delete your own account.",
+            });
+        }
+
+        try {
+            await db.update(users).set({
+                name: userName
+            }).where(eq(users.id, session.user.id));
+        } catch {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to change user username",
+            });
+        }
+    })
 });

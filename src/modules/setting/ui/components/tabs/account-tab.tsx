@@ -16,12 +16,71 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { DB_USER_TYPE } from "~/server/db/schema";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 
-export default function AccountTab() {
+const customizationFormSchema = z.object({
+    userName: z.string(),
+});
+
+export default function AccountTab({ user }: { user: DB_USER_TYPE }) {
+    const form = useForm<z.infer<typeof customizationFormSchema>>({
+        resolver: zodResolver(customizationFormSchema),
+        defaultValues: {
+            userName: user.name || "",
+        },
+    });
+
+    const userMutation = api.user.changeUserName.useMutation();
+    function onSubmit(values: z.infer<typeof customizationFormSchema>) {
+        userMutation.mutate({
+            userId: user.id,
+            userName: values.userName,
+        });
+    }
+
     return (
-        <div className="space-y-6">
-            <DeleteAccountArea />
-        </div>
+        <>
+            <h2 className="text-2xl font-bold">Customize g7-chat</h2>
+            <div className="space-y-6">
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="s-y-8"
+                        autoComplete="off"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="userName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-base">
+                                        Change Username
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Enter your name"
+                                            className="w-60"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex flex-row items-center mt-3 gap-2">
+                            <Button type="submit">Submit</Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+            <div className="space-y-6">
+                <DeleteAccountArea />
+            </div>
+        </>
     );
 }
 

@@ -25,7 +25,7 @@ export default async function SettingTabPage({
         {
             value: "account",
             name: "Account",
-            component: <AccountTab />,
+            component: <AccountTab user={user} />,
         },
         {
             value: "customization",
