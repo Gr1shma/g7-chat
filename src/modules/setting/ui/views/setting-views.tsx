@@ -37,24 +37,24 @@ export default function SettingViews({ tabList }: { tabList: SettingTab[] }) {
 
     return (
         <div className="md:w-3/4 md:pl-12">
-            <div className="space-y-6">
-                <Tabs value={activeTab} onValueChange={handleTabChange}>
-                    <div className="flex justify-center">
-                        <TabsList className="no-scrollbar -mx-0.5 gap-1 overflow-auto rounded-lg text-secondary-foreground md:w-fit">
-                            {tabList.map((tab) => (
-                                <TabsTrigger key={tab.value} value={tab.value}>
-                                    {tab.name}
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
-                    </div>
-                    {tabList.map((tab) => (
-                        <TabsContent key={tab.value} value={tab.value}>
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
+                <div className="flex justify-center">
+                    <TabsList className="no-scrollbar -mx-0.5 gap-1 overflow-auto rounded-lg text-secondary-foreground md:w-fit">
+                        {tabList.map((tab) => (
+                            <TabsTrigger key={tab.value} value={tab.value}>
+                                {tab.name}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </div>
+                {tabList.map((tab) => (
+                    <TabsContent key={tab.value} value={tab.value}>
+                        <div className="space-y-6">
                             {tab.component}
-                        </TabsContent>
-                    ))}
-                </Tabs>
-            </div>
+                        </div>
+                    </TabsContent>
+                ))}
+            </Tabs>
         </div>
     );
 }

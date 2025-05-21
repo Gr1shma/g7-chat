@@ -34,15 +34,16 @@ const tabList: SettingTab[] = [
 export default async function SettingTabPage({
     params,
 }: {
-    params: { tab: string };
+    params: Promise<{ tab: string }>;
 }) {
+
     const session = await auth();
     if (!session) {
         redirect("/auth");
     }
 
-    // Use the tabList for validation
-    const isValidTab = tabList.some((tab) => tab.value === params.tab);
+    const { tab: tabParams } = await params;
+    const isValidTab = tabList.some((tab) => tab.value === tabParams);
 
     if (!isValidTab) {
         redirect("/setting/account");

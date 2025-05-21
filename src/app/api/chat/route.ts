@@ -15,6 +15,7 @@ import { google } from "@ai-sdk/google";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { messages_table } from "~/server/db/schema";
+import { regularPrompt } from "~/lib/ai-prompts";
 
 export const maxDuration = 60;
 
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
     return createDataStreamResponse({
         execute: (dataStream) => {
             const result = streamText({
+                system: regularPrompt,
                 model: google("gemini-2.0-flash-001"),
                 messages,
                 maxSteps: 5,
