@@ -7,29 +7,7 @@ import SettingViews, {
     type SettingTab,
 } from "~/modules/setting/ui/views/setting-views";
 import { auth } from "~/server/auth";
-
-const tabList: SettingTab[] = [
-    {
-        value: "account",
-        name: "Account",
-        component: <AccountTab />,
-    },
-    {
-        value: "customization",
-        name: "Customization",
-        component: <CustomizationTab />,
-    },
-    {
-        value: "history-and-sync",
-        name: "History And Sync",
-        component: <HistoryAndSyncTab />,
-    },
-    {
-        value: "about-me",
-        name: "About Me",
-        component: <AboutMeTab />,
-    },
-];
+import { api } from "~/trpc/server";
 
 export default async function SettingTabPage({
     params,
@@ -41,6 +19,31 @@ export default async function SettingTabPage({
         redirect("/auth");
     }
 
+    const user = await api.user.getUserById();
+
+    const tabList: SettingTab[] = [
+        {
+            value: "account",
+            name: "Account",
+            component: <AccountTab />,
+        },
+        {
+            value: "customization",
+            name: "Customization",
+            component: <CustomizationTab user={user} />,
+        },
+        {
+            value: "history-and-sync",
+            name: "History And Sync",
+            component: <HistoryAndSyncTab />,
+        },
+        {
+            value: "about-me",
+            name: "About Me",
+            component: <AboutMeTab />,
+        },
+    ];
+
     const { tab: tabParams } = await params;
     const isValidTab = tabList.some((tab) => tab.value === tabParams);
 
@@ -48,5 +51,6 @@ export default async function SettingTabPage({
         redirect("/setting/account");
     }
 
-    return <SettingViews tabList={tabList} />;
+
+    return <SettingViews tabList={tabList} user={user} />;
 }

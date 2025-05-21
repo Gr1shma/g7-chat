@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { DB_USER_TYPE } from "~/server/db/schema";
 
 export type SettingTab = {
     value: string;
@@ -10,7 +11,7 @@ export type SettingTab = {
     component: React.ReactNode;
 };
 
-export default function SettingViews({ tabList }: { tabList: SettingTab[] }) {
+export default function SettingViews({ tabList, user }: { tabList: SettingTab[], user: DB_USER_TYPE  }) {
     const router = useRouter();
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState("account");

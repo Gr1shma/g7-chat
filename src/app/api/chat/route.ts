@@ -15,7 +15,6 @@ import { google } from "@ai-sdk/google";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { messages_table } from "~/server/db/schema";
-import { regularPrompt } from "~/lib/ai-prompts";
 
 export const maxDuration = 60;
 
@@ -53,9 +52,41 @@ export async function POST(request: Request) {
         });
     }
 
+    const user = await caller.user.getUserById();
+
     await db
         .insert(messages_table)
         .values([{ ...userMessage, createdAt: new Date(), threadId: id }]);
+
+
+    const regularPrompt = (() => {
+        const customization = user?.customization;
+
+        let prompt = "You are a friendly assistant! Keep your responses concise and helpful.";
+
+        if (!customization) return prompt;
+
+        const { name, whatDoYouDo, chatTraits, keepInMind } = customization;
+
+        if (name.trim()) {
+            prompt += ` The user's name is ${name}.`;
+        }
+
+        if (whatDoYouDo.trim()) {
+            prompt += ` The user is a ${whatDoYouDo}. Tailor your responses to be relevant, professional, and considerate of this background.`;
+        }
+
+        if (chatTraits.trim()) {
+            prompt += ` The user prefers these conversational traits: ${chatTraits}.`;
+        }
+
+        if (keepInMind.trim()) {
+            prompt += ` Keep in mind: ${keepInMind}.`;
+        }
+
+        return prompt;
+    })();
+
 
     return createDataStreamResponse({
         execute: (dataStream) => {

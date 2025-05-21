@@ -14,28 +14,37 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
+import { DB_USER_TYPE } from "~/server/db/schema";
 
-const formSchema = z.object({
-    name: z.string().min(1).max(99),
-    whatDoYouDo: z.string().min(1),
-    chatTraits: z.string().min(1),
-    keepInMind: z.string().min(1),
+const customizationFormSchema = z.object({
+    name: z.string(),
+    whatDoYouDo: z.string(),
+    chatTraits: z.string(),
+    keepInMind: z.string(),
 });
 
-export default function CustomizationTab() {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+export default function CustomizationTab({user}: {user: DB_USER_TYPE}) {
+    const form = useForm<z.infer<typeof customizationFormSchema>>({
+        resolver: zodResolver(customizationFormSchema),
         defaultValues: {
-            name: "",
-            whatDoYouDo: "",
-            chatTraits: "",
-            keepInMind: "",
+            name: user.customization.name,
+            whatDoYouDo: user.customization.whatDoYouDo,
+            chatTraits: user.customization.chatTraits,
+            keepInMind: user.customization.keepInMind,
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+    const userMutation = api.user.addCustomization.useMutation();
+    function onSubmit(values: z.infer<typeof customizationFormSchema>) {
+        userMutation.mutate({
+            name: values.name,
+            chatTraits: values.chatTraits,
+            keepInMind: values.keepInMind,
+            whatDoYouDo: values.whatDoYouDo,
+        });
     }
+
     return (
         <>
             <h2 className="text-2xl font-bold">Customize g7-chat</h2>

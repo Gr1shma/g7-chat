@@ -12,6 +12,7 @@ import {
     varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { CustomizationFomSchema } from "../api/routers/user";
 
 export const createTable = pgTableCreator((name) => `g7-chat_${name}`);
 
@@ -27,7 +28,15 @@ export const users = createTable("user", {
         withTimezone: true,
     }).default(sql`CURRENT_TIMESTAMP`),
     image: varchar("image", { length: 255 }),
+    customization: json("customization").$type<CustomizationFomSchema>().default({
+        chatTraits: "",
+        keepInMind: "",
+        whatDoYouDo: "",
+        name: "",
+    }).notNull(),
 });
+
+export type DB_USER_TYPE = InferSelectModel<typeof users>;
 
 export const usersRelations = relations(users, ({ many }) => ({
     accounts: many(accounts),
