@@ -22,12 +22,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { useToast } from "~/hooks/use-toast";
 
 const customizationFormSchema = z.object({
     userName: z.string(),
 });
 
 export default function AccountTab({ user }: { user: DB_USER_TYPE }) {
+    const { toast } = useToast();
+
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
@@ -41,6 +44,9 @@ export default function AccountTab({ user }: { user: DB_USER_TYPE }) {
             userId: user.id,
             userName: values.userName,
         });
+        toast({
+            description: "Submitted",
+        })
     }
 
     return (

@@ -51,5 +51,5 @@ export default async function SettingTabPage({
         redirect("/setting/account");
     }
 
-    return <SettingViews tabList={tabList} user={user} />;
+    return <SettingViews tabList={tabList} />;
 }

@@ -16,6 +16,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { type DB_USER_TYPE } from "~/server/db/schema";
+import { useToast } from "~/hooks/use-toast";
 
 const customizationFormSchema = z.object({
     name: z.string(),
@@ -25,6 +26,7 @@ const customizationFormSchema = z.object({
 });
 
 export default function CustomizationTab({ user }: { user: DB_USER_TYPE }) {
+    const { toast } = useToast();
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
@@ -43,6 +45,9 @@ export default function CustomizationTab({ user }: { user: DB_USER_TYPE }) {
             keepInMind: values.keepInMind,
             whatDoYouDo: values.whatDoYouDo,
         });
+        toast({
+            description: "Submtted",
+        })
     }
 
     return (

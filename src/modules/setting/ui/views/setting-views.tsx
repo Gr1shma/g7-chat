@@ -13,10 +13,8 @@ export type SettingTab = {
 
 export default function SettingViews({
     tabList,
-    user,
 }: {
     tabList: SettingTab[];
-    user: DB_USER_TYPE;
 }) {
     const router = useRouter();
     const pathname = usePathname();
