@@ -34,7 +34,6 @@ export const authConfig = {
             user: {
                 ...session.user,
                 id: user.id,
-                customization: user.customization,
             },
         }),
     },

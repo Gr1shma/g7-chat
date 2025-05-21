@@ -11,11 +11,7 @@ export type SettingTab = {
     component: React.ReactNode;
 };
 
-export default function SettingViews({
-    tabList,
-}: {
-    tabList: SettingTab[];
-}) {
+export default function SettingViews({ tabList }: { tabList: SettingTab[] }) {
     const router = useRouter();
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState("account");

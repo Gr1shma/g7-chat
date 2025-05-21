@@ -16,11 +16,17 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { DB_USER_TYPE } from "~/server/db/schema";
+import { type DB_USER_TYPE } from "~/server/db/schema";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "~/components/ui/form";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { useToast } from "~/hooks/use-toast";
 
@@ -46,7 +52,7 @@ export default function AccountTab({ user }: { user: DB_USER_TYPE }) {
         });
         toast({
             description: "Submitted",
-        })
+        });
     }
 
     return (
@@ -77,7 +83,7 @@ export default function AccountTab({ user }: { user: DB_USER_TYPE }) {
                                 </FormItem>
                             )}
                         />
-                        <div className="flex flex-row items-center mt-3 gap-2">
+                        <div className="mt-3 flex flex-row items-center gap-2">
                             <Button type="submit">Submit</Button>
                         </div>
                     </form>

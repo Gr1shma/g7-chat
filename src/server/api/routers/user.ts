@@ -138,29 +138,36 @@ export const userRouter = createTRPCRouter({
             });
         }
     }),
-    changeUserName: protectedProcedure.input(z.object({
-        userId: z.string(),
-        userName: z.string(),
-    })).mutation(async ({ ctx, input }) => {
-        const { session, db } = ctx;
-        const { userName } = input;
+    changeUserName: protectedProcedure
+        .input(
+            z.object({
+                userId: z.string(),
+                userName: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { session, db } = ctx;
+            const { userName } = input;
 
-        if (session.user.id !== input.userId) {
-            throw new TRPCError({
-                code: "FORBIDDEN",
-                message: "You can only delete your own account.",
-            });
-        }
+            if (session.user.id !== input.userId) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You can only delete your own account.",
+                });
+            }
 
-        try {
-            await db.update(users).set({
-                name: userName
-            }).where(eq(users.id, session.user.id));
-        } catch {
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to change user username",
-            });
-        }
-    })
+            try {
+                await db
+                    .update(users)
+                    .set({
+                        name: userName,
+                    })
+                    .where(eq(users.id, session.user.id));
+            } catch {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to change user username",
+                });
+            }
+        }),
 });

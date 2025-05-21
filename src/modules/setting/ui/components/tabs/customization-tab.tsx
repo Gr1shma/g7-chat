@@ -47,7 +47,7 @@ export default function CustomizationTab({ user }: { user: DB_USER_TYPE }) {
         });
         toast({
             description: "Submtted",
-        })
+        });
     }
 
     return (
