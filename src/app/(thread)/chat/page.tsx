@@ -12,5 +12,5 @@ export default async function ThreadPage() {
     }
     const threadId = crypto.randomUUID();
 
-    return <ThreadView threadId={threadId} initialMessages={[]} />;
+    return <ThreadView threadId={threadId} />;
 }
