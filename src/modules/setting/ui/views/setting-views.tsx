@@ -1,9 +1,11 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { type DB_USER_TYPE } from "~/server/db/schema";
+import AccountTab from "../components/tabs/account-tab";
+import CustomizationTab from "../components/tabs/customization-tab";
+import HistoryAndSyncTab from "../components/tabs/history-and-sync-tab";
+import AboutMeTab from "../components/tabs/about-me";
 
 export type SettingTab = {
     value: string;
@@ -11,34 +13,33 @@ export type SettingTab = {
     component: React.ReactNode;
 };
 
-export default function SettingViews({ tabList }: { tabList: SettingTab[] }) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const [activeTab, setActiveTab] = useState("account");
-    const [_, startTransition] = useTransition();
+const tabList: SettingTab[] = [
+    {
+        value: "account",
+        name: "Account",
+        component: <AccountTab />,
+    },
+    {
+        value: "customization",
+        name: "Customization",
+        component: <CustomizationTab />,
+    },
+    {
+        value: "history-and-sync",
+        name: "History And Sync",
+        component: <HistoryAndSyncTab />,
+    },
+    {
+        value: "about-me",
+        name: "About Me",
+        component: <AboutMeTab />,
+    },
+];
 
-    useEffect(() => {
-        const tabValue = pathname.split("/").pop();
-
-        if (tabValue && tabList.some((tab) => tab.value === tabValue)) {
-            setActiveTab(tabValue);
-        } else if (pathname === "/setting") {
-            router.replace("/setting/account");
-        }
-    }, [pathname, router, tabList]);
-
-    const handleTabChange = (value: string) => {
-        setActiveTab(value);
-
-        startTransition(() => {
-            window.history.replaceState(null, "", `/setting/${value}`);
-            router.replace(`/setting/${value}`, { scroll: false });
-        });
-    };
-
+export default function SettingViews() {
     return (
         <div className="md:w-3/4 md:pl-12">
-            <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <Tabs defaultValue={tabList[0]?.value}>
                 <div className="flex justify-center">
                     <TabsList className="no-scrollbar -mx-0.5 gap-1 overflow-auto rounded-lg text-secondary-foreground md:w-fit">
                         {tabList.map((tab) => (

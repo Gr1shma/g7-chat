@@ -78,9 +78,10 @@ export async function POST(request: Request) {
                                     messages: response.messages,
                                 });
                             if (messages.length === 1) {
-                                const title = await generateTitleFromUserMessage({
-                                    message: userMessage,
-                                });
+                                const title =
+                                    await generateTitleFromUserMessage({
+                                        message: userMessage,
+                                    });
                                 await caller.thread.saveThread({
                                     threadId: id,
                                     title,
@@ -89,8 +90,13 @@ export async function POST(request: Request) {
 
                             await db
                                 .insert(messages_table)
-                                .values([{ ...userMessage, createdAt: new Date(), threadId: id }]);
-
+                                .values([
+                                    {
+                                        ...userMessage,
+                                        createdAt: new Date(),
+                                        threadId: id,
+                                    },
+                                ]);
 
                             await db.insert(messages_table).values(
                                 sanitizedResponseMessages.map((message) => {

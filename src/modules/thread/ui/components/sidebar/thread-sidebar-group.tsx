@@ -11,7 +11,6 @@ import {
     useSidebar,
 } from "~/components/ui/sidebar";
 
-
 import { ThreadItem } from "./thread-sidebar-item";
 import { api } from "~/trpc/react";
 import { InfinitScroll } from "~/components/infinite-scroll";
@@ -27,7 +26,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                 <SidebarHistory searchQuery={searchQuery} />
             </ErrorBoundary>
         </Suspense>
-    )
+    );
 }
 
 export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {

@@ -16,7 +16,6 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { type DB_USER_TYPE } from "~/server/db/schema";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,20 +33,22 @@ const customizationFormSchema = z.object({
     userName: z.string(),
 });
 
-export default function AccountTab({ user }: { user: DB_USER_TYPE }) {
+export default function AccountTab() {
+    console.log("hi");
     const { toast } = useToast();
+    const session = useSession();
 
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
-            userName: user.name || "",
+            userName: session.data?.user.name || "",
         },
     });
 
     const userMutation = api.user.changeUserName.useMutation();
     function onSubmit(values: z.infer<typeof customizationFormSchema>) {
         userMutation.mutate({
-            userId: user.id,
+            userId: session.data?.user.id!,
             userName: values.userName,
         });
         toast({

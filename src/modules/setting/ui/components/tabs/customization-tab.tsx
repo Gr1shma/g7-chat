@@ -15,8 +15,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
-import { type DB_USER_TYPE } from "~/server/db/schema";
 import { useToast } from "~/hooks/use-toast";
+import { useSession } from "next-auth/react";
 
 const customizationFormSchema = z.object({
     name: z.string(),
@@ -25,19 +25,23 @@ const customizationFormSchema = z.object({
     keepInMind: z.string(),
 });
 
-export default function CustomizationTab({ user }: { user: DB_USER_TYPE }) {
+export default function CustomizationTab() {
     const { toast } = useToast();
+    const session = useSession();
+
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
-            name: user.customization.name,
-            whatDoYouDo: user.customization.whatDoYouDo,
-            chatTraits: user.customization.chatTraits,
-            keepInMind: user.customization.keepInMind,
+            name: session.data?.user.customization.name,
+            whatDoYouDo: session.data?.user.customization.whatDoYouDo,
+            chatTraits: session.data?.user.customization.chatTraits,
+            keepInMind: session.data?.user.customization.keepInMind,
         },
     });
 
-    const userMutation = api.user.addCustomization.useMutation();
+    const userMutation = api.user.addCustomization.useMutation({
+        onSuccess: session.update,
+    });
     function onSubmit(values: z.infer<typeof customizationFormSchema>) {
         userMutation.mutate({
             name: values.name,

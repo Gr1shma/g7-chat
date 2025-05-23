@@ -13,7 +13,7 @@ export async function ThreadLayout({
     }
     void api.thread.getInfiniteThreads({
         limit: 20,
-    })
+    });
     return (
         <div className="relative flex h-[100dvh] text-gray-100">
             <SidebarProvider>
