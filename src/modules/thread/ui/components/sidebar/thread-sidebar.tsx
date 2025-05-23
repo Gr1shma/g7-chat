@@ -11,11 +11,10 @@ import {
     SidebarHeader,
 } from "~/components/ui/sidebar";
 import { SidebarUserNav } from "./user-nav";
-import { SidebarHistory } from "./thread-sidebar-group";
+import { SidebarSection } from "./thread-sidebar-group";
 import { useState } from "react";
-import { type ThreadSidebarProps } from "./thread-sidebar.types";
 
-export function ThreadSideBar({ user }: ThreadSidebarProps) {
+export function ThreadSideBar() {
     const [searchQuery, setSearchQuery] = useState("");
     return (
         <Sidebar>
@@ -50,11 +49,11 @@ export function ThreadSideBar({ user }: ThreadSidebarProps) {
                 </div>
             </SidebarHeader>
             <SidebarContent>
-                <SidebarHistory user={user} searchQuery={searchQuery} />
+                <SidebarSection searchQuery={searchQuery} />
             </SidebarContent>
             <Separator />
             <SidebarFooter>
-                <SidebarUserNav user={user} />
+                <SidebarUserNav />
             </SidebarFooter>
         </Sidebar>
     );

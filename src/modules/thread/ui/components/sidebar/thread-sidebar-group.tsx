@@ -1,6 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { ErrorBoundary } from "react-error-boundary";
+import { Suspense } from "react";
 
 import {
     SidebarGroup,
@@ -9,14 +11,27 @@ import {
     useSidebar,
 } from "~/components/ui/sidebar";
 
+
 import { ThreadItem } from "./thread-sidebar-item";
 import { api } from "~/trpc/react";
 import { InfinitScroll } from "~/components/infinite-scroll";
 import { Skeleton } from "~/components/ui/skeleton";
 import { type SidebarHistoryProps } from "./thread-sidebar.types";
 import { groupThreadsByDate } from "./thread-sidebar.utils";
+import { useSession } from "next-auth/react";
 
-export function SidebarHistory({ user, searchQuery }: SidebarHistoryProps) {
+export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
+    return (
+        <Suspense fallback={<p>Loading</p>}>
+            <ErrorBoundary fallback={<p>Error</p>}>
+                <SidebarHistory searchQuery={searchQuery} />
+            </ErrorBoundary>
+        </Suspense>
+    )
+}
+
+export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
+    const session = useSession();
     const { setOpenMobile } = useSidebar();
     const { threadId } = useParams();
 
@@ -26,7 +41,7 @@ export function SidebarHistory({ user, searchQuery }: SidebarHistoryProps) {
             { getNextPageParam: (lastPage) => lastPage.nextCursor }
         );
 
-    if (!user) {
+    if (!session.data?.user.id) {
         return (
             <SidebarGroup>
                 <SidebarGroupContent>

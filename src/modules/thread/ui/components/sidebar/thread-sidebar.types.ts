@@ -1,13 +1,4 @@
-import type { User } from "next-auth";
 import type { DB_THREAD_TYPE } from "~/server/db/schema";
-
-export interface ThreadSidebarProps {
-    user: User;
-}
-
-export interface SidebarUserNavProps {
-    user: User;
-}
 
 export interface ThreadItemProps {
     thread: DB_THREAD_TYPE;
@@ -15,6 +6,6 @@ export interface ThreadItemProps {
     setOpenMobile: (open: boolean) => void;
 }
 
-export interface SidebarHistoryProps extends ThreadSidebarProps {
+export interface SidebarHistoryProps {
     searchQuery: string;
 }
