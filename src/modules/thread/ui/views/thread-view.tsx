@@ -1,19 +1,30 @@
 "use client";
 
-import { type Message, useChat } from "ai/react";
-import { useRef, useEffect } from "react";
+import { useChat } from "ai/react";
+import { useRef, useEffect, Suspense } from "react";
 import { api } from "~/trpc/react";
 import { ThreadMessages } from "../components/message/thread-messages";
 import { useScrollToBottomButton } from "~/hooks/use-scroll-button";
 import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
 import { ThreadInputForm } from "../components/input/thread-input-form";
+import { ErrorBoundary } from "react-error-boundary";
+import { convertToUIMessages } from "~/lib/utils";
 
 interface ThreadViewProps {
     threadId: string;
-    initialMessages: Array<Message>;
 }
 
-export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
+export function ThreadViewSection({ threadId }: ThreadViewProps) {
+    return (
+        <Suspense>
+            <ErrorBoundary fallback={<p>Error...</p>}>
+                <ThreadView threadId={threadId} />
+            </ErrorBoundary>
+        </Suspense>
+    );
+}
+
+export function ThreadView({ threadId }: ThreadViewProps) {
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const threadContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -21,6 +32,10 @@ export function ThreadView({ threadId, initialMessages }: ThreadViewProps) {
         useScrollToBottomButton(threadContainerRef);
 
     const utils = api.useUtils();
+    const [initialImpureMessages] =
+        api.message.getMessagesByThreadId.useSuspenseQuery(threadId);
+
+    const initialMessages = convertToUIMessages(initialImpureMessages);
 
     const {
         input,

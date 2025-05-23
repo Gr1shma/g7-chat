@@ -1,9 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { convertToUIMessages } from "~/lib/utils";
 
-import { ThreadView } from "~/modules/thread/ui/views/thread-view";
+import { ThreadViewSection } from "~/modules/thread/ui/views/thread-view";
 import { auth } from "~/server/auth";
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 
 export const dynamic = "force-dynamic";
 
@@ -40,11 +39,11 @@ export default async function Page({
         notFound();
     }
 
-    const initialMessages = convertToUIMessages(
-        await api.message.getMessagesByThreadId(threadId)
-    );
+    void api.message.getMessagesByThreadId.prefetch(threadId);
 
     return (
-        <ThreadView threadId={thread.id} initialMessages={initialMessages} />
+        <HydrateClient>
+            <ThreadViewSection threadId={thread.id} />
+        </HydrateClient>
     );
 }

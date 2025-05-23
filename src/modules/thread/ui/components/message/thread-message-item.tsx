@@ -39,7 +39,6 @@ export default function MessageItem({
             />
         );
     }
-
     return (
         <div
             className={`mb-11 flex justify-start ${

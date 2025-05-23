@@ -18,7 +18,7 @@ export async function ThreadLayout({
         <div className="relative flex h-[100dvh] text-gray-100">
             <SidebarProvider>
                 <HydrateClient>
-                    <ThreadSideBar user={session?.user} />
+                    <ThreadSideBar />
                 </HydrateClient>
                 <SidebarTrigger className="m-2 size-10 hover:bg-neutral-800/40 hover:text-white" />
                 <main className="relative flex w-full flex-1 flex-col">

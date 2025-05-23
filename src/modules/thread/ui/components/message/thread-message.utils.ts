@@ -14,8 +14,12 @@ export function getNextAssistantIndex(
     messages: Message[],
     latestUserIndex?: number
 ) {
+    if (latestUserIndex === undefined) {
+        return -1;
+    }
+
     return messages.findIndex(
-        (m, i) => i > (latestUserIndex ?? -1) && m.role !== "user"
+        (m, i) => i > latestUserIndex && m.role !== "user"
     );
 }
 
