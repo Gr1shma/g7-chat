@@ -40,50 +40,24 @@ export async function POST(request: Request) {
         headers: request.headers,
     });
 
-    const thread = await caller.thread.getThreadById(id);
-
-    if (!thread) {
-        const title = await generateTitleFromUserMessage({
-            message: userMessage,
-        });
-        await caller.thread.saveThread({
-            threadId: id,
-            title,
-        });
-    }
-
-    const user = await caller.user.getUserById();
-
-    await db
-        .insert(messages_table)
-        .values([{ ...userMessage, createdAt: new Date(), threadId: id }]);
-
     const regularPrompt = (() => {
-        const customization = user?.customization;
-
+        const customization = session.user.customization;
         let prompt =
             "You are a friendly assistant! Keep your responses concise and helpful.";
-
         if (!customization) return prompt;
-
         const { name, whatDoYouDo, chatTraits, keepInMind } = customization;
-
         if (name.trim()) {
             prompt += ` The user's name is ${name}.`;
         }
-
         if (whatDoYouDo.trim()) {
             prompt += ` The user is a ${whatDoYouDo}. Tailor your responses to be relevant, professional, and considerate of this background.`;
         }
-
         if (chatTraits.trim()) {
             prompt += ` The user prefers these conversational traits: ${chatTraits}.`;
         }
-
         if (keepInMind.trim()) {
             prompt += ` Keep in mind: ${keepInMind}.`;
         }
-
         return prompt;
     })();
 
@@ -103,6 +77,20 @@ export async function POST(request: Request) {
                                 sanitizeResponseMessages({
                                     messages: response.messages,
                                 });
+                            if (messages.length === 1) {
+                                const title = await generateTitleFromUserMessage({
+                                    message: userMessage,
+                                });
+                                await caller.thread.saveThread({
+                                    threadId: id,
+                                    title,
+                                });
+                            }
+
+                            await db
+                                .insert(messages_table)
+                                .values([{ ...userMessage, createdAt: new Date(), threadId: id }]);
+
 
                             await db.insert(messages_table).values(
                                 sanitizedResponseMessages.map((message) => {
