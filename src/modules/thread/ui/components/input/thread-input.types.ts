@@ -22,9 +22,7 @@ interface ThreadInputTextareaProps {
 interface InputToolbarProps {
     input: UseChatHelpers["input"];
     status: UseChatHelpers["status"];
-    stop: UseChatHelpers["stop"];
     submitForm: () => void;
-    setMessages: UseChatHelpers["setMessages"];
 }
 
 export type { ThreadInputProps, ThreadInputTextareaProps, InputToolbarProps };

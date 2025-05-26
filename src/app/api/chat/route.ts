@@ -88,6 +88,8 @@ export async function POST(request: Request) {
                                 });
                             }
 
+                            console.log("hi")
+
                             await db
                                 .insert(messages_table)
                                 .values([
@@ -106,7 +108,6 @@ export async function POST(request: Request) {
                                         role: message.role,
                                         content: message.content,
                                         createdAt: new Date(),
-                                        status: "done" as const,
                                     };
                                 })
                             );

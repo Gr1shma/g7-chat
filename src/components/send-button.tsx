@@ -1,13 +1,16 @@
 import { ArrowUpIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { memo } from "react";
+import { UseChatHelpers } from "ai/react";
 
 function PureSendButton({
     submitForm,
     input,
+    status,
 }: {
     submitForm: () => void;
     input: string;
+    status: UseChatHelpers["status"];
 }) {
     return (
         <Button
@@ -18,7 +21,7 @@ function PureSendButton({
                 event.preventDefault();
                 submitForm();
             }}
-            disabled={input.length === 0}
+            disabled={input.length === 0 || status === "submitted" || status === "streaming"}
         >
             <ArrowUpIcon
                 className="size-5"

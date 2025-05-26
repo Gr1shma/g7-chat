@@ -47,7 +47,6 @@ export default function MessageItem({
         >
             <div className="group relative w-full max-w-full break-words">
                 <Markdown>{message.content}</Markdown>
-                {false ? <ErrorMessage /> : null}
             </div>
         </div>
     );
@@ -172,14 +171,6 @@ function AnimationAndSpace({ assistantSpaceRef }: AnimationAndSpaceProps) {
                     <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40" />
                 </div>
             </div>
-        </div>
-    );
-}
-
-function ErrorMessage() {
-    return (
-        <div className="mt-4 flex items-start gap-3 rounded-lg bg-red-500/15 px-4 py-3 text-sm text-red-900 dark:text-red-400">
-            <div className="leading-relaxed">Stopped by user</div>
         </div>
     );
 }

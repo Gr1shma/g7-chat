@@ -14,7 +14,7 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-function addToolMessageToThread({
+function addToolMessageToChat({
     toolMessage,
     messages,
 }: {
@@ -50,21 +50,14 @@ function addToolMessageToThread({
     });
 }
 
-export type CustomMessage = Message & { status: "done" | "error" };
-
 export function convertToUIMessages(
     messages: Array<DB_MESSAGE_TYPE>
-): Array<CustomMessage> {
-    return messages.reduce((threadMessages: Array<CustomMessage>, message) => {
+): Array<Message> {
+    return messages.reduce((chatMessages: Array<Message>, message) => {
         if (message.role === "tool") {
-            const toolMessages = addToolMessageToThread({
+            return addToolMessageToChat({
                 toolMessage: message as CoreToolMessage,
-                messages: threadMessages,
-            }) as unknown as Array<CustomMessage>;
-
-            return toolMessages.map((msg) => {
-                if ("status" in msg) return msg;
-                return { ...(msg as Message), status: "done" as const };
+                messages: chatMessages,
             });
         }
 
@@ -91,17 +84,16 @@ export function convertToUIMessages(
             }
         }
 
-        threadMessages.push({
+        chatMessages.push({
             id: message.id,
             role: message.role as Message["role"],
             content: textContent,
             reasoning,
             toolInvocations,
-            status: "done",
         });
 
-        return threadMessages;
-    }, [] as Array<CustomMessage>);
+        return chatMessages;
+    }, []);
 }
 
 type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
@@ -124,14 +116,10 @@ export function sanitizeResponseMessages({
         }
     }
 
-    const sanitizedMessages = messages.map((message) => {
-        if (message.role !== "assistant") {
-            return message;
-        }
+    const messagesBySanitizedContent = messages.map((message) => {
+        if (message.role !== "assistant") return message;
 
-        if (typeof message.content === "string") {
-            return message;
-        }
+        if (typeof message.content === "string") return message;
 
         const sanitizedContent = message.content.filter((content) =>
             content.type === "tool-call"
@@ -147,10 +135,8 @@ export function sanitizeResponseMessages({
         };
     });
 
-    return sanitizedMessages.filter((message) =>
-        Array.isArray(message.content)
-            ? message.content.length > 0
-            : !!message.content
+    return messagesBySanitizedContent.filter(
+        (message) => message.content.length > 0
     );
 }
 
