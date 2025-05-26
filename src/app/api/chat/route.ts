@@ -88,17 +88,13 @@ export async function POST(request: Request) {
                                 });
                             }
 
-                            console.log("hi")
-
-                            await db
-                                .insert(messages_table)
-                                .values([
-                                    {
-                                        ...userMessage,
-                                        createdAt: new Date(),
-                                        threadId: id,
-                                    },
-                                ]);
+                            await db.insert(messages_table).values([
+                                {
+                                    ...userMessage,
+                                    createdAt: new Date(),
+                                    threadId: id,
+                                },
+                            ]);
 
                             await db.insert(messages_table).values(
                                 sanitizedResponseMessages.map((message) => {

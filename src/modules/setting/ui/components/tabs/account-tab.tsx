@@ -34,7 +34,6 @@ const customizationFormSchema = z.object({
 });
 
 export default function AccountTab() {
-    console.log("hi");
     const { toast } = useToast();
     const session = useSession();
 
