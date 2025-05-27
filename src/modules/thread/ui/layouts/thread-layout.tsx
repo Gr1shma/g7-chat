@@ -11,9 +11,10 @@ export async function ThreadLayout({
     if (!session) {
         redirect("/auth");
     }
-    void api.thread.getInfiniteThreads({
+    void api.thread.getInfiniteThreads.prefetchInfinite({
         limit: 20,
     });
+    void api.project.getAllProjects.prefetchInfinite();
     return (
         <div className="relative flex h-[100dvh] text-gray-100">
             <SidebarProvider>

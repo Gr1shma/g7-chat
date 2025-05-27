@@ -20,7 +20,7 @@ import { type SidebarHistoryProps } from "./thread-sidebar.types";
 import { groupThreadsByDate } from "./thread-sidebar.utils";
 import { useSession } from "next-auth/react";
 
-export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
+export default function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     return (
         <Suspense fallback={<p>Loading</p>}>
             <ErrorBoundary fallback={<p>Error</p>}>
@@ -30,7 +30,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     );
 }
 
-export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
+function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const session = useSession();
     const { setOpenMobile } = useSidebar();
     const { threadId } = useParams();

@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { projects_table } from "~/server/db/schema";
 
 export const projectRouter = createTRPCRouter({
-    getAllProjects: protectedProcedure.query(async ({ ctx, input }) => {
+    getAllProjects: protectedProcedure.query(async ({ ctx }) => {
         const { db, session } = ctx;
         try {
             const projects = await db

@@ -11,9 +11,9 @@ import {
     SidebarHeader,
 } from "~/components/ui/sidebar";
 import { SidebarUserNav } from "./user-nav";
-import { SidebarSection } from "./thread-sidebar-group";
+import SidebarSection from "./thread-sidebar-group";
 import { useState } from "react";
-import { ProjectSection } from "./project/project-section";
+import ProjectSection from "./project/project-section";
 
 export function ThreadSideBar() {
     const [searchQuery, setSearchQuery] = useState("");
