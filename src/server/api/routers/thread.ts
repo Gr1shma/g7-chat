@@ -51,15 +51,15 @@ export const threadRouter = createTRPCRouter({
 
                 const whereClause = cursor
                     ? and(
-                          eq(threads_table.userId, userId),
-                          or(
-                              lt(threads_table.updatedAt, cursor.updatedAt),
-                              and(
-                                  eq(threads_table.updatedAt, cursor.updatedAt),
-                                  lt(threads_table.id, cursor.id)
-                              )
-                          )
-                      )
+                        eq(threads_table.userId, userId),
+                        or(
+                            lt(threads_table.updatedAt, cursor.updatedAt),
+                            and(
+                                eq(threads_table.updatedAt, cursor.updatedAt),
+                                lt(threads_table.id, cursor.id)
+                            )
+                        )
+                    )
                     : eq(threads_table.userId, userId);
 
                 const data = await db
@@ -131,7 +131,10 @@ export const threadRouter = createTRPCRouter({
             try {
                 const result = await db
                     .update(threads_table)
-                    .set({ title: input.title })
+                    .set({
+                        title: input.title,
+                        updatedAt: new Date(),
+                    })
                     .where(
                         and(
                             eq(threads_table.id, input.threadId),
@@ -188,6 +191,50 @@ export const threadRouter = createTRPCRouter({
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to toggle pin of thread",
+                });
+            }
+        }),
+    toogleThreadVisibility: protectedProcedure
+        .input(z.string())
+        .mutation(async ({ ctx, input }) => {
+            const { db, session } = ctx;
+            const userId = session.user.id;
+
+            try {
+                const thread = await db.query.threads_table.findFirst({
+                    where: and(
+                        eq(threads_table.id, input),
+                        eq(threads_table.userId, userId)
+                    ),
+                    columns: { visibility: true },
+                });
+
+                if (!thread) {
+                    throw new Error("Thread not found or unauthorized.");
+                }
+
+                const newVisibility = thread.visibility === "private" ? "public" : "private";
+
+                const result = await db
+                    .update(threads_table)
+                    .set({ visibility: newVisibility })
+                    .where(
+                        and(
+                            eq(threads_table.id, input),
+                            eq(threads_table.userId, userId)
+                        )
+                    );
+
+                if (result.rowCount === 0) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Thread not found or unauthorized",
+                    });
+                }
+            } catch (error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to toggle visibility of thread",
                 });
             }
         }),

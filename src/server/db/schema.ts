@@ -115,7 +115,6 @@ export const verificationTokens = createTable(
     })
 );
 
-
 export const projects_table = createTable("projects", {
     id: varchar("id", { length: 255 })
         .notNull()
@@ -127,6 +126,13 @@ export const projects_table = createTable("projects", {
     userId: varchar("user_id", { length: 255 })
         .notNull()
         .references(() => users.id),
+    threadId: text("threads")
+        .array()
+        .notNull()
+        .default(sql`ARRAY[]::text[]`),
+    visibility: varchar('visibility', { enum: ['public', 'private'] })
+        .notNull()
+        .default('private'),
 });
 
 export type DB_PROJECT_TYPE = InferSelectModel<typeof projects_table>;
@@ -144,6 +150,9 @@ export const threads_table = createTable("threads", {
     userId: varchar("user_id", { length: 255 })
         .notNull()
         .references(() => users.id),
+    visibility: varchar('visibility', { enum: ['public', 'private'] })
+        .notNull()
+        .default('private'),
 });
 
 export type DB_THREAD_TYPE = InferSelectModel<typeof threads_table>;
