@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import {
     SidebarGroup,
     SidebarGroupContent,
+    SidebarGroupLabel,
     SidebarMenu,
     useSidebar,
 } from "~/components/ui/sidebar";
@@ -148,13 +149,13 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
 
                                 return (
                                     <div key={label}>
-                                        <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
+                                        <SidebarGroupLabel>
                                             {
                                                 labelMap[
-                                                    label as keyof typeof groupedThreads
+                                                label as keyof typeof groupedThreads
                                                 ]
                                             }
-                                        </div>
+                                        </SidebarGroupLabel>
                                         {threads.map((thread) => (
                                             <ThreadItem
                                                 key={thread.id}

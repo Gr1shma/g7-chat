@@ -13,6 +13,7 @@ import {
 import { SidebarUserNav } from "./user-nav";
 import { SidebarSection } from "./thread-sidebar-group";
 import { useState } from "react";
+import { ProjectSection } from "./project/project-section";
 
 export function ThreadSideBar() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -49,6 +50,7 @@ export function ThreadSideBar() {
                 </div>
             </SidebarHeader>
             <SidebarContent>
+                {searchQuery === "" ? <ProjectSection /> : null}
                 <SidebarSection searchQuery={searchQuery} />
             </SidebarContent>
             <Separator />

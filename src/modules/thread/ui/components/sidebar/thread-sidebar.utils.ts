@@ -19,7 +19,7 @@ export const groupThreadsByDate = (
 
     return threads.reduce(
         (groups, thread) => {
-            const threadDate = new Date(thread.createdAt);
+            const threadDate = new Date(thread.updatedAt);
             if (thread.isPinned === true) {
                 groups.pinned.push(thread);
             } else if (isToday(threadDate)) {

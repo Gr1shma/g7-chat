@@ -14,7 +14,9 @@ import {
 import { google } from "@ai-sdk/google";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
-import { messages_table } from "~/server/db/schema";
+import { messages_table, threads_table } from "~/server/db/schema";
+import { threadId } from "worker_threads";
+import { and, eq } from "drizzle-orm";
 
 export const maxDuration = 60;
 
@@ -95,6 +97,13 @@ export async function POST(request: Request) {
                                     threadId: id,
                                 },
                             ]);
+
+                            await db.update(threads_table).set({
+                                updatedAt: new Date(),
+                            }).where(and(
+                                eq(threads_table.id, id),
+                                eq(threads_table.userId, session.user.id),
+                            ))
 
                             await db.insert(messages_table).values(
                                 sanitizedResponseMessages.map((message) => {

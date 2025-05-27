@@ -6,29 +6,30 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { projects_table } from "~/server/db/schema";
 
 export const projectRouter = createTRPCRouter({
-    getAllProjects: protectedProcedure
-        .query(async ({ ctx, input }) => {
-            const { db, session } = ctx;
-            try {
-                const projects = await db
-                    .select()
-                    .from(projects_table)
-                    .where(eq(projects_table.userId, session.user.id))
-                    .orderBy(asc(projects_table.updatedAt));
+    getAllProjects: protectedProcedure.query(async ({ ctx, input }) => {
+        const { db, session } = ctx;
+        try {
+            const projects = await db
+                .select()
+                .from(projects_table)
+                .where(eq(projects_table.userId, session.user.id))
+                .orderBy(asc(projects_table.updatedAt));
 
-                return projects;
-            } catch (error) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to fetch projects",
-                });
-            }
-        }),
+            return projects;
+        } catch (error) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to fetch projects",
+            });
+        }
+    }),
 
     createProject: protectedProcedure
-        .input(z.object({
-            title: z.string(),
-        }))
+        .input(
+            z.object({
+                title: z.string(),
+            })
+        )
         .mutation(async ({ ctx, input }) => {
             const { db, session } = ctx;
             const { title } = input;
@@ -37,7 +38,7 @@ export const projectRouter = createTRPCRouter({
                 await db.insert(projects_table).values({
                     title,
                     userId: session.user.id,
-                })
+                });
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
@@ -46,10 +47,12 @@ export const projectRouter = createTRPCRouter({
             }
         }),
     changeProjectTitle: protectedProcedure
-        .input(z.object({
-            title: z.string(),
-            projectId: z.string()
-        }))
+        .input(
+            z.object({
+                title: z.string(),
+                projectId: z.string(),
+            })
+        )
         .mutation(async ({ ctx, input }) => {
             const { db, session } = ctx;
             const { title, projectId } = input;
@@ -100,7 +103,8 @@ export const projectRouter = createTRPCRouter({
                     throw new Error("Project not found or unauthorized.");
                 }
 
-                const newVisibility = project.visibility === "private" ? "public" : "private";
+                const newVisibility =
+                    project.visibility === "private" ? "public" : "private";
 
                 const result = await db
                     .update(projects_table)

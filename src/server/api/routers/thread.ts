@@ -51,15 +51,15 @@ export const threadRouter = createTRPCRouter({
 
                 const whereClause = cursor
                     ? and(
-                        eq(threads_table.userId, userId),
-                        or(
-                            lt(threads_table.updatedAt, cursor.updatedAt),
-                            and(
-                                eq(threads_table.updatedAt, cursor.updatedAt),
-                                lt(threads_table.id, cursor.id)
-                            )
-                        )
-                    )
+                          eq(threads_table.userId, userId),
+                          or(
+                              lt(threads_table.updatedAt, cursor.updatedAt),
+                              and(
+                                  eq(threads_table.updatedAt, cursor.updatedAt),
+                                  lt(threads_table.id, cursor.id)
+                              )
+                          )
+                      )
                     : eq(threads_table.userId, userId);
 
                 const data = await db
@@ -213,7 +213,8 @@ export const threadRouter = createTRPCRouter({
                     throw new Error("Thread not found or unauthorized.");
                 }
 
-                const newVisibility = thread.visibility === "private" ? "public" : "private";
+                const newVisibility =
+                    thread.visibility === "private" ? "public" : "private";
 
                 const result = await db
                     .update(threads_table)
