@@ -60,9 +60,7 @@ function PureThreadInput({
                     <InputToolbar
                         input={input}
                         status={status}
-                        stop={stop}
                         submitForm={submitForm}
-                        setMessages={setMessages}
                     />
                 </div>
             </form>

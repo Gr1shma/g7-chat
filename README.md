@@ -48,12 +48,7 @@ Open [localhost:3000](http://localhost:3000) and start breaking the system… or
   * Delete user accounts
   * Configure chatbot response styles and user display names (e.g., unopinionated, factual, friendly)
 
-### Phase 3: Data Synchronization
-
-* Build a robust sync system to keep client and server data in sync
-* Add data export functionality in JSON format
-
-### Phase 4: Project & Collaboration Features
+### Phase 3: Project & Collaboration Features(Currently Working 🎯)
 
 * Introduce grouping of threads into Projects for better organization
 * Enable sharing of threads or Projects with others

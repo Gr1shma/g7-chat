@@ -115,6 +115,22 @@ export const verificationTokens = createTable(
     })
 );
 
+
+export const projects_table = createTable("projects", {
+    id: varchar("id", { length: 255 })
+        .notNull()
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    title: text("title").notNull(),
+    userId: varchar("user_id", { length: 255 })
+        .notNull()
+        .references(() => users.id),
+});
+
+export type DB_PROJECT_TYPE = InferSelectModel<typeof projects_table>;
+
 export const threads_table = createTable("threads", {
     id: varchar("id", { length: 255 })
         .notNull()
