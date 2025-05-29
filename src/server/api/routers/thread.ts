@@ -96,6 +96,7 @@ export const threadRouter = createTRPCRouter({
             z.object({
                 threadId: z.string(),
                 title: z.string(),
+                projectId: z.string().nullable(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -108,6 +109,7 @@ export const threadRouter = createTRPCRouter({
                     createdAt: new Date(),
                     userId,
                     title: input.title,
+                    projectId: input.projectId,
                 });
             } catch (error) {
                 throw new TRPCError({

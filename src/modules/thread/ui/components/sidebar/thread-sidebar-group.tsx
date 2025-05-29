@@ -20,6 +20,12 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { type SidebarHistoryProps } from "./thread-sidebar.types";
 import { groupThreadsByDate } from "./thread-sidebar.utils";
 import { useSession } from "next-auth/react";
+import { type DB_PROJECT_TYPE, type DB_THREAD_TYPE } from "~/server/db/schema";
+import { ProjectSection } from "./project/project-section";
+
+export type ProjectWithThreads = DB_PROJECT_TYPE & {
+    threads: DB_THREAD_TYPE[];
+};
 
 export default function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     return (
@@ -36,6 +42,7 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const { setOpenMobile } = useSidebar();
     const { threadId } = useParams();
 
+    const [fetchedProjects] = api.project.getAllProjects.useSuspenseQuery();
     const [data, query] =
         api.thread.getInfiniteThreads.useSuspenseInfiniteQuery(
             { limit: 20 },
@@ -97,6 +104,21 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
 
     const allThreads = data?.pages.flatMap((page) => page.items) ?? [];
 
+    const projectsWithThreads: ProjectWithThreads[] = fetchedProjects.map(
+        (project) => {
+            const projectThreads = allThreads.filter(
+                (thread) => thread.projectId === project.id
+            );
+
+            return {
+                ...project,
+                threads: projectThreads,
+            };
+        }
+    );
+
+    const unassignedThreads = allThreads.filter((thread) => !thread.projectId);
+
     if (allThreads.length === 0) {
         return (
             <SidebarGroup>
@@ -128,7 +150,7 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         );
     }
 
-    const groupedThreads = groupThreadsByDate(filteredThreads);
+    const groupedThreads = groupThreadsByDate(unassignedThreads);
 
     const labelMap: Record<keyof typeof groupedThreads, string> = {
         pinned: "Pinned Thread",
@@ -140,49 +162,58 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     };
 
     return (
-        <SidebarGroup>
-            <SidebarGroupContent>
-                <SidebarMenu>
-                    <div className="flex flex-col gap-6">
-                        {Object.entries(groupedThreads).map(
-                            ([label, threads]) => {
-                                if (threads.length === 0) return null;
+        <>
+            <ProjectSection
+                projectWithThreads={projectsWithThreads}
+                threadId={threadId}
+            />
+            <SidebarGroup>
+                <SidebarGroupContent>
+                    <SidebarMenu>
+                        <div className="flex flex-col gap-6">
+                            {Object.entries(groupedThreads).map(
+                                ([label, threads]) => {
+                                    if (threads.length === 0) return null;
 
-                                return (
-                                    <div key={label}>
-                                        <SidebarGroupLabel>
-                                            {
-                                                labelMap[
-                                                    label as keyof typeof groupedThreads
-                                                ]
-                                            }
-                                        </SidebarGroupLabel>
-                                        {threads.map((thread) => (
-                                            <SidebarMenuItem key={thread.id}>
-                                                <ThreadItem
+                                    return (
+                                        <div key={label}>
+                                            <SidebarGroupLabel>
+                                                {
+                                                    labelMap[
+                                                        label as keyof typeof groupedThreads
+                                                    ]
+                                                }
+                                            </SidebarGroupLabel>
+                                            {threads.map((thread) => (
+                                                <SidebarMenuItem
                                                     key={thread.id}
-                                                    thread={thread}
-                                                    isActive={
-                                                        thread.id === threadId
-                                                    }
-                                                    setOpenMobile={
-                                                        setOpenMobile
-                                                    }
-                                                />
-                                            </SidebarMenuItem>
-                                        ))}
-                                    </div>
-                                );
-                            }
-                        )}
-                    </div>
-                </SidebarMenu>
-                <InfinitScroll
-                    hasNextPage={query.hasNextPage}
-                    isFetchingNextPage={query.isFetchingNextPage}
-                    fetchNextPage={query.fetchNextPage}
-                />
-            </SidebarGroupContent>
-        </SidebarGroup>
+                                                >
+                                                    <ThreadItem
+                                                        key={thread.id}
+                                                        thread={thread}
+                                                        isActive={
+                                                            thread.id ===
+                                                            threadId
+                                                        }
+                                                        setOpenMobile={
+                                                            setOpenMobile
+                                                        }
+                                                    />
+                                                </SidebarMenuItem>
+                                            ))}
+                                        </div>
+                                    );
+                                }
+                            )}
+                        </div>
+                    </SidebarMenu>
+                    <InfinitScroll
+                        hasNextPage={query.hasNextPage}
+                        isFetchingNextPage={query.isFetchingNextPage}
+                        fetchNextPage={query.fetchNextPage}
+                    />
+                </SidebarGroupContent>
+            </SidebarGroup>
+        </>
     );
 }

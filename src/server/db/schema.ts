@@ -126,10 +126,6 @@ export const projects_table = createTable("projects", {
     userId: varchar("user_id", { length: 255 })
         .notNull()
         .references(() => users.id),
-    threadId: text("threads")
-        .array()
-        .notNull()
-        .default(sql`ARRAY[]::text[]`),
     visibility: varchar("visibility", { enum: ["public", "private"] })
         .notNull()
         .default("private"),
@@ -153,6 +149,9 @@ export const threads_table = createTable("threads", {
     visibility: varchar("visibility", { enum: ["public", "private"] })
         .notNull()
         .default("private"),
+    projectId: varchar("projectId", { length: 255 }).references(
+        () => projects_table.id
+    ),
 });
 
 export type DB_THREAD_TYPE = InferSelectModel<typeof threads_table>;

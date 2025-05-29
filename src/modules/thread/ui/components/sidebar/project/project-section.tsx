@@ -1,16 +1,16 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import {
     SidebarGroup,
     SidebarGroupAction,
     SidebarGroupContent,
     SidebarGroupLabel,
+    useSidebar,
 } from "~/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger } from "~/components/ui/collapsible";
 import { api } from "~/trpc/react";
-import { ErrorBoundary } from "react-error-boundary";
 import {
     Dialog,
     DialogContent,
@@ -19,21 +19,18 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { Suspense } from "react";
+import type { ProjectWithThreads } from "../thread-sidebar-group";
+import { ThreadItem } from "../thread-item";
 
-export default function ProjectSection() {
-    return (
-        <Suspense fallback={<p>Fetching Projects...</p>}>
-            <ErrorBoundary fallback={<p>Error while fetching projects.</p>}>
-                <Project />
-            </ErrorBoundary>
-        </Suspense>
-    );
+interface ProjectSecionProps {
+    threadId: string | undefined | string[];
+    projectWithThreads: ProjectWithThreads[];
 }
 
-function Project() {
-    const [fetchedProjects] = api.project.getAllProjects.useSuspenseQuery();
-
+export function ProjectSection({
+    projectWithThreads,
+    threadId,
+}: ProjectSecionProps) {
     const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
         {}
     );
@@ -45,6 +42,29 @@ function Project() {
             [projectId]: !prev[projectId],
         }));
     };
+
+    const { setOpenMobile } = useSidebar();
+
+    useEffect(() => {
+        if (!threadId) return;
+
+        for (const project of projectWithThreads) {
+            const hasActiveThread = project.threads.some(
+                (thread) => thread.id === threadId
+            );
+            if (hasActiveThread) {
+                setOpenProjects((prev) => ({
+                    ...prev,
+                    [project.id]: true,
+                }));
+                break;
+            }
+        }
+    }, [threadId, projectWithThreads]);
+
+    if (!projectWithThreads) {
+        return <></>;
+    }
 
     return (
         <>
@@ -61,7 +81,7 @@ function Project() {
                     </SidebarGroupAction>
 
                     <SidebarGroupContent className="flex flex-col gap-1 px-1 py-2">
-                        {fetchedProjects.map((project) => {
+                        {projectWithThreads.map((project) => {
                             const isOpen = openProjects[project.id];
 
                             return (
@@ -74,22 +94,27 @@ function Project() {
                                     >
                                         <span>{project.title}</span>
                                         <ChevronDown
-                                            className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+                                            className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                                isOpen ? "rotate-180" : ""
+                                            }`}
                                         />
                                     </CollapsibleTrigger>
 
-                                    {isOpen && project.threadId.length > 0 && (
-                                        <div className="ml-4 mt-1 flex flex-col gap-1">
-                                            {project.threadId.map(
-                                                (threadId) => (
-                                                    <div
-                                                        key={threadId}
-                                                        className="rounded px-2 py-1 text-xs text-muted-foreground transition hover:bg-muted/50"
-                                                    >
-                                                        {threadId}
-                                                    </div>
-                                                )
-                                            )}
+                                    {isOpen && (
+                                        <div className="ml-3 mt-1 flex flex-col gap-1">
+                                            {project.threads.map((thread) => (
+                                                <ThreadItem
+                                                    key={thread.id}
+                                                    thread={thread}
+                                                    isActive={
+                                                        thread.id === threadId
+                                                    }
+                                                    setOpenMobile={
+                                                        setOpenMobile
+                                                    }
+                                                    isProjectItem={true}
+                                                />
+                                            ))}
                                         </div>
                                     )}
                                 </div>
@@ -98,6 +123,7 @@ function Project() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </Collapsible>
+
             <CreateNewProjectDailog
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}

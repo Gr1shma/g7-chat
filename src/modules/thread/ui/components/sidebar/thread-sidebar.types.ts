@@ -4,6 +4,7 @@ export interface ThreadItemProps {
     thread: DB_THREAD_TYPE;
     isActive: boolean;
     setOpenMobile: (open: boolean) => void;
+    isProjectItem: boolean;
 }
 
 export interface SidebarHistoryProps {

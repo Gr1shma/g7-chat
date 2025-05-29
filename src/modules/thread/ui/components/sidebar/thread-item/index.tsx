@@ -10,7 +10,6 @@ import { api } from "~/trpc/react";
 import { type ThreadItemProps } from "../thread-sidebar.types";
 import { PinThreadButton } from "./pin-thread-button";
 import { ThreadDropDownButton } from "./thread-dropdown-button";
-import { Button } from "~/components/ui/button";
 
 const input = { limit: 20 };
 
@@ -18,6 +17,7 @@ const PureThreadItem = ({
     thread,
     isActive,
     setOpenMobile,
+    isProjectItem,
 }: ThreadItemProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(thread.title);
@@ -147,7 +147,9 @@ const PureThreadItem = ({
                                     isActive ? "opacity-100" : "opacity-0"
                                 }`}
                             />
-                            <PinThreadButton thread={thread} />
+                            {isProjectItem ? null : (
+                                <PinThreadButton thread={thread} />
+                            )}
                             <ThreadDropDownButton
                                 thread={thread}
                                 onOpenChange={setIsDropdownOpen}

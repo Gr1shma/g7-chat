@@ -15,7 +15,6 @@ import { google } from "@ai-sdk/google";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { messages_table, threads_table } from "~/server/db/schema";
-import { threadId } from "worker_threads";
 import { and, eq } from "drizzle-orm";
 
 export const maxDuration = 60;
@@ -85,6 +84,7 @@ export async function POST(request: Request) {
                                         message: userMessage,
                                     });
                                 await caller.thread.saveThread({
+                                    projectId: null,
                                     threadId: id,
                                     title,
                                 });
