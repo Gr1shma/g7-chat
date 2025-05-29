@@ -9,10 +9,11 @@ import {
     SidebarGroupContent,
     SidebarGroupLabel,
     SidebarMenu,
+    SidebarMenuItem,
     useSidebar,
 } from "~/components/ui/sidebar";
 
-import { ThreadItem } from "./thread-sidebar-item";
+import { ThreadItem } from "./thread-item";
 import { api } from "~/trpc/react";
 import { InfinitScroll } from "~/components/infinite-scroll";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -152,19 +153,23 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                                         <SidebarGroupLabel>
                                             {
                                                 labelMap[
-                                                label as keyof typeof groupedThreads
+                                                    label as keyof typeof groupedThreads
                                                 ]
                                             }
                                         </SidebarGroupLabel>
                                         {threads.map((thread) => (
-                                            <ThreadItem
-                                                key={thread.id}
-                                                thread={thread}
-                                                isActive={
-                                                    thread.id === threadId
-                                                }
-                                                setOpenMobile={setOpenMobile}
-                                            />
+                                            <SidebarMenuItem key={thread.id}>
+                                                <ThreadItem
+                                                    key={thread.id}
+                                                    thread={thread}
+                                                    isActive={
+                                                        thread.id === threadId
+                                                    }
+                                                    setOpenMobile={
+                                                        setOpenMobile
+                                                    }
+                                                />
+                                            </SidebarMenuItem>
                                         ))}
                                     </div>
                                 );

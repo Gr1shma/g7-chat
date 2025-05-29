@@ -98,12 +98,20 @@ export async function POST(request: Request) {
                                 },
                             ]);
 
-                            await db.update(threads_table).set({
-                                updatedAt: new Date(),
-                            }).where(and(
-                                eq(threads_table.id, id),
-                                eq(threads_table.userId, session.user.id),
-                            ))
+                            await db
+                                .update(threads_table)
+                                .set({
+                                    updatedAt: new Date(),
+                                })
+                                .where(
+                                    and(
+                                        eq(threads_table.id, id),
+                                        eq(
+                                            threads_table.userId,
+                                            session.user.id
+                                        )
+                                    )
+                                );
 
                             await db.insert(messages_table).values(
                                 sanitizedResponseMessages.map((message) => {
