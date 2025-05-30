@@ -1,8 +1,9 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ErrorBoundary } from "react-error-boundary";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState, useMemo } from "react";
+import { Folder } from "lucide-react";
 
 import {
     SidebarGroup,
@@ -12,6 +13,13 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "~/components/ui/sidebar";
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "~/components/ui/command";
 
 import { ThreadItem } from "./thread-item";
 import { api } from "~/trpc/react";
@@ -22,9 +30,17 @@ import { groupThreadsByDate } from "./thread-sidebar.utils";
 import { useSession } from "next-auth/react";
 import { type DB_PROJECT_TYPE, type DB_THREAD_TYPE } from "~/server/db/schema";
 import { ProjectSection } from "./project/project-section";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 export type ProjectWithThreads = DB_PROJECT_TYPE & {
     threads: DB_THREAD_TYPE[];
+};
+
+type SearchableThread = {
+    thread: DB_THREAD_TYPE;
+    project?: DB_PROJECT_TYPE;
+    isProjectThread: boolean;
 };
 
 export default function SidebarSection({ searchQuery }: SidebarHistoryProps) {
@@ -41,8 +57,8 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const session = useSession();
     const { setOpenMobile } = useSidebar();
     const params = useParams();
+    const router = useRouter();
 
-    // Handle threadId which might be undefined, string, or string[]
     const threadId = Array.isArray(params.threadId)
         ? params.threadId[0]
         : params.threadId || undefined;
@@ -53,6 +69,71 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
             { limit: 20 },
             { getNextPageParam: (lastPage) => lastPage.nextCursor }
         );
+
+    const [openCommand, setOpenCommand] = useState(false);
+    const [commandSearch, setCommandSearch] = useState("");
+
+    const searchableThreads = useMemo((): SearchableThread[] => {
+        if (!data?.pages) return [];
+
+        const allThreads = data.pages.flatMap((page) => page.items);
+        const threads: SearchableThread[] = [];
+
+        fetchedProjects.forEach((project) => {
+            const projectThreads = allThreads.filter(
+                (thread) => thread.projectId === project.id
+            );
+            projectThreads.forEach((thread) => {
+                threads.push({
+                    thread,
+                    project,
+                    isProjectThread: true,
+                });
+            });
+        });
+
+        const unassignedThreads = allThreads.filter(
+            (thread) => !thread.projectId
+        );
+        unassignedThreads.forEach((thread) => {
+            threads.push({
+                thread,
+                isProjectThread: false,
+            });
+        });
+
+        return threads;
+    }, [data?.pages, fetchedProjects]);
+
+    const filteredSearchResults = useMemo(() => {
+        if (!commandSearch.trim()) return [];
+
+        const query = commandSearch.toLowerCase().trim();
+        return searchableThreads.filter(({ thread, project }) => {
+            const threadTitle = thread.title?.toLowerCase() || "";
+            const projectName = project?.title?.toLowerCase() || "";
+
+            return threadTitle.includes(query) || projectName.includes(query);
+        });
+    }, [commandSearch, searchableThreads]);
+
+    const handleThreadSelect = (thread: DB_THREAD_TYPE) => {
+        setOpenCommand(false);
+        setOpenMobile(false);
+        router.push(`/chat/${thread.id}`);
+    };
+
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setOpenCommand((openCommand) => !openCommand);
+            }
+        };
+
+        document.addEventListener("keydown", down);
+        return () => document.removeEventListener("keydown", down);
+    }, []);
 
     if (!session.data?.user.id) {
         return (
@@ -140,14 +221,12 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const normalizedQuery = searchQuery?.toLowerCase().trim() || "";
     const isSearchEmpty = !normalizedQuery;
 
-    // Filter unassigned threads based on search query
     const filteredUnassignedThreads = isSearchEmpty
         ? unassignedThreads
         : unassignedThreads.filter((thread) =>
               thread.title?.toLowerCase().includes(normalizedQuery)
           );
 
-    // Check if there are any matching results (either in projects or unassigned threads)
     const hasProjectMatches =
         !isSearchEmpty &&
         projectsWithThreads.some((project) =>
@@ -158,7 +237,6 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
 
     const hasUnassignedMatches = filteredUnassignedThreads.length > 0;
 
-    // Show "no results" only if there are no matches in both projects and unassigned threads
     if (!isSearchEmpty && !hasProjectMatches && !hasUnassignedMatches) {
         return (
             <>
@@ -189,7 +267,6 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         older: "Older than last month",
     };
 
-    // Check if there are any unassigned threads to show
     const hasUnassignedThreadsToShow = Object.values(groupedThreads).some(
         (threads) => threads.length > 0
     );
@@ -256,6 +333,71 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                     </SidebarGroupContent>
                 </SidebarGroup>
             )}
+            <CommandDialog open={openCommand} onOpenChange={setOpenCommand}>
+                <CommandInput
+                    placeholder="Search threads..."
+                    value={commandSearch}
+                    onValueChange={setCommandSearch}
+                />
+                <VisuallyHidden>
+                    <DialogTitle>Search Threads</DialogTitle>
+                </VisuallyHidden>
+                <CommandList className="max-h-[400px] overflow-y-auto">
+                    {query.isLoading ? (
+                        <div className="space-y-2 p-2">
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="flex items-center gap-3 px-2 py-2"
+                                >
+                                    <Skeleton className="h-4 w-4 rounded" />
+                                    <Skeleton className="h-4 w-20" />
+                                    <Skeleton className="h-2 w-1 rounded-full" />
+                                    <Skeleton className="h-4 max-w-[200px] flex-1" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <>
+                            <CommandEmpty>No threads found.</CommandEmpty>
+                            {(commandSearch.trim()
+                                ? filteredSearchResults
+                                : searchableThreads
+                            ).map(({ thread, project, isProjectThread }) => (
+                                <CommandItem
+                                    key={thread.id}
+                                    onSelect={() => handleThreadSelect(thread)}
+                                    className="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-accent/50"
+                                >
+                                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                                        {isProjectThread && project ? (
+                                            <>
+                                                <Folder className="h-4 w-4 flex-shrink-0 text-primary" />
+                                                <span className="max-w-[80px] truncate text-sm font-medium text-muted-foreground">
+                                                    {project.title}
+                                                </span>
+                                                <div className="h-1 w-1 flex-shrink-0 rounded-full bg-muted-foreground/40" />
+                                                <span className="flex-1 truncate text-sm font-medium">
+                                                    {thread.title ||
+                                                        "Untitled Thread"}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="ml-6 flex-1 truncate text-sm font-medium">
+                                                {thread.title ||
+                                                    "Untitled Thread"}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {thread.id === threadId && (
+                                        <div className="h-2 w-2 flex-shrink-0 rounded-full text-primary" />
+                                    )}
+                                </CommandItem>
+                            ))}
+                        </>
+                    )}
+                </CommandList>
+            </CommandDialog>
         </>
     );
 }

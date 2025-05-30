@@ -5,10 +5,6 @@ export default function KeyBoardShortCuts() {
             keysCombination: "Ctrl + K",
         },
         {
-            name: "New Chat",
-            keysCombination: "Ctrl + Shift + K",
-        },
-        {
             name: "Toggle Sidebar",
             keysCombination: "Ctrl + B",
         },
