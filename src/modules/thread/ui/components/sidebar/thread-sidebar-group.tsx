@@ -40,7 +40,12 @@ export default function SidebarSection({ searchQuery }: SidebarHistoryProps) {
 function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const session = useSession();
     const { setOpenMobile } = useSidebar();
-    const { threadId } = useParams();
+    const params = useParams();
+
+    // Handle threadId which might be undefined, string, or string[]
+    const threadId = Array.isArray(params.threadId)
+        ? params.threadId[0]
+        : params.threadId || undefined;
 
     const [fetchedProjects] = api.project.getAllProjects.useSuspenseQuery();
     const [data, query] =
@@ -132,25 +137,48 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         );
     }
 
-    const normalizedQuery = searchQuery.toLowerCase();
+    const normalizedQuery = searchQuery?.toLowerCase().trim() || "";
+    const isSearchEmpty = !normalizedQuery;
 
-    const filteredThreads = allThreads.filter((thread) =>
-        thread.title?.toLowerCase().includes(normalizedQuery)
-    );
+    // Filter unassigned threads based on search query
+    const filteredUnassignedThreads = isSearchEmpty
+        ? unassignedThreads
+        : unassignedThreads.filter((thread) =>
+              thread.title?.toLowerCase().includes(normalizedQuery)
+          );
 
-    if (filteredThreads.length === 0) {
+    // Check if there are any matching results (either in projects or unassigned threads)
+    const hasProjectMatches =
+        !isSearchEmpty &&
+        projectsWithThreads.some((project) =>
+            project.threads.some((thread) =>
+                thread.title?.toLowerCase().includes(normalizedQuery)
+            )
+        );
+
+    const hasUnassignedMatches = filteredUnassignedThreads.length > 0;
+
+    // Show "no results" only if there are no matches in both projects and unassigned threads
+    if (!isSearchEmpty && !hasProjectMatches && !hasUnassignedMatches) {
         return (
-            <SidebarGroup>
-                <SidebarGroupContent>
-                    <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-                        No threads found matching your search.
-                    </div>
-                </SidebarGroupContent>
-            </SidebarGroup>
+            <>
+                <ProjectSection
+                    projectWithThreads={projectsWithThreads}
+                    threadId={threadId}
+                    searchQuery={searchQuery}
+                />
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
+                            No threads found matching your search.
+                        </div>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </>
         );
     }
 
-    const groupedThreads = groupThreadsByDate(unassignedThreads);
+    const groupedThreads = groupThreadsByDate(filteredUnassignedThreads);
 
     const labelMap: Record<keyof typeof groupedThreads, string> = {
         pinned: "Pinned Thread",
@@ -161,63 +189,73 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         older: "Older than last month",
     };
 
+    // Check if there are any unassigned threads to show
+    const hasUnassignedThreadsToShow = Object.values(groupedThreads).some(
+        (threads) => threads.length > 0
+    );
+
     return (
         <>
             <ProjectSection
                 projectWithThreads={projectsWithThreads}
                 threadId={threadId}
+                searchQuery={searchQuery}
             />
-            <SidebarGroup>
-                <SidebarGroupContent>
-                    <SidebarMenu>
-                        <div className="flex flex-col gap-6">
-                            {Object.entries(groupedThreads).map(
-                                ([label, threads]) => {
-                                    if (threads.length === 0) return null;
+            {hasUnassignedThreadsToShow && (
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <div className="flex flex-col gap-6">
+                                {Object.entries(groupedThreads).map(
+                                    ([label, threads]) => {
+                                        if (threads.length === 0) return null;
 
-                                    return (
-                                        <div key={label}>
-                                            <SidebarGroupLabel>
-                                                {
-                                                    labelMap[
-                                                        label as keyof typeof groupedThreads
-                                                    ]
-                                                }
-                                            </SidebarGroupLabel>
-                                            {threads.map((thread) => (
-                                                <SidebarMenuItem
-                                                    key={thread.id}
-                                                >
-                                                    <ThreadItem
-                                                        projectWithThreads={
-                                                            projectsWithThreads
-                                                        }
-                                                        isProjectItem={false}
+                                        return (
+                                            <div key={label}>
+                                                <SidebarGroupLabel>
+                                                    {
+                                                        labelMap[
+                                                            label as keyof typeof groupedThreads
+                                                        ]
+                                                    }
+                                                </SidebarGroupLabel>
+                                                {threads.map((thread) => (
+                                                    <SidebarMenuItem
                                                         key={thread.id}
-                                                        thread={thread}
-                                                        isActive={
-                                                            thread.id ===
-                                                            threadId
-                                                        }
-                                                        setOpenMobile={
-                                                            setOpenMobile
-                                                        }
-                                                    />
-                                                </SidebarMenuItem>
-                                            ))}
-                                        </div>
-                                    );
-                                }
-                            )}
-                        </div>
-                    </SidebarMenu>
-                    <InfinitScroll
-                        hasNextPage={query.hasNextPage}
-                        isFetchingNextPage={query.isFetchingNextPage}
-                        fetchNextPage={query.fetchNextPage}
-                    />
-                </SidebarGroupContent>
-            </SidebarGroup>
+                                                    >
+                                                        <ThreadItem
+                                                            projectWithThreads={
+                                                                projectsWithThreads
+                                                            }
+                                                            isProjectItem={
+                                                                false
+                                                            }
+                                                            key={thread.id}
+                                                            thread={thread}
+                                                            isActive={
+                                                                thread.id ===
+                                                                threadId
+                                                            }
+                                                            setOpenMobile={
+                                                                setOpenMobile
+                                                            }
+                                                        />
+                                                    </SidebarMenuItem>
+                                                ))}
+                                            </div>
+                                        );
+                                    }
+                                )}
+                            </div>
+                        </SidebarMenu>
+                        <InfinitScroll
+                            hasNextPage={query.hasNextPage}
+                            isFetchingNextPage={query.isFetchingNextPage}
+                            fetchNextPage={query.fetchNextPage}
+                        />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            )}
         </>
     );
 }

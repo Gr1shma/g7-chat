@@ -12,10 +12,8 @@ function PureThreadInput({
     input,
     setInput,
     isLoading,
-    stop,
     handleSubmit,
     status,
-    setMessages,
 }: ThreadInputProps) {
     const { textareaRef, adjustHeight, resetHeight } =
         useTextareaAutosize(input);
