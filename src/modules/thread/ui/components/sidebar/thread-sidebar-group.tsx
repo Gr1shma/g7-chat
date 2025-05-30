@@ -189,6 +189,10 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                                                     key={thread.id}
                                                 >
                                                     <ThreadItem
+                                                        projectWithThreads={
+                                                            projectsWithThreads
+                                                        }
+                                                        isProjectItem={false}
                                                         key={thread.id}
                                                         thread={thread}
                                                         isActive={

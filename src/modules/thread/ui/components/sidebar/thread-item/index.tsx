@@ -18,6 +18,7 @@ const PureThreadItem = ({
     isActive,
     setOpenMobile,
     isProjectItem,
+    projectWithThreads,
 }: ThreadItemProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(thread.title);
@@ -154,6 +155,7 @@ const PureThreadItem = ({
                                 thread={thread}
                                 onOpenChange={setIsDropdownOpen}
                                 isActive={isActive}
+                                projectWithThreads={projectWithThreads}
                             />
                         </div>
                     </div>

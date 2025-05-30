@@ -1,4 +1,4 @@
-import { Ellipsis, Share2, Trash2 } from "lucide-react";
+import { Ellipsis, Folder, Share2, Trash2 } from "lucide-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import {
     DropdownMenu,
@@ -10,17 +10,22 @@ import {
 } from "~/components/ui/dropdown-menu";
 import type { DB_THREAD_TYPE } from "~/server/db/schema";
 import { ThreadDeleteDailog } from "./thread-delete-dailog";
+import { type ProjectWithThreads } from "../thread-sidebar-group";
+import { MoveToProjectCommand } from "./thread-move-to-project-command";
 
 export function ThreadDropDownButton({
     thread,
     onOpenChange,
     isActive,
+    projectWithThreads,
 }: {
     thread: DB_THREAD_TYPE;
     onOpenChange: Dispatch<SetStateAction<boolean>>;
     isActive: boolean;
+    projectWithThreads: ProjectWithThreads[];
 }) {
-    const [showAlert, setShowAlert] = useState(false);
+    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const [showMoveProjectCommand, setShowMoveProjectCommand] = useState(false);
     return (
         <>
             <DropdownMenu onOpenChange={onOpenChange}>
@@ -36,12 +41,21 @@ export function ThreadDropDownButton({
                         {thread.title}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-accent focus:bg-accent"
+                        onClick={() => {
+                            setShowMoveProjectCommand(true);
+                        }}
+                    >
+                        <Folder className="h-4 w-4 text-muted-foreground" />
+                        <span>Move to Project</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-accent focus:bg-accent">
                         <Share2 className="h-4 w-4 text-muted-foreground" />
                         <span>Share Link</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                        onSelect={() => setShowAlert(true)}
+                        onSelect={() => setShowDeleteAlert(true)}
                         className="flex cursor-pointer items-center gap-3 bg-destructive/40 px-3 py-2 text-sm hover:bg-destructive/70"
                     >
                         <Trash2 className="h-4 w-4" />
@@ -50,10 +64,16 @@ export function ThreadDropDownButton({
                 </DropdownMenuContent>
             </DropdownMenu>
             <ThreadDeleteDailog
-                open={showAlert}
-                onOpenChange={setShowAlert}
+                open={showDeleteAlert}
+                onOpenChange={setShowDeleteAlert}
                 thread={thread}
                 isActive={isActive}
+            />
+            <MoveToProjectCommand
+                threadId={thread.id}
+                projectWithThreads={projectWithThreads}
+                setShowMoveProjectCommand={setShowMoveProjectCommand}
+                showMoveProjectCommand={showMoveProjectCommand}
             />
         </>
     );

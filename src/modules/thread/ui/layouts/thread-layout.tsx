@@ -14,7 +14,7 @@ export async function ThreadLayout({
     void api.thread.getInfiniteThreads.prefetchInfinite({
         limit: 20,
     });
-    void api.project.getAllProjectsWithThread.prefetchInfinite();
+    void api.project.getAllProjects.prefetchInfinite();
     return (
         <div className="relative flex h-[100dvh] text-gray-100">
             <SidebarProvider>

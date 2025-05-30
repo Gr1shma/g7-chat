@@ -157,6 +157,51 @@ export const threadRouter = createTRPCRouter({
                 });
             }
         }),
+    changeThreadProjectId: protectedProcedure
+        .input(
+            z.object({
+                projectId: z.string(),
+                threadId: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { db, session } = ctx;
+            const { threadId, projectId } = input;
+            const userId = session.user?.id;
+
+            if (!userId) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "Not authenticated",
+                });
+            }
+
+            try {
+                const result = await db
+                    .update(threads_table)
+                    .set({
+                        projectId,
+                    })
+                    .where(
+                        and(
+                            eq(threads_table.id, threadId),
+                            eq(threads_table.userId, userId)
+                        )
+                    );
+
+                if (result.rowCount === 0) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Thread not found or unauthorized",
+                    });
+                }
+            } catch (error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to change projectId of thread",
+                });
+            }
+        }),
     toogleThreadPinById: protectedProcedure
         .input(z.string())
         .mutation(async ({ ctx, input }) => {

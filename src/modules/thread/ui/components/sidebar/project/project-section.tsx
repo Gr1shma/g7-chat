@@ -104,6 +104,9 @@ export function ProjectSection({
                                         <div className="ml-3 mt-1 flex flex-col gap-1">
                                             {project.threads.map((thread) => (
                                                 <ThreadItem
+                                                    projectWithThreads={
+                                                        projectWithThreads
+                                                    }
                                                     key={thread.id}
                                                     thread={thread}
                                                     isActive={
