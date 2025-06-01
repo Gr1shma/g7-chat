@@ -1,7 +1,7 @@
 "use client";
 
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, EllipsisIcon, Plus, Trash2 } from "lucide-react";
 import {
     SidebarGroup,
     SidebarGroupAction,
@@ -17,10 +17,19 @@ import {
     DialogHeader,
     DialogTitle,
 } from "~/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu"
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import type { ProjectWithThreads } from "../thread-sidebar-group";
 import { ThreadItem } from "../thread-item";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "~/components/ui/alert-dialog";
 
 interface ProjectSecionProps {
     threadId: string | undefined;
@@ -37,6 +46,7 @@ export function ProjectSection({
         {}
     );
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isAlertDailogOpen, setIsAlertDialogOpen] = useState(false);
 
     const toggleProject = (projectId: string) => {
         setOpenProjects((prev) => ({
@@ -61,10 +71,8 @@ export function ProjectSection({
                     : false;
 
             if (isSearchEmpty) {
-                // When search is empty, only open projects with active threads
                 newOpenProjects[project.id] = hasActiveThread;
             } else {
-                // When searching, open projects that have matching threads
                 const hasMatchingThread = project.threads.some((thread) =>
                     thread.title?.toLowerCase().includes(normalizedQuery)
                 );
@@ -77,7 +85,6 @@ export function ProjectSection({
         setOpenProjects(newOpenProjects);
     }, [threadId, projectWithThreads, searchQuery]);
 
-    // Filter projects based on search query
     const getFilteredProjects = () => {
         if (!projectWithThreads) return [];
 
@@ -85,10 +92,8 @@ export function ProjectSection({
         const isSearchEmpty = !normalizedQuery;
 
         if (isSearchEmpty) {
-            // Show all projects when search is empty
             return projectWithThreads;
         } else {
-            // Only show projects that have threads matching the search query
             return projectWithThreads.filter((project) =>
                 project.threads.some((thread) =>
                     thread.title?.toLowerCase().includes(normalizedQuery)
@@ -127,14 +132,33 @@ export function ProjectSection({
                                         onClick={() =>
                                             toggleProject(project.id)
                                         }
-                                        className="flex w-full items-center justify-between rounded-md px-2 py-1 text-left text-sm transition hover:bg-muted"
+                                        className="flex w-full items-center justify-between rounded-md px-2 py-1 text-left text-sm"
                                     >
                                         <span>{project.title}</span>
-                                        <ChevronDown
-                                            className={`h-4 w-4 text-muted-foreground transition-transform ${
-                                                isOpen ? "rotate-180" : ""
-                                            }`}
-                                        />
+                                        <div className="flex flex-row gap-2">
+                                            {isOpen ? (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger className="flex items-center p-1 rounded-md justify-center outline-none transition-colors hover:bg-muted/90">
+                                                        <EllipsisIcon className="h-4 w-4" />
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent className="w-48 border-border bg-secondary shadow-lg">
+                                                        <DropdownMenuLabel>{project.title}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            onSelect={() => setIsAlertDialogOpen(true)}
+                                                            className="flex cursor-pointer items-center gap-3 bg-destructive/40 px-3 py-2 text-sm"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                            <span>Delete Thread</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            ) : <ChevronDown
+                                                className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""
+                                                    }`}
+                                            />
+                                            }
+                                        </div>
                                     </CollapsibleTrigger>
 
                                     {isOpen && (
@@ -167,6 +191,10 @@ export function ProjectSection({
             <CreateNewProjectDailog
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
+            />
+            <DeleteProjectAlertDailog
+                isAlertDialogOpen={isAlertDailogOpen}
+                setIsAlertDialogOpen={setIsAlertDialogOpen}
             />
         </>
     );
@@ -227,4 +255,36 @@ function CreateNewProjectDailog({
             </DialogContent>
         </Dialog>
     );
+}
+
+function DeleteProjectAlertDailog({ isAlertDialogOpen, setIsAlertDialogOpen }: {
+    isAlertDialogOpen: boolean,
+    setIsAlertDialogOpen: Dispatch<SetStateAction<boolean>>;
+}) {
+    return (
+        <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete this project and all its threads and messages.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        type="button"
+                        onClick={async () => {
+                            setIsAlertDialogOpen(false);
+                        }}
+                    >
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
 }
