@@ -1,7 +1,20 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
-import { ChevronDown, EllipsisIcon, Plus, Trash2 } from "lucide-react";
+import {
+    type Dispatch,
+    type SetStateAction,
+    useEffect,
+    useState,
+    useRef,
+} from "react";
+import {
+    CheckIcon,
+    ChevronDown,
+    EllipsisIcon,
+    Plus,
+    Trash2,
+    XIcon,
+} from "lucide-react";
 import {
     SidebarGroup,
     SidebarGroupAction,
@@ -57,9 +70,23 @@ export function ProjectSection({
     );
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isAlertDailogOpen, setIsAlertDialogOpen] = useState(false);
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    const [selectedProjectId, _setSelectedProjectId] = useState<string | null>(
         null
     );
+    const [editingProjectId, setEditingProjectId] = useState<string | null>(
+        null
+    );
+    const [editedTitle, setEditedTitle] = useState("");
+
+    const utils = api.useUtils();
+
+    const changeTitle = api.project.changeProjectTitle.useMutation({
+        onSuccess: async () => {
+            await utils.project.getAllProjects.invalidate();
+            setEditingProjectId(null);
+            setEditedTitle("");
+        },
+    });
 
     const toggleProject = (projectId: string) => {
         setOpenProjects((prev) => ({
@@ -117,6 +144,40 @@ export function ProjectSection({
 
     const filteredProjects = getFilteredProjects();
 
+    const handleProjectTitleSave = async (projectId: string) => {
+        const trimmed = editedTitle.trim();
+        if (!trimmed) {
+            cancelEditing();
+            return;
+        }
+
+        if (
+            trimmed !==
+            projectWithThreads.find((p) => p.id === projectId)?.title
+        ) {
+            await changeTitle.mutateAsync({
+                projectId,
+                title: trimmed,
+            });
+        } else {
+            cancelEditing();
+        }
+    };
+
+    const cancelEditing = () => {
+        setEditingProjectId(null);
+        setEditedTitle("");
+    };
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+        if (editingProjectId && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [editingProjectId]);
+
     if (!projectWithThreads || filteredProjects.length === 0) {
         return <></>;
     }
@@ -141,56 +202,108 @@ export function ProjectSection({
 
                             return (
                                 <div key={project.id}>
-                                    <CollapsibleTrigger
-                                        onClick={() =>
-                                            toggleProject(project.id)
-                                        }
-                                        className="flex w-full items-center justify-between rounded-md px-2 py-1 text-left text-sm"
-                                    >
-                                        <span>{project.title}</span>
-                                        <div className="flex flex-row gap-2">
-                                            {isOpen ? (
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger
-                                                        asChild
-                                                    >
-                                                        <EllipsisIcon className="flex size-6 items-center justify-center rounded-md p-1 outline-none transition-colors hover:bg-muted/90" />
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-48 border-border bg-secondary shadow-lg">
-                                                        <DropdownMenuLabel>
-                                                            {project.title}
-                                                        </DropdownMenuLabel>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            onSelect={() => {
-                                                                setSelectedProjectId(
-                                                                    project.id
-                                                                );
-                                                                setIsAlertDialogOpen(
-                                                                    true
-                                                                );
-                                                            }}
-                                                            className="flex cursor-pointer items-center gap-3 bg-destructive/40 px-3 py-2 text-sm"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                            <span>
-                                                                Delete Project
-                                                            </span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            ) : (
-                                                <ChevronDown
-                                                    className={`h-4 w-4 text-muted-foreground transition-transform ${
-                                                        isOpen
-                                                            ? "rotate-180"
-                                                            : ""
-                                                    }`}
-                                                />
-                                            )}
-                                        </div>
-                                    </CollapsibleTrigger>
+                                    {editingProjectId === project.id ? (
+                                        <div className="relative w-full">
+                                            <Input
+                                                ref={inputRef}
+                                                value={editedTitle}
+                                                onChange={(e) =>
+                                                    setEditedTitle(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                onBlur={() =>
+                                                    handleProjectTitleSave(
+                                                        project.id
+                                                    )
+                                                }
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter")
+                                                        handleProjectTitleSave(
+                                                            project.id
+                                                        );
+                                                    if (e.key === "Escape")
+                                                        cancelEditing();
+                                                }}
+                                                className="w-full rounded-sm bg-muted px-2 py-1 pr-20 text-sm font-medium text-foreground"
+                                            />
 
+                                            <div className="absolute right-2 top-1/2 flex -translate-y-1/2 space-x-0.5">
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        handleProjectTitleSave(
+                                                            project.id
+                                                        )
+                                                    }
+                                                    className="rounded-sm bg-muted/80 p-1 hover:bg-muted hover:text-sidebar-accent-foreground"
+                                                    aria-label="Save title"
+                                                >
+                                                    <CheckIcon className="size-3.5" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={cancelEditing}
+                                                    className="rounded-sm bg-muted/80 p-1 hover:bg-muted hover:text-sidebar-accent-foreground"
+                                                    aria-label="Cancel editing"
+                                                >
+                                                    <XIcon className="size-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <CollapsibleTrigger
+                                            onClick={() =>
+                                                toggleProject(project.id)
+                                            }
+                                            onDoubleClick={() => {
+                                                setEditingProjectId(project.id);
+                                                setEditedTitle(project.title);
+                                            }}
+                                            className="flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-1 text-left text-sm"
+                                        >
+                                            <span>{project.title}</span>
+                                            <div className="flex flex-row gap-2">
+                                                {isOpen ? (
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger
+                                                            asChild
+                                                        >
+                                                            <EllipsisIcon className="flex size-6 items-center justify-center rounded-md p-1 outline-none transition-colors hover:bg-muted/90" />
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-48 border-border bg-secondary shadow-lg">
+                                                            <DropdownMenuLabel>
+                                                                {project.title}
+                                                            </DropdownMenuLabel>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onSelect={() => {
+                                                                    setIsAlertDialogOpen(
+                                                                        true
+                                                                    );
+                                                                }}
+                                                                className="flex cursor-pointer items-center gap-3 bg-destructive/40 px-3 py-2 text-sm"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                                <span>
+                                                                    Delete
+                                                                    Project
+                                                                </span>
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                ) : (
+                                                    <ChevronDown
+                                                        className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                                            isOpen
+                                                                ? "rotate-180"
+                                                                : ""
+                                                        }`}
+                                                    />
+                                                )}
+                                            </div>
+                                        </CollapsibleTrigger>
+                                    )}
                                     {isOpen && (
                                         <div className="ml-3 mt-1 flex flex-col gap-1">
                                             {project.threads.map((thread) => (

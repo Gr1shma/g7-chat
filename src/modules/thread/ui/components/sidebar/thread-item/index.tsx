@@ -10,6 +10,7 @@ import { api } from "~/trpc/react";
 import { type ThreadItemProps } from "../thread-sidebar.types";
 import { PinThreadButton } from "./pin-thread-button";
 import { ThreadDropDownButton } from "./thread-dropdown-button";
+import { Button } from "~/components/ui/button";
 
 const input = { limit: 20 };
 
@@ -168,27 +169,31 @@ const PureThreadItem = ({
                         onChange={handleTitleChange}
                         onKeyDown={handleKeyDown}
                         onBlur={handleTitleSave}
-                        className="h-7 w-full bg-sidebar-accent text-sm"
+                        className="h-7 w-full bg-sidebar-accent pr-20 text-sm"
                         aria-label="Edit thread title"
                     />
-                    <div className="absolute right-2 flex space-x-0.5">
-                        <button
+                    <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center space-x-0.5">
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={handleTitleSave}
-                            className="rounded-sm bg-muted/80 p-1 hover:bg-muted hover:text-sidebar-accent-foreground"
+                            className="h-5 w-5 p-0"
                             aria-label="Save title"
                         >
-                            <CheckIcon className="size-3.5" />
-                        </button>
-                        <button
+                            <CheckIcon className="h-3 w-3" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => {
                                 setTitle(thread.title);
                                 setIsEditing(false);
                             }}
-                            className="rounded-sm bg-muted/80 p-1 hover:bg-muted hover:text-sidebar-accent-foreground"
+                            className="h-5 w-5 p-0"
                             aria-label="Cancel editing"
                         >
-                            <XIcon className="size-3.5" />
-                        </button>
+                            <XIcon className="h-3 w-3" />
+                        </Button>
                     </div>
                 </div>
             )}
