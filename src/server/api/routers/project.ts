@@ -3,7 +3,11 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { projects_table } from "~/server/db/schema";
+import {
+    messages_table,
+    projects_table,
+    threads_table,
+} from "~/server/db/schema";
 
 export const projectRouter = createTRPCRouter({
     getAllProjects: protectedProcedure.query(async ({ ctx }) => {
@@ -23,7 +27,6 @@ export const projectRouter = createTRPCRouter({
             });
         }
     }),
-
     createProject: protectedProcedure
         .input(
             z.object({
@@ -43,6 +46,55 @@ export const projectRouter = createTRPCRouter({
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to create project",
+                });
+            }
+        }),
+    deleteProject: protectedProcedure
+        .input(
+            z.object({
+                projectId: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { db, session } = ctx;
+            const userId = session.user?.id;
+            const { projectId } = input;
+
+            try {
+                const threads = await db
+                    .select({ id: threads_table.id })
+                    .from(threads_table)
+                    .where(
+                        and(
+                            eq(threads_table.projectId, projectId),
+                            eq(threads_table.userId, userId)
+                        )
+                    );
+
+                const threadIds = threads.map((t) => t.id);
+
+                if (threadIds.length > 0) {
+                    await db
+                        .delete(messages_table)
+                        .where(inArray(messages_table.threadId, threadIds));
+
+                    await db
+                        .delete(threads_table)
+                        .where(inArray(threads_table.id, threadIds));
+                }
+
+                await db
+                    .delete(projects_table)
+                    .where(
+                        and(
+                            eq(projects_table.id, projectId),
+                            eq(projects_table.userId, userId)
+                        )
+                    );
+            } catch (error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to delete project",
                 });
             }
         }),

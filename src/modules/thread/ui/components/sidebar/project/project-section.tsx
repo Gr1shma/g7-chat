@@ -24,12 +24,22 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import type { ProjectWithThreads } from "../thread-sidebar-group";
 import { ThreadItem } from "../thread-item";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "~/components/ui/alert-dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
+import { useParams, useRouter } from "next/navigation";
 
 interface ProjectSecionProps {
     threadId: string | undefined;
@@ -47,6 +57,9 @@ export function ProjectSection({
     );
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isAlertDailogOpen, setIsAlertDialogOpen] = useState(false);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+        null
+    );
 
     const toggleProject = (projectId: string) => {
         setOpenProjects((prev) => ({
@@ -138,26 +151,43 @@ export function ProjectSection({
                                         <div className="flex flex-row gap-2">
                                             {isOpen ? (
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger className="flex items-center p-1 rounded-md justify-center outline-none transition-colors hover:bg-muted/90">
-                                                        <EllipsisIcon className="h-4 w-4" />
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <EllipsisIcon className="flex size-6 items-center justify-center rounded-md p-1 outline-none transition-colors hover:bg-muted/90" />
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent className="w-48 border-border bg-secondary shadow-lg">
-                                                        <DropdownMenuLabel>{project.title}</DropdownMenuLabel>
+                                                        <DropdownMenuLabel>
+                                                            {project.title}
+                                                        </DropdownMenuLabel>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
-                                                            onSelect={() => setIsAlertDialogOpen(true)}
+                                                            onSelect={() => {
+                                                                setSelectedProjectId(
+                                                                    project.id
+                                                                );
+                                                                setIsAlertDialogOpen(
+                                                                    true
+                                                                );
+                                                            }}
                                                             className="flex cursor-pointer items-center gap-3 bg-destructive/40 px-3 py-2 text-sm"
                                                         >
                                                             <Trash2 className="h-4 w-4" />
-                                                            <span>Delete Thread</span>
+                                                            <span>
+                                                                Delete Project
+                                                            </span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
-                                            ) : <ChevronDown
-                                                className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""
+                                            ) : (
+                                                <ChevronDown
+                                                    className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                                        isOpen
+                                                            ? "rotate-180"
+                                                            : ""
                                                     }`}
-                                            />
-                                            }
+                                                />
+                                            )}
                                         </div>
                                     </CollapsibleTrigger>
 
@@ -193,8 +223,10 @@ export function ProjectSection({
                 setIsDialogOpen={setIsDialogOpen}
             />
             <DeleteProjectAlertDailog
+                projectId={selectedProjectId}
                 isAlertDialogOpen={isAlertDailogOpen}
                 setIsAlertDialogOpen={setIsAlertDialogOpen}
+                projectWithThreads={projectWithThreads}
             />
         </>
     );
@@ -208,7 +240,6 @@ function CreateNewProjectDailog({
     setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
 }) {
     const [newProjectTitle, setNewProjectTitle] = useState("");
-
     const utils = api.useUtils();
     const projectMutation = api.project.createProject.useMutation({
         onSuccess: async () => {
@@ -257,12 +288,47 @@ function CreateNewProjectDailog({
     );
 }
 
-function DeleteProjectAlertDailog({ isAlertDialogOpen, setIsAlertDialogOpen }: {
-    isAlertDialogOpen: boolean,
+function DeleteProjectAlertDailog({
+    projectId,
+    isAlertDialogOpen,
+    setIsAlertDialogOpen,
+    projectWithThreads,
+}: {
+    projectId: string | null;
+    isAlertDialogOpen: boolean;
     setIsAlertDialogOpen: Dispatch<SetStateAction<boolean>>;
+    projectWithThreads: ProjectWithThreads[];
 }) {
+    const utils = api.useUtils();
+    const router = useRouter();
+    const { threadId } = useParams();
+    const project = projectWithThreads.find((p) => p.id === projectId);
+    const deleteMutation = api.project.deleteProject.useMutation({
+        onSuccess: async () => {
+            await utils.project.getAllProjects.invalidate();
+            await utils.thread.getInfiniteThreads.invalidate();
+
+            const deletedThreadIds = project?.threads.map((t) => t.id) ?? [];
+
+            if (
+                typeof threadId === "string" &&
+                deletedThreadIds.includes(threadId)
+            ) {
+                router.push("/chat");
+            }
+        },
+    });
+    const handleDelete = async () => {
+        if (projectId) {
+            await deleteMutation.mutateAsync({ projectId });
+            setIsAlertDialogOpen(false);
+        }
+    };
     return (
-        <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+        <AlertDialog
+            open={isAlertDialogOpen}
+            onOpenChange={setIsAlertDialogOpen}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
@@ -270,21 +336,20 @@ function DeleteProjectAlertDailog({ isAlertDialogOpen, setIsAlertDialogOpen }: {
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                         This action cannot be undone. This will permanently
-                        delete this project and all its threads and messages.
+                        delete{" "}
+                        <span className="font-extrabold">
+                            "{project?.title}"
+                        </span>{" "}
+                        project and all its threads and messages.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                        type="button"
-                        onClick={async () => {
-                            setIsAlertDialogOpen(false);
-                        }}
-                    >
+                    <AlertDialogAction type="button" onClick={handleDelete}>
                         Delete
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
-    )
+    );
 }
