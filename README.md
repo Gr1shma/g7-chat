@@ -6,7 +6,7 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
 
 * [Demo](#demo)
 * [What It Does](#what-it-does)
-* [Tech Stack 🛠️](#tech-stack-)
+* [Tech Stack 🛠️](#tech-stack)
 * [Features ✨](#features-)
 * [Optimizations ⚡](#optimizations-)
 * [Lessons Learned 📚](#lessons-learned-)
@@ -36,7 +36,7 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
 
 g7-chat provides a distraction-free interface to interact with AI assistants, giving users full visibility and management of their chat threads. It’s designed with performance, privacy, and user experience in mind—no unnecessary clutter, no data lock-in.
 
-## Tech Stack 🛠️
+## Tech Stack
 
 * **[Next.js](https://nextjs.org/)** – React framework for fast, full-stack web apps.
 * **[tRPC](https://trpc.io/)** – End-to-end typesafe APIs without needing REST or GraphQL.
