@@ -136,49 +136,4 @@ export const projectRouter = createTRPCRouter({
                 });
             }
         }),
-    toggleProjectVisibility: protectedProcedure
-        .input(z.string())
-        .mutation(async ({ ctx, input }) => {
-            const { db, session } = ctx;
-            const userId = session.user.id;
-
-            try {
-                const project = await db.query.projects_table.findFirst({
-                    where: and(
-                        eq(projects_table.id, input),
-                        eq(projects_table.userId, userId)
-                    ),
-                    columns: { visibility: true },
-                });
-
-                if (!project) {
-                    throw new Error("Project not found or unauthorized.");
-                }
-
-                const newVisibility =
-                    project.visibility === "private" ? "public" : "private";
-
-                const result = await db
-                    .update(projects_table)
-                    .set({ visibility: newVisibility })
-                    .where(
-                        and(
-                            eq(projects_table.id, input),
-                            eq(projects_table.userId, userId)
-                        )
-                    );
-
-                if (result.rowCount === 0) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Thread not found or unauthorized",
-                    });
-                }
-            } catch (error) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to toggle visibility of project",
-                });
-            }
-        }),
 });

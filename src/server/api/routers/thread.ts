@@ -9,19 +9,13 @@ export const threadRouter = createTRPCRouter({
     getThreadById: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
-            const { db, session } = ctx;
-            const userId = session.user.id;
+            const { db } = ctx;
 
             try {
                 const [thread] = await db
                     .select()
                     .from(threads_table)
-                    .where(
-                        and(
-                            eq(threads_table.id, input),
-                            eq(threads_table.userId, userId)
-                        )
-                    );
+                    .where(eq(threads_table.id, input));
                 return thread;
             } catch (error) {
                 throw new TRPCError({
@@ -90,7 +84,6 @@ export const threadRouter = createTRPCRouter({
                 });
             }
         }),
-
     saveThread: protectedProcedure
         .input(
             z.object({
@@ -118,7 +111,6 @@ export const threadRouter = createTRPCRouter({
                 });
             }
         }),
-
     changeThreadTitle: protectedProcedure
         .input(
             z.object({

@@ -43,9 +43,31 @@ type SearchableThread = {
     isProjectThread: boolean;
 };
 
+function ThreadSidebarItemsSkeleton() {
+    return (
+        <div className="flex flex-col">
+            {[44, 32, 28, 64, 52].map((item) => (
+                <div
+                    key={item}
+                    className="flex h-8 items-center gap-2 rounded-md px-2"
+                >
+                    <Skeleton
+                        className="h-4 max-w-[--skeleton-width] flex-1 rounded-md bg-sidebar-accent-foreground/10"
+                        style={
+                            {
+                                "--skeleton-width": `${item}%`,
+                            } as React.CSSProperties
+                        }
+                    />
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     return (
-        <Suspense fallback={<p>Loading</p>}>
+        <Suspense fallback={<ThreadSidebarItemsSkeleton />}>
             <ErrorBoundary fallback={<p>Error</p>}>
                 <SidebarHistory searchQuery={searchQuery} />
             </ErrorBoundary>
@@ -154,23 +176,7 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                     Today
                 </div>
                 <SidebarGroupContent>
-                    <div className="flex flex-col">
-                        {[44, 32, 28, 64, 52].map((item) => (
-                            <div
-                                key={item}
-                                className="flex h-8 items-center gap-2 rounded-md px-2"
-                            >
-                                <Skeleton
-                                    className="h-4 max-w-[--skeleton-width] flex-1 rounded-md bg-sidebar-accent-foreground/10"
-                                    style={
-                                        {
-                                            "--skeleton-width": `${item}%`,
-                                        } as React.CSSProperties
-                                    }
-                                />
-                            </div>
-                        ))}
-                    </div>
+                    <ThreadSidebarItemsSkeleton />
                 </SidebarGroupContent>
             </SidebarGroup>
         );

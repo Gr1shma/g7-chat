@@ -12,6 +12,7 @@ import type { DB_THREAD_TYPE } from "~/server/db/schema";
 import { ThreadDeleteDailog } from "./thread-delete-dailog";
 import { type ProjectWithThreads } from "../thread-sidebar-group";
 import { MoveToProjectCommand } from "./thread-move-to-project-command";
+import { ThreadShareDialog } from "./thread-share-dailog";
 
 export function ThreadDropDownButton({
     thread,
@@ -25,6 +26,7 @@ export function ThreadDropDownButton({
     projectWithThreads: ProjectWithThreads[];
 }) {
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const [showShareAlert, setShowShareAlert] = useState(false);
     const [showMoveProjectCommand, setShowMoveProjectCommand] = useState(false);
     return (
         <>
@@ -50,9 +52,12 @@ export function ThreadDropDownButton({
                         <Folder className="h-4 w-4 text-muted-foreground" />
                         <span>Move to Project</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-accent focus:bg-accent">
+                    <DropdownMenuItem
+                        onSelect={() => setShowShareAlert(true)}
+                        className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-accent focus:bg-accent"
+                    >
                         <Share2 className="h-4 w-4 text-muted-foreground" />
-                        <span>Share Link</span>
+                        <span>Toggle Visibility</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => setShowDeleteAlert(true)}
@@ -63,6 +68,11 @@ export function ThreadDropDownButton({
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+            <ThreadShareDialog
+                open={showShareAlert}
+                onOpenChange={setShowShareAlert}
+                thread={thread}
+            />
             <ThreadDeleteDailog
                 open={showDeleteAlert}
                 onOpenChange={setShowDeleteAlert}

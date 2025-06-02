@@ -25,18 +25,26 @@ export async function generateMetadata({
 export default async function Page({
     params,
 }: {
-    params: Promise<{ threadId: string }>;
+    params: { threadId: string };
 }) {
-    const session = await auth();
-    if (!session) {
-        redirect("/auth");
-    }
-
     const { threadId } = await params;
 
     const thread = await api.thread.getThreadById(threadId);
+
     if (!thread) {
         notFound();
+    }
+
+    if (thread.visibility !== "public") {
+        const session = await auth();
+
+        if (!session) {
+            redirect("/auth");
+        }
+
+        if (thread.userId !== session.user.id) {
+            notFound();
+        }
     }
 
     void api.message.getMessagesByThreadId.prefetch(threadId);
