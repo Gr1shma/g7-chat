@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import AccountTab from "../components/tabs/account-tab";
 import CustomizationTab from "../components/tabs/customization-tab";
-import HistoryAndSyncTab from "../components/tabs/history-and-sync-tab";
+import HistoryTab from "../components/tabs/history-tab";
 import AboutMeTab from "../components/tabs/about-me";
 
 export type SettingTab = {
@@ -25,9 +24,9 @@ const tabList: SettingTab[] = [
         component: <CustomizationTab />,
     },
     {
-        value: "history-and-sync",
-        name: "History And Sync",
-        component: <HistoryAndSyncTab />,
+        value: "history",
+        name: "History",
+        component: <HistoryTab />,
     },
     {
         value: "about-me",

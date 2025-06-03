@@ -5,8 +5,9 @@ import {
     verificationTokens,
     threads_table,
     messages_table,
+    type DB_MESSAGE_TYPE,
 } from "~/server/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
@@ -138,6 +139,62 @@ export const userRouter = createTRPCRouter({
             });
         }
     }),
+    getHistory: protectedProcedure
+        .input(
+            z.object({
+                threadIds: z.array(z.string().uuid()),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { threadIds } = input;
+            const { session, db } = ctx;
+            const userId = session.user.id;
+
+            if (threadIds.length === 0) {
+                return {};
+            }
+
+            const threads = await db
+                .select({
+                    id: threads_table.id,
+                    title: threads_table.title,
+                    isPinned: threads_table.isPinned,
+                    lastMessageAt: threads_table.lastMessageAt,
+                    visibility: threads_table.visibility,
+                    projectId: threads_table.projectId,
+                    userId: threads_table.userId,
+                })
+                .from(threads_table)
+                .where(
+                    and(
+                        inArray(threads_table.id, threadIds),
+                        eq(threads_table.userId, userId)
+                    )
+                );
+
+            const ownedThreadIds = threads.map((t) => t.id);
+
+            const messages: DB_MESSAGE_TYPE[] = await db
+                .select()
+                .from(messages_table)
+                .where(inArray(messages_table.threadId, ownedThreadIds))
+                .orderBy(asc(messages_table.createdAt));
+
+            const groupedMessages: Record<string, DB_MESSAGE_TYPE[]> = {};
+
+            for (const threadId of ownedThreadIds) {
+                groupedMessages[threadId] = [];
+            }
+
+            for (const message of messages) {
+                (groupedMessages[message.threadId] ??= []).push(message);
+            }
+
+            return {
+                threads,
+                messages: groupedMessages,
+            };
+        }),
     changeUserName: protectedProcedure
         .input(
             z.object({

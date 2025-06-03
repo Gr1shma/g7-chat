@@ -86,6 +86,14 @@ g7-chat is built to be snappy and lightweight, with a focus on developer experie
         * Specify your **profession or role** to guide context-aware replies.
         * All preferences are used in a dynamic **system prompt**.
 
+* **📦 Model Selection**
+
+    * Choose from a range of available AI models:
+
+        * Use a searchable popover and selector powered by shadcn/ui.
+        * Models are grouped by provider with clean headings.
+        * Instantly switch between models.
+
 * **🎨 Clean & Dynamic UI**
 
     * Built with **shadcn/ui** for accessible and elegant components.

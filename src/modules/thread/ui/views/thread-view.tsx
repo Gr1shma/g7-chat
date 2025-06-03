@@ -10,7 +10,10 @@ import { ThreadInputForm } from "../components/input/thread-input-form";
 import { ErrorBoundary } from "react-error-boundary";
 import { convertToUIMessages } from "~/lib/utils";
 import { useLocalStorage } from "usehooks-ts";
-import { getDefaultModelString, type ValidModelString } from "~/lib/ai/providers";
+import {
+    getDefaultModelString,
+    type ValidModelString,
+} from "~/lib/ai/providers";
 
 interface ThreadViewProps {
     threadId: string;

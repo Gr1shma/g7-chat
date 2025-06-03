@@ -11,10 +11,7 @@ import {
     getMostRecentUserMessage,
     sanitizeResponseMessages,
 } from "~/lib/utils";
-import {
-    AIProviderSafe,
-    getDefaultModel,
-} from "~/lib/ai/providers";
+import { AIProviderSafe, getDefaultModel } from "~/lib/ai/providers";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { messages_table, threads_table } from "~/server/db/schema";
