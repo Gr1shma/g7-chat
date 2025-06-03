@@ -220,7 +220,8 @@ g7-chat requires several environment variables to run properly, especially for a
 | `AUTH_GOOGLE_ID`               | Client ID for Google OAuth provider, used for user login via Google.         | Obtain from [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials) |
 | `AUTH_GOOGLE_SECRET`           | Client Secret for Google OAuth provider.                                     | Obtain from Google Cloud Console alongside the client ID                                          |
 | `DATABASE_URL`                 | Connection string to your PostgreSQL database instance.                      | Format: `postgresql://username:password@host:port/database`                                       |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | API key for accessing Vercel’s AI SDK, enabling AI-powered chat features.    | Obtain from [Google Ai Studio](https://aistudio.google.com/apikey)       |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | API key for accessing Google provider in Vercel’s AI SDK   | Obtain from [Google Ai Studio](https://aistudio.google.com/apikey)       |
+| `GROQ_API_KEY` | API key for accessing Groq provider in Vercel’s AI SDK, enabling AI-powered chat features.    | Obtain from [Groq](https://groq.com/)       |
 
 ---
 
@@ -232,6 +233,7 @@ AUTH_GOOGLE_ID="your-google-client-id"
 AUTH_GOOGLE_SECRET="your-google-client-secret"
 DATABASE_URL="postgresql://postgres:password@localhost:5432/g7-chat"
 GOOGLE_GENERATIVE_AI_API_KEY="your-google-generative-ai-api-key"
+GROQ_API_KEY="your-groq-api-key"
 ```
 
 ### How to generate auth secret 
@@ -263,7 +265,7 @@ or refer [Auth.js Setup Environment](https://authjs.dev/getting-started/installa
 
 ## Roadmap 🧭
 
-* [ ] **Model Switching** – Support for multiple AI models with UI to change between them.
+* [x] **Model Switching** – Support for multiple AI models with UI to change between them.
 * [ ] **Export Threads** – Export threads (with all messages) as JSON files for backup or sharing.
 * [ ] **Testing** - Simulate user flows with E2E tests and mock models to validate chat behavior.
 
@@ -276,7 +278,6 @@ or refer [Auth.js Setup Environment](https://authjs.dev/getting-started/installa
 ## License 📄
 
 MIT License – see the [LICENSE](LICENSE) file.
-
 
 ## Contributing
 

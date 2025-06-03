@@ -17,7 +17,7 @@ export const threadRouter = createTRPCRouter({
                     .from(threads_table)
                     .where(eq(threads_table.id, input));
                 return thread;
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to get thread",
@@ -77,7 +77,7 @@ export const threadRouter = createTRPCRouter({
                             ? { id: lastItem.id, updatedAt: lastItem.updatedAt }
                             : null,
                 };
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to fetch threads",
@@ -104,7 +104,7 @@ export const threadRouter = createTRPCRouter({
                     title: input.title,
                     projectId: input.projectId,
                 });
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to save thread",
@@ -142,7 +142,7 @@ export const threadRouter = createTRPCRouter({
                         message: "Thread not found or unauthorized",
                     });
                 }
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to change thread title",
@@ -187,7 +187,7 @@ export const threadRouter = createTRPCRouter({
                         message: "Thread not found or unauthorized",
                     });
                 }
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to change projectId of thread",
@@ -226,7 +226,7 @@ export const threadRouter = createTRPCRouter({
                         message: "Thread not found or unauthorized",
                     });
                 }
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to toggle pin of thread",
@@ -271,7 +271,7 @@ export const threadRouter = createTRPCRouter({
                         message: "Thread not found or unauthorized",
                     });
                 }
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to toggle visibility of thread",
@@ -297,7 +297,7 @@ export const threadRouter = createTRPCRouter({
                             eq(threads_table.userId, userId)
                         )
                     );
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to delete thread",

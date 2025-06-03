@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, CopyCheckIcon, Copy as CopyIcon } from "lucide-react";
+import { Copy as CopyIcon } from "lucide-react";
 import { Highlight, themes, Prism } from "prism-react-renderer";
 import { useToast } from "~/hooks/use-toast";
 
@@ -22,14 +22,12 @@ require("prismjs/components/prism-erlang");
 require("prismjs/components/prism-pascal");
 
 interface CodeBlockProps {
-    node: any;
     inline: boolean;
     className: string;
     children: any;
 }
 
 export function CodeBlock({
-    node,
     inline,
     className,
     children,

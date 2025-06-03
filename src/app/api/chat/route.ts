@@ -14,7 +14,6 @@ import {
 import {
     AIProviderSafe,
     getDefaultModel,
-    type ValidModelString,
 } from "~/lib/ai/providers";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";

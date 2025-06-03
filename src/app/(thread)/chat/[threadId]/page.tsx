@@ -27,7 +27,7 @@ export default async function Page({
 }: {
     params: { threadId: string };
 }) {
-    const { threadId } = await params;
+    const { threadId } = params;
 
     const thread = await api.thread.getThreadById(threadId);
 

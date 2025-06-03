@@ -20,7 +20,7 @@ export const projectRouter = createTRPCRouter({
                 .orderBy(asc(projects_table.updatedAt));
 
             return projects;
-        } catch (error) {
+        } catch {
             throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Failed to fetch projects",
@@ -42,7 +42,7 @@ export const projectRouter = createTRPCRouter({
                     title,
                     userId: session.user.id,
                 });
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to create project",
@@ -91,7 +91,7 @@ export const projectRouter = createTRPCRouter({
                             eq(projects_table.userId, userId)
                         )
                     );
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to delete project",
@@ -129,7 +129,7 @@ export const projectRouter = createTRPCRouter({
                         message: "Project not found or unauthorized",
                     });
                 }
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to change title of project",

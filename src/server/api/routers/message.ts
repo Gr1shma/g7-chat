@@ -19,7 +19,7 @@ export const messageRouter = createTRPCRouter({
                     .orderBy(asc(messages_table.createdAt));
 
                 return messages;
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to fetch messages for this thread",
@@ -46,7 +46,7 @@ export const messageRouter = createTRPCRouter({
                 }
 
                 return message;
-            } catch (error) {
+            } catch {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to fetch message",
