@@ -167,8 +167,26 @@ export function HistoryTabSuspense() {
                 accessorKey: "updatedAt",
                 header: "Updated At",
                 cell: ({ row }) => {
-                    const date = row.getValue("updatedAt");
-                    return date ? new Date(date).toLocaleDateString() : "";
+                    const date = row.getValue("updatedAt")
+
+                    if (!date) return ""
+
+                    try {
+                        if (date instanceof Date) {
+                            return date.toLocaleDateString()
+                        }
+
+                        const parsedDate = new Date(date as string | number)
+
+                        if (isNaN(parsedDate.getTime())) {
+                            return ""
+                        }
+
+                        return parsedDate.toLocaleDateString()
+                    } catch (error) {
+                        console.warn("Invalid date format:", date)
+                        return ""
+                    }
                 },
             },
             {
@@ -209,10 +227,10 @@ export function HistoryTabSuspense() {
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
+                                                header.column.columnDef
+                                                    .header,
+                                                header.getContext()
+                                            )}
                                     </TableHead>
                                 ))}
                             </TableRow>
