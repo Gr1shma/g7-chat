@@ -10,7 +10,7 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
 * [Features ✨](#features-)
 * [Optimizations ⚡](#optimizations-)
 * [Lessons Learned 📚](#lessons-learned-)
-* [Getting Started](#getting-started)
+* [Getting Started 🚀](#getting-started-)
 
     * [Prerequisites](#prerequisites)
     * [Installation](#installation)
@@ -20,6 +20,8 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
     * [Example `.env`](#example-env)
     * [Generating `AUTH_SECRET`](#how-to-generate-auth-secret)
     * [Setting Up Google OAuth Credentials](#setting-up-google-oauth-credentials)
+* [AI Model Providers 🧠](#ai-model-providers-)
+* [Adding More Models or Providers ⚒️](#adding-more-models-or-providers-)
 * [Roadmap 🧭](#roadmap-)
 * [Acknowledgements 🌟](#acknowledgements-)
 * [License 📄](#license-)
@@ -75,7 +77,7 @@ g7-chat is built to be snappy and lightweight, with a focus on developer experie
         * **Copy** content easily.
         * Use **Redo/Retry** to ask AI to regenerate responses.
 
-* **🧠 AI Customization**
+* **🧠 Personalizing the Assistant**
 
     * Personalize your AI assistant:
 
@@ -121,7 +123,7 @@ g7-chat is built to be snappy and lightweight, with a focus on developer experie
 
 ---
 
-## Getting Started
+## Getting Started 🚀
 
 ### Prerequisites
 
@@ -223,8 +225,6 @@ g7-chat requires several environment variables to run properly, especially for a
 | `GOOGLE_GENERATIVE_AI_API_KEY` | API key for accessing Google provider in Vercel’s AI SDK   | Obtain from [Google Ai Studio](https://aistudio.google.com/apikey)       |
 | `GROQ_API_KEY` | API key for accessing Groq provider in Vercel’s AI SDK, enabling AI-powered chat features.    | Obtain from [Groq](https://groq.com/)       |
 
----
-
 ### Example `.env`
 
 ```env
@@ -260,6 +260,131 @@ or refer [Auth.js Setup Environment](https://authjs.dev/getting-started/installa
     * `http://localhost:3000/api/auth/callback/google`
     * The corresponding production callback URL (e.g., `https://yourdomain.com/api/auth/callback/google`)
 6. Save and copy the generated **Client ID** and **Client Secret** into your `.env` file as `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
+
+---
+
+## AI Model Providers 🧠
+
+g7-chat supports multiple AI model providers with a clean, type-safe integration using the [Vercel AI SDK](https://ai-sdk.dev/). You can switch between different models at runtime using a unified `provider:model` string format.
+
+### Supported Providers and Models ✅
+
+| Provider | Model Key                       | Description          |
+| -------- | ------------------------------- | -------------------- |
+| `google` | `gemini-2.0-flash-001`          | Gemini 2.0 Flash     |
+| `google` | `gemini-1.5-flash`              | Gemini 1.5 Flash     |
+| `groq`   | `llama-3.1-8b-instant`          | Llama 3.1 8B Instant |
+| `groq`   | `deepseek-r1-distill-llama-70b` | Deepseek R1 70B      |
+
+### How It Works 🧩
+
+All models are defined and accessed using a type-safe registry:
+
+```ts
+const PROVIDER_MODELS = {
+    google: {
+        "gemini-2.0-flash-001": google("gemini-2.0-flash-001"),
+        "gemini-1.5-flash": google("gemini-1.5-flash"),
+    },
+    groq: {
+        "llama-3.1-8b-instant": groq("llama-3.1-8b-instant"),
+        "deepseek-r1-distill-llama-70b": groq("deepseek-r1-distill-llama-70b"),
+    },
+};
+```
+
+You can get a model instance with:
+
+```ts
+const model = AIProvider("google:gemini-2.0-flash-001");
+```
+
+If the input string is dynamic or user-provided, use the safe wrapper:
+
+```ts
+const model = AIProviderSafe(userInput); // returns null if invalid
+```
+
+### Default Model 🧾
+
+The default model used in the app is:
+
+```ts
+getDefaultModel(); // => Gemini 2.0 Flash
+```
+
+To change this, modify the `getDefaultModel()` function in `src/lib/ai/providers.ts`.
+
+## Adding More Models or Providers ⚒️
+
+To add more models or providers (like `openai`, `anthropic`, etc.), follow these steps:
+
+### 1. Check Provider Support and Get API Keys
+
+You can view the list of supported providers and model identifiers, as well as how to obtain API keys, at:
+
+🔗 [AI SDK Providers and Models Documentation](https://ai-sdk.dev/docs/foundations/providers-and-models#ai-sdk-providers)
+
+### 2. Extend `PROVIDER_MODELS`
+
+To register a new provider and its models, update the `PROVIDER_MODELS` in `src/lib/ai/providers.ts` object:
+
+```ts
+import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
+
+const PROVIDER_MODELS = {
+    // Existing providers...
+
+    openai: {
+        "gpt-4": openai("gpt-4"),
+        "gpt-3.5-turbo": openai("gpt-3.5-turbo"),
+    },
+    anthropic: {
+        "claude-3-opus-20240229": anthropic("claude-3-opus-20240229"),
+        "claude-3-sonnet-20240229": anthropic("claude-3-sonnet-20240229"),
+    },
+} as const;
+```
+
+### 3. Update `VALID_MODELS` (Optional Constants)
+
+These constants are helpful for referencing models in a type-safe and readable way:
+
+```ts
+export const VALID_MODELS = {
+    // Existing providers...
+
+    OPENAI: {
+        GPT_4: "openai:gpt-4",
+        GPT_3_5_TURBO: "openai:gpt-3.5-turbo",
+    },
+    ANTHROPIC: {
+        CLAUDE_3_OPUS: "anthropic:claude-3-opus-20240229",
+        CLAUDE_3_SONNET: "anthropic:claude-3-sonnet-20240229",
+    },
+} as const satisfies Record<string, Record<string, ValidModelString>>;
+```
+
+### 4. Add Display Names for Models
+
+To show clean names in the UI or logs, extend the `formatModelDisplayName()` function:
+
+```ts
+function formatModelDisplayName(model: string): string {
+    const nameMap: Readonly<Record<string, string>> = {
+        // Existing providers...
+
+        "gpt-4": "OpenAI GPT-4",
+        "gpt-3.5-turbo": "OpenAI GPT-3.5 Turbo",
+
+        "claude-3-opus-20240229": "Claude 3 Opus (2024-02)",
+        "claude-3-sonnet-20240229": "Claude 3 Sonnet (2024-02)",
+    } as const;
+
+    return nameMap[model] || model;
+}
+```
 
 ---
 
