@@ -3,8 +3,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import AccountTab from "../components/tabs/account-tab";
 import CustomizationTab from "../components/tabs/customization-tab";
-import HistoryTab from "../components/tabs/history-tab";
 import AboutMeTab from "../components/tabs/about-me";
+import { HistorySection } from "../components/tabs/history-tab";
 
 export type SettingTab = {
     value: string;
@@ -26,7 +26,7 @@ const tabList: SettingTab[] = [
     {
         value: "history",
         name: "History",
-        component: <HistoryTab />,
+        component: <HistorySection />,
     },
     {
         value: "about-me",
