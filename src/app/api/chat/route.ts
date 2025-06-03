@@ -11,7 +11,11 @@ import {
     getMostRecentUserMessage,
     sanitizeResponseMessages,
 } from "~/lib/utils";
-import { google } from "@ai-sdk/google";
+import {
+    AIProviderSafe,
+    getDefaultModel,
+    type ValidModelString,
+} from "~/lib/ai/providers";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { messages_table, threads_table } from "~/server/db/schema";
@@ -20,7 +24,11 @@ import { and, eq } from "drizzle-orm";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-    const { id, messages }: { id: string; messages: Array<Message> } =
+    const {
+        id,
+        messages,
+        model,
+    }: { id: string; messages: Array<Message>; model?: string } =
         await request.json();
 
     const session = await auth();
@@ -33,6 +41,20 @@ export async function POST(request: Request) {
 
     if (!userMessage) {
         return new Response("No user message found", { status: 400 });
+    }
+
+    let selectedModel;
+
+    if (model) {
+        selectedModel = AIProviderSafe(model);
+        if (!selectedModel) {
+            console.warn(
+                `Invalid model specified: ${model}, falling back to default`
+            );
+            selectedModel = getDefaultModel();
+        }
+    } else {
+        selectedModel = getDefaultModel();
     }
 
     const caller = appRouter.createCaller({
@@ -66,7 +88,7 @@ export async function POST(request: Request) {
         execute: (dataStream) => {
             const result = streamText({
                 system: regularPrompt,
-                model: google("gemini-2.0-flash-001"),
+                model: selectedModel,
                 messages,
                 maxSteps: 5,
                 experimental_transform: smoothStream({ chunking: "word" }),

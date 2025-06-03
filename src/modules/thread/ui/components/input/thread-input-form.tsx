@@ -1,11 +1,11 @@
 "use client";
 
 import { memo, useCallback, useEffect } from "react";
-import { InputToolbar } from "./thread-input-toolbar";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
 import { type ThreadInputProps } from "./thread-input.types";
 import { useLocalStorage } from "usehooks-ts";
+import { InputToolbar } from "./toolbar";
 
 function PureThreadInput({
     threadId,
@@ -14,6 +14,8 @@ function PureThreadInput({
     isLoading,
     handleSubmit,
     status,
+    selectedModel,
+    onModelChange,
 }: ThreadInputProps) {
     const { textareaRef, adjustHeight, resetHeight } =
         useTextareaAutosize(input);
@@ -59,6 +61,8 @@ function PureThreadInput({
                         input={input}
                         status={status}
                         submitForm={submitForm}
+                        onModelChange={onModelChange}
+                        selectedModel={selectedModel}
                     />
                 </div>
             </form>

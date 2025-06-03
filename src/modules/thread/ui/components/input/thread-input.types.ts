@@ -1,4 +1,5 @@
 import type { UseChatHelpers } from "ai/react";
+import type { ValidModelString } from "~/lib/ai/providers";
 
 interface ThreadInputProps {
     threadId: UseChatHelpers["id"];
@@ -9,6 +10,8 @@ interface ThreadInputProps {
     handleSubmit: UseChatHelpers["handleSubmit"];
     status: UseChatHelpers["status"];
     setMessages: UseChatHelpers["setMessages"];
+    selectedModel: ValidModelString;
+    onModelChange: (modelId: ValidModelString) => void;
 }
 
 interface ThreadInputTextareaProps {
@@ -23,6 +26,8 @@ interface InputToolbarProps {
     input: UseChatHelpers["input"];
     status: UseChatHelpers["status"];
     submitForm: () => void;
+    selectedModel: ValidModelString;
+    onModelChange: (modelId: ValidModelString) => void;
 }
 
 export type { ThreadInputProps, ThreadInputTextareaProps, InputToolbarProps };

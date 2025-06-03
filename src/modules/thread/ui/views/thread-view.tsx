@@ -9,6 +9,8 @@ import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
 import { ThreadInputForm } from "../components/input/thread-input-form";
 import { ErrorBoundary } from "react-error-boundary";
 import { convertToUIMessages } from "~/lib/utils";
+import { useLocalStorage } from "usehooks-ts";
+import { getDefaultModelString, type ValidModelString } from "~/lib/ai/providers";
 
 interface ThreadViewProps {
     threadId: string;
@@ -37,6 +39,11 @@ export function ThreadView({ threadId }: ThreadViewProps) {
 
     const initialMessages = convertToUIMessages(initialImpureMessages);
 
+    const [selectedModel, setSelectedModel] = useLocalStorage<ValidModelString>(
+        "selected-model",
+        getDefaultModelString()
+    );
+
     const {
         input,
         setInput,
@@ -52,6 +59,9 @@ export function ThreadView({ threadId }: ThreadViewProps) {
         initialMessages,
         experimental_throttle: 100,
         sendExtraMessageFields: true,
+        body: {
+            model: selectedModel,
+        },
         onFinish: async () => {
             await utils.thread.invalidate();
         },
@@ -84,6 +94,8 @@ export function ThreadView({ threadId }: ThreadViewProps) {
                         handleSubmit={handleSubmit}
                         stop={stop}
                         status={status}
+                        selectedModel={selectedModel}
+                        onModelChange={setSelectedModel}
                     />
                 </div>
             </div>
