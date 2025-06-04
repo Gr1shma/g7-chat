@@ -68,6 +68,7 @@ g7-chat is built to be snappy and lightweight, with a focus on developer experie
         * **Edit**, **delete**, or **pin** important threads.
         * Toggle **visibility** between **private** and **public**.
         * **Move threads** between projects for better organization.
+        * **Export threads** in the json format for other use.
 
 * **📨 Message Tools**
 
@@ -395,12 +396,6 @@ function formatModelDisplayName(model: string): string {
 ```
 
 ---
-
-## Roadmap 🧭
-
-* [x] **Model Switching** – Support for multiple AI models with UI to change between them.
-* [ ] **Export Threads** – Export threads (with all messages) as JSON files for backup or sharing.
-* [ ] **Testing** - Simulate user flows with E2E tests and mock models to validate chat behavior.
 
 ## Acknowledgements 🌟
 
