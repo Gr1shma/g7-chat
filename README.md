@@ -21,7 +21,7 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
     * [Generating `AUTH_SECRET`](#how-to-generate-auth-secret)
     * [Setting Up Google OAuth Credentials](#setting-up-google-oauth-credentials)
 * [AI Model Providers 🧠](#ai-model-providers-)
-* [Adding More Models or Providers ⚒️](#adding-more-models-or-providers-)
+* [Adding More Models or Providers ⚒️](#adding-more-models-or-providers)
 * [Roadmap 🧭](#roadmap-)
 * [Acknowledgements 🌟](#acknowledgements-)
 * [License 📄](#license-)
@@ -323,7 +323,7 @@ getDefaultModel(); // => Gemini 2.0 Flash
 
 To change this, modify the `getDefaultModel()` function in `src/lib/ai/providers.ts`.
 
-## Adding More Models or Providers ⚒️
+## Adding More Models or Providers
 
 To add more models or providers (like `openai`, `anthropic`, etc.), follow these steps:
 

@@ -1,3 +1,3 @@
 # TODO
-- [ ] Export thread/threads in json or other format
+- [ ] Adding modularity splitting large code in small ones
 - [ ] Testing of user flows
