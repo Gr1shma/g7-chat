@@ -167,25 +167,25 @@ export function HistoryTabSuspense() {
                 accessorKey: "updatedAt",
                 header: "Updated At",
                 cell: ({ row }) => {
-                    const date = row.getValue("updatedAt")
+                    const date = row.getValue("updatedAt");
 
-                    if (!date) return ""
+                    if (!date) return "";
 
                     try {
                         if (date instanceof Date) {
-                            return date.toLocaleDateString()
+                            return date.toLocaleDateString();
                         }
 
-                        const parsedDate = new Date(date as string | number)
+                        const parsedDate = new Date(date as string | number);
 
                         if (isNaN(parsedDate.getTime())) {
-                            return ""
+                            return "";
                         }
 
-                        return parsedDate.toLocaleDateString()
+                        return parsedDate.toLocaleDateString();
                     } catch (error) {
-                        console.warn("Invalid date format:", date)
-                        return ""
+                        console.warn("Invalid date format:", date);
+                        return "";
                     }
                 },
             },
@@ -227,10 +227,10 @@ export function HistoryTabSuspense() {
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
-                                                header.column.columnDef
-                                                    .header,
-                                                header.getContext()
-                                            )}
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext()
+                                              )}
                                     </TableHead>
                                 ))}
                             </TableRow>

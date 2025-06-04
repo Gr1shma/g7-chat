@@ -25,9 +25,9 @@ export async function generateMetadata({
 export default async function Page({
     params,
 }: {
-    params: { threadId: string };
+    params: Promise<{ threadId: string }>;
 }) {
-    const { threadId } = params;
+    const { threadId } = await params;
 
     const thread = await api.thread.getThreadById(threadId);
 
