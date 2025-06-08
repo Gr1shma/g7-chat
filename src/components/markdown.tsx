@@ -1,8 +1,75 @@
+"use client";
 import Link from "next/link";
-import React, { memo } from "react";
+import React, { type ReactNode, useState } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkDirective from "remark-directive";
 import { CodeBlock } from "./code-block";
+import { visit } from "unist-util-visit";
+import { cn } from "~/lib/utils";
+import { ChevronRight } from "lucide-react";
+import {
+    Table,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "~/components/ui/table";
+
+const Think = ({ children }: { children: ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    return (
+        <details
+            className="group my-2 text-muted-foreground"
+            open={open}
+            onToggle={(e) => setOpen(e.currentTarget.open)}
+        >
+            <summary
+                className={cn(
+                    "flex cursor-pointer select-none items-center gap-1.5",
+                    "text-sm font-medium transition-colors duration-200 hover:text-foreground"
+                )}
+            >
+                <ChevronRight
+                    className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        "text-muted-foreground/50 group-hover:text-muted-foreground",
+                        open && "rotate-90"
+                    )}
+                />
+                <span>Thought Process</span>
+            </summary>
+            <div
+                className={cn(
+                    "mt-2 space-y-2 pl-5 text-sm",
+                    "text-muted-foreground/90",
+                    "prose-sm prose-neutral dark:prose-invert",
+                    "whitespace-pre-wrap"
+                )}
+            >
+                {children}
+            </div>
+        </details>
+    );
+};
+
+const remarkThinkBlock = () => {
+    return (tree: any) => {
+        visit(tree, (node: any) => {
+            if (
+                node.type === "textDirective" ||
+                node.type === "leafDirective" ||
+                node.type === "containerDirective"
+            ) {
+                if (node.name !== "think") return;
+
+                const data = node.data || (node.data = {});
+                data.hName = "think";
+                data.hProperties = node.attributes || {};
+            }
+        });
+    };
+};
 
 const components: Partial<Components> = {
     // @ts-expect-error
@@ -91,19 +158,62 @@ const components: Partial<Components> = {
             </h6>
         );
     },
+    think: Think,
+    table: ({ children, ...props }) => (
+        <div className="my-4 w-full">
+            <Table
+                className="border-collapse [&_tr:last-child]:border-0"
+                {...props}
+            >
+                {children}
+            </Table>
+        </div>
+    ),
+    thead: ({ children, ...props }) => (
+        <TableHeader {...props}>{children}</TableHeader>
+    ),
+    tr: ({ children, ...props }) => (
+        <TableRow className="hover:bg-muted/50" {...props}>
+            {children}
+        </TableRow>
+    ),
+    th: ({ children, ...props }) => (
+        <TableHead
+            className="h-9 px-4 text-xs font-medium text-muted-foreground"
+            {...props}
+        >
+            {children}
+        </TableHead>
+    ),
+    td: ({ children, ...props }) => (
+        <TableCell className="px-4 py-2.5" {...props}>
+            {children}
+        </TableCell>
+    ),
 };
 
-const remarkPlugins = [remarkGfm];
+type MarkdownProps = { children: string };
 
-const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+const NonMemoizedMarkdown = ({ children }: MarkdownProps) => {
+    const processContent = (content: string) => {
+        return content
+            .replace(/\\n/g, "\n")
+            .replace(/<think>\n?([\s\S]*?)\n?<\/think>/g, (_, thinkContent) => {
+                return `:::think\n${thinkContent.trim()}\n:::`;
+            });
+    };
+
     return (
-        <ReactMarkdown remarkPlugins={remarkPlugins} components={components}>
-            {children}
+        <ReactMarkdown
+            remarkPlugins={[remarkGfm, remarkDirective, remarkThinkBlock]}
+            components={components}
+        >
+            {processContent(children)}
         </ReactMarkdown>
     );
 };
 
-export const Markdown = memo(
+export const Markdown = React.memo(
     NonMemoizedMarkdown,
-    (prevProps, nextProps) => prevProps.children === nextProps.children
+    (prev, next) => prev.children === next.children
 );
