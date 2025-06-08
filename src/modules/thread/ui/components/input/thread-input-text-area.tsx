@@ -1,5 +1,13 @@
 import React, { forwardRef } from "react";
-import { type ThreadInputTextareaProps } from "./thread-input.types";
+import { type UseChatHelpers } from "ai/react";
+
+interface ThreadInputTextareaProps {
+    input: UseChatHelpers["input"];
+    setInput: UseChatHelpers["setInput"];
+    isLoading: UseChatHelpers["isLoading"];
+    onHeightChange: () => void;
+    onSubmit: () => void;
+}
 
 export const ThreadInputTextarea = forwardRef<
     HTMLTextAreaElement,

@@ -1,9 +1,10 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ErrorBoundary } from "react-error-boundary";
-import { Suspense, useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Folder } from "lucide-react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 import {
     SidebarGroup,
@@ -20,18 +21,14 @@ import {
     CommandItem,
     CommandList,
 } from "~/components/ui/command";
-
-import { ThreadItem } from "./thread-item";
-import { api } from "~/trpc/react";
 import { InfinitScroll } from "~/components/infinite-scroll";
 import { Skeleton } from "~/components/ui/skeleton";
-import { type SidebarHistoryProps } from "./thread-sidebar.types";
+import { ThreadItem } from "./thread-item";
+import { api } from "~/trpc/react";
 import { groupThreadsByDate } from "./thread-sidebar.utils";
 import { useSession } from "next-auth/react";
 import { type DB_PROJECT_TYPE, type DB_THREAD_TYPE } from "~/server/db/schema";
 import { ProjectSection } from "./project/project-section";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 export type ProjectWithThreads = DB_PROJECT_TYPE & {
     threads: DB_THREAD_TYPE[];
@@ -65,17 +62,11 @@ function ThreadSidebarItemsSkeleton() {
     );
 }
 
-export default function SidebarSection({ searchQuery }: SidebarHistoryProps) {
-    return (
-        <Suspense fallback={<ThreadSidebarItemsSkeleton />}>
-            <ErrorBoundary fallback={<p>Error</p>}>
-                <SidebarHistory searchQuery={searchQuery} />
-            </ErrorBoundary>
-        </Suspense>
-    );
+export interface SidebarHistoryProps {
+    searchQuery: string;
 }
 
-function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
+export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     const session = useSession();
     const { setOpenMobile } = useSidebar();
     const params = useParams();
@@ -85,12 +76,20 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         ? params.threadId[0]
         : params.threadId || undefined;
 
-    const [fetchedProjects] = api.project.getAllProjects.useSuspenseQuery();
-    const [data, query] =
-        api.thread.getInfiniteThreads.useSuspenseInfiniteQuery(
-            { limit: 20 },
-            { getNextPageParam: (lastPage) => lastPage.nextCursor }
-        );
+    const { data: fetchedProjects = [], isLoading: projectsLoading } =
+        api.project.getAllProjects.useQuery();
+
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isError,
+        isFetchingNextPage,
+    } = api.thread.getInfiniteThreads.useInfiniteQuery(
+        { limit: 20 },
+        { getNextPageParam: (lastPage) => lastPage.nextCursor }
+    );
 
     const [openCommand, setOpenCommand] = useState(false);
     const [commandSearch, setCommandSearch] = useState("");
@@ -169,7 +168,7 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         );
     }
 
-    if (query.isLoading) {
+    if (isLoading) {
         return (
             <SidebarGroup>
                 <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
@@ -182,7 +181,7 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
         );
     }
 
-    if (query.isError) {
+    if (isError) {
         return (
             <SidebarGroup>
                 <SidebarGroupContent>
@@ -332,9 +331,9 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                             </div>
                         </SidebarMenu>
                         <InfinitScroll
-                            hasNextPage={query.hasNextPage}
-                            isFetchingNextPage={query.isFetchingNextPage}
-                            fetchNextPage={query.fetchNextPage}
+                            hasNextPage={hasNextPage}
+                            isFetchingNextPage={isFetchingNextPage}
+                            fetchNextPage={fetchNextPage}
                         />
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -349,7 +348,7 @@ function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                     <DialogTitle>Search Threads</DialogTitle>
                 </VisuallyHidden>
                 <CommandList className="max-h-[400px] overflow-y-auto">
-                    {query.isLoading ? (
+                    {isLoading ? (
                         <div className="space-y-2 p-2">
                             {Array.from({ length: 8 }).map((_, i) => (
                                 <div

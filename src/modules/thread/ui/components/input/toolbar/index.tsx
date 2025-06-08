@@ -1,6 +1,15 @@
 import { SendButton } from "~/components/send-button";
-import { type InputToolbarProps } from "../thread-input.types";
 import { ModelSelector } from "./model-selector";
+import { type UseChatHelpers } from "ai/react";
+import { type ValidModelString } from "~/lib/ai/providers";
+
+interface InputToolbarProps {
+    input: UseChatHelpers["input"];
+    status: UseChatHelpers["status"];
+    submitForm: () => void;
+    selectedModel: ValidModelString;
+    onModelChange: (modelId: ValidModelString) => void;
+}
 
 export function InputToolbar({
     input,

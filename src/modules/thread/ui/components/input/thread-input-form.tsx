@@ -3,9 +3,23 @@
 import { memo, useCallback, useEffect } from "react";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
-import { type ThreadInputProps } from "./thread-input.types";
 import { useLocalStorage } from "usehooks-ts";
 import { InputToolbar } from "./toolbar";
+import { type UseChatHelpers } from "ai/react";
+import { type ValidModelString } from "~/lib/ai/providers";
+
+interface ThreadInputProps {
+    threadId: UseChatHelpers["id"];
+    input: UseChatHelpers["input"];
+    setInput: UseChatHelpers["setInput"];
+    isLoading: UseChatHelpers["isLoading"];
+    stop: UseChatHelpers["stop"];
+    handleSubmit: UseChatHelpers["handleSubmit"];
+    status: UseChatHelpers["status"];
+    setMessages: UseChatHelpers["setMessages"];
+    selectedModel: ValidModelString;
+    onModelChange: (modelId: ValidModelString) => void;
+}
 
 function PureThreadInput({
     threadId,

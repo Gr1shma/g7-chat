@@ -1,19 +1,29 @@
 import { Copy, RefreshCcw, SquarePen } from "lucide-react";
+import { useState, useCallback, type KeyboardEvent, useEffect } from "react";
+import { type Message } from "ai";
+import { type UseChatHelpers } from "ai/react";
+
 import { Markdown } from "~/components/markdown";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
-import { useState, useCallback, type KeyboardEvent, useEffect } from "react";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 
-import type {
-    MessageItemProps,
-    UserMessageItemProps,
-    AnimationAndSpaceProps,
-    ControlUserMessageProps,
-} from "./thread-messages.types";
+interface MessageItemProps {
+    message: Message;
+    messages: Message[];
+    index: number;
+    latestUserIndex?: number;
+    nextAssistantIndex: number;
+    showAssistantSpace: boolean;
+    isNotFirstUserMessage: boolean;
+    userRef: React.RefObject<HTMLDivElement>;
+    assistantSpaceRef: React.RefObject<HTMLDivElement>;
+    append: UseChatHelpers["append"];
+}
 
-export default function MessageItem({
+export function MessageItem({
     message,
+    messages,
     index,
     latestUserIndex,
     nextAssistantIndex,
@@ -40,16 +50,39 @@ export default function MessageItem({
         );
     }
     return (
-        <div
-            className={`mb-11 flex justify-start ${
-                isNextAssistant ? "min-h-[calc(100vh-20rem)]" : ""
-            }`}
-        >
-            <div className="group relative w-full max-w-full break-words">
-                <Markdown>{message.content}</Markdown>
+        <>
+            <div
+                className={`mb-11 flex justify-start ${
+                    isNextAssistant ? "min-h-[calc(100vh-20rem)]" : ""
+                }`}
+            >
+                <div className="group relative w-full max-w-full break-words">
+                    <Markdown>{message.content}</Markdown>
+                    <div className="absolute left-0 -ml-0.5 mt-2 flex w-full flex-row justify-start gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 group-focus:opacity-100">
+                        <div className="flex w-full flex-row justify-between gap-1 sm:w-auto">
+                            <div className="flex items-center gap-1">
+                                <ControlAssistantMessage
+                                    append={append}
+                                    message={message}
+                                    userMessage={messages[index - 1]}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </>
     );
+}
+
+export interface UserMessageItemProps {
+    message: Message;
+    isLatestUser: boolean;
+    isNotFirstUserMessage: boolean;
+    showAssistantSpace: boolean;
+    userRef: React.RefObject<HTMLDivElement>;
+    assistantSpaceRef: React.RefObject<HTMLDivElement>;
+    append: UseChatHelpers["append"];
 }
 
 function UserMessageItem({
@@ -84,7 +117,7 @@ function UserMessageItem({
                             onCancel={() => setIsEditing(null)}
                         />
                     ) : (
-                        message.content
+                        <Markdown>{message.content}</Markdown>
                     )}
                     <ControlUserMessage
                         append={append}
@@ -157,6 +190,10 @@ function EditMessageForm({
     );
 }
 
+export interface AnimationAndSpaceProps {
+    assistantSpaceRef: React.RefObject<HTMLDivElement>;
+}
+
 function AnimationAndSpace({ assistantSpaceRef }: AnimationAndSpaceProps) {
     return (
         <div
@@ -173,6 +210,13 @@ function AnimationAndSpace({ assistantSpaceRef }: AnimationAndSpaceProps) {
             </div>
         </div>
     );
+}
+
+interface ControlUserMessageProps {
+    message: Message;
+    onEdit: () => void;
+    isEditing?: boolean;
+    append: UseChatHelpers["append"];
 }
 
 function ControlUserMessage({
@@ -230,5 +274,50 @@ function ControlUserMessage({
                 <Copy className="size-4" />
             </Button>
         </div>
+    );
+}
+
+function ControlAssistantMessage({
+    message,
+    append,
+    userMessage,
+}: {
+    message: Message;
+    append: UseChatHelpers["append"];
+    userMessage: Message | undefined;
+}) {
+    const { toast } = useToast();
+    let handleResend;
+    if (userMessage) {
+        handleResend = () => {
+            append({
+                role: "user",
+                content: userMessage.content,
+            });
+        };
+    }
+
+    return (
+        <>
+            <Button
+                className="h-8 w-8 rounded-lg p-0 text-xs"
+                variant="ghost"
+                onClick={handleResend}
+            >
+                <RefreshCcw className="size-4" />
+            </Button>
+            <Button
+                className="h-8 w-8 rounded-lg p-0 text-xs"
+                variant="ghost"
+                onClick={() => {
+                    navigator.clipboard.writeText(message.content);
+                    toast({
+                        description: "Copied to clipboard",
+                    });
+                }}
+            >
+                <Copy className="size-4" />
+            </Button>
+        </>
     );
 }

@@ -156,17 +156,26 @@ export const threads_table = createTable("threads", {
 
 export type DB_THREAD_TYPE = InferSelectModel<typeof threads_table>;
 
-export const messages_table = createTable("messages", {
-    id: varchar("id", { length: 255 })
-        .notNull()
-        .primaryKey()
-        .$defaultFn(() => crypto.randomUUID()),
-    threadId: varchar("thread_id", { length: 255 })
-        .notNull()
-        .references(() => threads_table.id),
-    role: varchar("role").notNull(),
-    content: json("content").notNull(),
-    createdAt: timestamp("createdAt").notNull(),
-});
+export const messages_table = createTable(
+    "messages",
+    {
+        id: varchar("id", { length: 255 })
+            .notNull()
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+        threadId: varchar("thread_id", { length: 255 })
+            .notNull()
+            .references(() => threads_table.id),
+        role: varchar("role").notNull(),
+        content: json("content").notNull(),
+        createdAt: timestamp("createdAt").notNull(),
+    },
+    (table) => ({
+        threadIdCreatedAtIndex: index("messages_threadid_createdat_idx").on(
+            table.threadId,
+            table.createdAt
+        ),
+    })
+);
 
 export type DB_MESSAGE_TYPE = InferSelectModel<typeof messages_table>;

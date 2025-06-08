@@ -1,14 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import MessageItem from "./thread-message-item";
-import type { ThreadMessagesProps } from "./thread-messages.types";
+import { type Message } from "ai";
+import { type UseChatHelpers } from "ai/react";
 
+import { MessageItem } from "./thread-message-item";
 import {
     getLatestUserMessageIndex,
     getNextAssistantIndex,
     shouldShowAssistantSpace,
 } from "./thread-message.utils";
+
+export interface ThreadMessagesProps {
+    messages: Message[];
+    initialMessageLength: number;
+    append: UseChatHelpers["append"];
+}
 
 export function ThreadMessages({
     append,
@@ -55,6 +62,7 @@ export function ThreadMessages({
                 <MessageItem
                     key={m.id}
                     message={m}
+                    messages={messages}
                     index={index}
                     latestUserIndex={latestUserIndex}
                     nextAssistantIndex={nextAssistantIndex}

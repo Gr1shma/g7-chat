@@ -2,15 +2,24 @@
 
 import Link from "next/link";
 import { memo, useState, useRef, useEffect } from "react";
-import { SidebarMenuButton } from "~/components/ui/sidebar";
 import { CheckIcon, XIcon } from "lucide-react";
+
+import { SidebarMenuButton } from "~/components/ui/sidebar";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
-
-import { type ThreadItemProps } from "../thread-sidebar.types";
 import { PinThreadButton } from "./pin-thread-button";
 import { ThreadDropDownButton } from "./thread-dropdown-button";
 import { Button } from "~/components/ui/button";
+import { type DB_THREAD_TYPE } from "~/server/db/schema";
+import { type ProjectWithThreads } from "../thread-sidebar-group";
+
+export interface ThreadItemProps {
+    thread: DB_THREAD_TYPE;
+    isActive: boolean;
+    setOpenMobile: (open: boolean) => void;
+    isProjectItem: boolean;
+    projectWithThreads: ProjectWithThreads[];
+}
 
 const input = { limit: 20 };
 
