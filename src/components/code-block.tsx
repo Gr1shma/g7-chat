@@ -1,107 +1,93 @@
 "use client";
 
-import { Copy as CopyIcon } from "lucide-react";
-import { Highlight, themes, Prism } from "prism-react-renderer";
+import { createContext, useContext } from "react";
+import ShikiHighlighter from "react-shiki";
+import { Copy } from "lucide-react";
+
+import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 import { useToast } from "~/hooks/use-toast";
 
-(typeof global !== "undefined" ? global : window).Prism = Prism;
-
-require("prismjs/components/prism-bash");
-require("prismjs/components/prism-css");
-require("prismjs/components/prism-python");
-require("prismjs/components/prism-java");
-require("prismjs/components/prism-csharp");
-require("prismjs/components/prism-r");
-require("prismjs/components/prism-ruby");
-require("prismjs/components/prism-perl");
-require("prismjs/components/prism-zig");
-require("prismjs/components/prism-dart");
-require("prismjs/components/prism-elixir");
-require("prismjs/components/prism-lua");
-require("prismjs/components/prism-erlang");
-require("prismjs/components/prism-pascal");
-
-interface CodeBlockProps {
-    inline: boolean;
-    className: string;
+interface CodeComponentProps {
     children: any;
+    className?: string;
+}
+
+interface CodebarProps {
+    lang: string | undefined;
+    codeString: string;
+}
+
+type MarkdownSize = "default" | "small";
+
+const MarkdownSizeContext = createContext<MarkdownSize>("default");
+
+function Codebar({ lang = "plain", codeString }: CodebarProps) {
+    const { toast } = useToast();
+
+    const onCopy = () => {
+        navigator.clipboard.writeText(codeString);
+        toast({
+            description: "Code copied to clipboard",
+            duration: 2000,
+        });
+    };
+
+    return (
+        <div className="flex h-9 items-center justify-between rounded-md border-b px-3">
+            <span className="text-xs text-muted-foreground">{lang}</span>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 hover:bg-muted-foreground/10"
+                onClick={onCopy}
+            >
+                <Copy className="size-3.5" />
+                <span className="sr-only">Copy code</span>
+            </Button>
+        </div>
+    );
 }
 
 export function CodeBlock({
-    inline,
-    className,
     children,
+    className,
     ...props
-}: CodeBlockProps) {
+}: CodeComponentProps) {
+    const size = useContext(MarkdownSizeContext);
     const match = /language-(\w+)/.exec(className || "");
-    const language = match ? match[1] : "";
-    const code = String(children).replace(/\n$/, "");
 
-    if (inline) {
+    if (match) {
+        const lang = match[1];
         return (
-            <code
-                className={`${className} rounded-md bg-zinc-100 px-1 py-0.5 text-sm dark:bg-zinc-800`}
-                {...props}
-            >
-                {children}
-            </code>
+            <div className="my-6 rounded-lg border bg-muted shadow-sm">
+                <Codebar lang={lang} codeString={String(children)} />
+                <ShikiHighlighter
+                    language={lang}
+                    theme={"material-theme-darker"}
+                    className={cn(
+                        "font-mono text-sm",
+                        "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/30",
+                        "[&>pre]:my-0 [&>pre]:max-h-[650px] [&>pre]:p-4"
+                    )}
+                    showLanguage={false}
+                >
+                    {String(children)}
+                </ShikiHighlighter>
+            </div>
         );
     }
 
-    if (language === "") {
-        return <code className="font-bold">{code}</code>;
-    }
-    const { toast } = useToast();
+    const inlineCodeClasses = cn(
+        "overflow-auto font-mono bg-muted text-foreground rounded-md",
+        size === "small"
+            ? "mx-0.5 px-1 py-0.5 text-xs"
+            : "mx-0.5 px-2 py-1 text-sm"
+    );
+
     return (
-        <div className="overflow-hidden rounded-lg">
-            {language && (
-                <div className="flex items-center justify-between border-b border-zinc-800 bg-[#1e1e1e] px-4 py-2 text-zinc-400">
-                    <span className="text-sm">{language}</span>
-                    <button
-                        className="rounded p-1 transition-colors hover:bg-zinc-700"
-                        onClick={() => {
-                            navigator.clipboard.writeText(code);
-                            toast({
-                                description: "Copied to clipboard!",
-                            });
-                        }}
-                    >
-                        <CopyIcon className="size-4" />
-                    </button>
-                </div>
-            )}
-            <Highlight
-                prism={Prism}
-                theme={themes.vsDark}
-                code={code}
-                language={language || "text"}
-            >
-                {({
-                    className,
-                    style,
-                    tokens,
-                    getLineProps,
-                    getTokenProps,
-                }) => (
-                    <pre
-                        className={`${className} w-full overflow-x-auto bg-[#1e1e1e] p-4 text-sm`}
-                        style={style}
-                    >
-                        <code>
-                            {tokens.map((line, i) => (
-                                <div key={i} {...getLineProps({ line })}>
-                                    {line.map((token, key) => (
-                                        <span
-                                            key={key}
-                                            {...getTokenProps({ token })}
-                                        />
-                                    ))}
-                                </div>
-                            ))}
-                        </code>
-                    </pre>
-                )}
-            </Highlight>
-        </div>
+        <code className={inlineCodeClasses} {...props}>
+            {children}
+        </code>
     );
 }
