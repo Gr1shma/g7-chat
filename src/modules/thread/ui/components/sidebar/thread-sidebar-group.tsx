@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useTransition } from "react";
 import { Folder } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -71,10 +71,21 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     const { setOpenMobile } = useSidebar();
     const params = useParams();
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+
+    // Add state to track the currently navigating thread
+    const [navigatingToId, setNavigatingToId] = useState<string | null>(null);
 
     const threadId = Array.isArray(params.threadId)
         ? params.threadId[0]
         : params.threadId || undefined;
+
+    // Clear navigating state when params change
+    useEffect(() => {
+        if (threadId && navigatingToId === threadId) {
+            setNavigatingToId(null);
+        }
+    }, [threadId, navigatingToId]);
 
     const { data: fetchedProjects = [], isLoading: projectsLoading } =
         api.project.getAllProjects.useQuery();
@@ -138,10 +149,32 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
         });
     }, [commandSearch, searchableThreads]);
 
+    // Enhanced thread selection with optimistic navigation
     const handleThreadSelect = (thread: DB_THREAD_TYPE) => {
         setOpenCommand(false);
         setOpenMobile(false);
-        router.push(`/chat/${thread.id}`);
+        
+        // Set optimistic state immediately
+        setNavigatingToId(thread.id);
+        
+        // Use transition for smoother navigation
+        startTransition(() => {
+            router.push(`/chat/${thread.id}`);
+        });
+    };
+
+    // Function to determine if a thread should appear active
+    const isThreadActive = (thread: DB_THREAD_TYPE): boolean => {
+        // If we're navigating to this thread, show it as active immediately
+        if (navigatingToId === thread.id) {
+            return true;
+        }
+        // If we're navigating to a different thread, don't show current as active
+        if (navigatingToId && navigatingToId !== thread.id) {
+            return false;
+        }
+        // Default behavior
+        return thread.id === threadId;
     };
 
     useEffect(() => {
@@ -249,6 +282,8 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                     projectWithThreads={projectsWithThreads}
                     threadId={threadId}
                     searchQuery={searchQuery}
+                    navigatingToId={navigatingToId}
+                    onThreadSelect={handleThreadSelect}
                 />
                 <SidebarGroup>
                     <SidebarGroupContent>
@@ -282,6 +317,8 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                 projectWithThreads={projectsWithThreads}
                 threadId={threadId}
                 searchQuery={searchQuery}
+                navigatingToId={navigatingToId}
+                onThreadSelect={handleThreadSelect}
             />
             {hasUnassignedThreadsToShow && (
                 <SidebarGroup>
@@ -314,13 +351,11 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                                                             }
                                                             key={thread.id}
                                                             thread={thread}
-                                                            isActive={
-                                                                thread.id ===
-                                                                threadId
-                                                            }
+                                                            isActive={isThreadActive(thread)}
                                                             setOpenMobile={
                                                                 setOpenMobile
                                                             }
+                                                            onThreadSelect={handleThreadSelect}
                                                         />
                                                     </SidebarMenuItem>
                                                 ))}
@@ -394,7 +429,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                                             </span>
                                         )}
                                     </div>
-                                    {thread.id === threadId && (
+                                    {isThreadActive(thread) && (
                                         <div className="h-2 w-2 flex-shrink-0 rounded-full text-primary" />
                                     )}
                                 </CommandItem>

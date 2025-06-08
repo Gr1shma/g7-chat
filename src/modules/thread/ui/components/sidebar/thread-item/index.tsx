@@ -19,6 +19,7 @@ export interface ThreadItemProps {
     setOpenMobile: (open: boolean) => void;
     isProjectItem: boolean;
     projectWithThreads: ProjectWithThreads[];
+    onThreadSelect?: (thread: DB_THREAD_TYPE) => void;
 }
 
 const input = { limit: 20 };
@@ -29,6 +30,7 @@ const PureThreadItem = ({
     setOpenMobile,
     isProjectItem,
     projectWithThreads,
+    onThreadSelect,
 }: ThreadItemProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(thread.title);
@@ -88,9 +90,11 @@ const PureThreadItem = ({
         e.preventDefault();
         setIsEditing(true);
     };
+
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
     };
+
     const handleTitleSave = async () => {
         const trimmedTitle = title.trim();
         if (trimmedTitle === "") {
@@ -124,21 +128,33 @@ const PureThreadItem = ({
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    // Enhanced click handler that uses the custom navigation function
+    const handleLinkClick = (e: React.MouseEvent) => {
+        if (onThreadSelect) {
+            e.preventDefault();
+            onThreadSelect(thread);
+        } else {
+            setOpenMobile(false);
+        }
+    };
+
     return (
         <SidebarMenuButton
             asChild
             isActive={isActive}
-            className="hover:bg-transparent data-[active=true]:bg-sidebar-accent"
+            className="hover:bg-transparent data-[active=true]:bg-sidebar-accent transition-colors duration-200"
         >
             {!isEditing ? (
                 <div className="group/link relative flex w-full items-center overflow-hidden">
                     <Link
                         href={`/chat/${thread.id}`}
-                        onClick={() => setOpenMobile(false)}
+                        onClick={handleLinkClick}
                         className="min-w-0 flex-1 text-left transition-all duration-200"
+                        // Prevent default Link behavior when using custom navigation
+                        {...(onThreadSelect && { 'data-prevent-default': true })}
                     >
                         <span
-                            className="block overflow-hidden truncate px-1 py-1 text-sm hover:cursor-pointer"
+                            className="block overflow-hidden truncate px-1 py-1 text-sm hover:cursor-pointer transition-colors duration-200"
                             title={thread.title}
                             onDoubleClick={handleTitleClick}
                         >
@@ -213,5 +229,6 @@ const PureThreadItem = ({
 export const ThreadItem = memo(PureThreadItem, (prevProps, nextProps) => {
     if (prevProps.isActive !== nextProps.isActive) return false;
     if (prevProps.thread.title !== nextProps.thread.title) return false;
+    if (prevProps.thread.id !== nextProps.thread.id) return false;
     return true;
 });
