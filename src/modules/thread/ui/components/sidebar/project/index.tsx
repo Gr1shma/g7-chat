@@ -1,12 +1,6 @@
 "use client";
 
-import {
-    type Dispatch,
-    type SetStateAction,
-    useEffect,
-    useState,
-    useRef,
-} from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     CheckIcon,
     ChevronDown,
@@ -25,12 +19,6 @@ import {
 import { Collapsible, CollapsibleTrigger } from "~/components/ui/collapsible";
 import { api } from "~/trpc/react";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "~/components/ui/dialog";
-import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -42,35 +30,36 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import type { ProjectWithThreads } from "../thread-sidebar-group";
 import { ThreadItem } from "../thread-item";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import { useParams, useRouter } from "next/navigation";
+import type { DB_THREAD_TYPE } from "~/server/db/schema";
+import { CreateNewProjectDialog } from "./project-create-dailog";
+import { DeleteProjectAlertDialog } from "./project-delete-alert-dailog";
 
-interface ProjectSecionProps {
+interface ProjectSectionProps {
     threadId: string | undefined;
     projectWithThreads: ProjectWithThreads[];
     searchQuery: string;
+    navigatingToId: string | null;
+    activeThreadProjectId: string | null;
+    onThreadSelect: (thread: DB_THREAD_TYPE) => void;
 }
 
 export function ProjectSection({
     projectWithThreads,
     threadId,
     searchQuery,
-}: ProjectSecionProps) {
+    navigatingToId,
+    activeThreadProjectId,
+    onThreadSelect,
+}: ProjectSectionProps) {
     const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
         {}
     );
+    const [manuallyOpenedProjects, setManuallyOpenedProjects] = useState<
+        Record<string, boolean>
+    >({});
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isAlertDailogOpen, setIsAlertDialogOpen] = useState(false);
-    const [selectedProjectId, _setSelectedProjectId] = useState<string | null>(
+    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         null
     );
     const [editingProjectId, setEditingProjectId] = useState<string | null>(
@@ -83,47 +72,104 @@ export function ProjectSection({
     const changeTitle = api.project.changeProjectTitle.useMutation({
         onSuccess: async () => {
             await utils.project.getAllProjects.invalidate();
+            await utils.thread.getInfiniteThreads.invalidate({ limit: 20 });
             setEditingProjectId(null);
             setEditedTitle("");
         },
     });
+
+    const { setOpenMobile } = useSidebar();
 
     const toggleProject = (projectId: string) => {
         setOpenProjects((prev) => ({
             ...prev,
             [projectId]: !prev[projectId],
         }));
+        setManuallyOpenedProjects((prev) => ({
+            ...prev,
+            [projectId]: !openProjects[projectId],
+        }));
     };
 
-    const { setOpenMobile } = useSidebar();
+    const isThreadActive = (thread: DB_THREAD_TYPE): boolean => {
+        if (navigatingToId === thread.id) {
+            return true;
+        }
+        if (navigatingToId && navigatingToId !== thread.id) {
+            return false;
+        }
+        return thread.id === threadId;
+    };
+
+    useEffect(() => {
+        if (!projectWithThreads || !threadId) return;
+
+        setOpenProjects((prevOpenProjects) => {
+            const newOpenProjects: Record<string, boolean> = {
+                ...prevOpenProjects,
+            };
+
+            for (const project of projectWithThreads) {
+                const hasActiveThread = project.threads.some(
+                    (thread) => thread.id === threadId
+                );
+                const isActiveProject = project.id === activeThreadProjectId;
+                const manualState = manuallyOpenedProjects[project.id];
+
+                if (
+                    (hasActiveThread || isActiveProject) &&
+                    manualState !== false
+                ) {
+                    newOpenProjects[project.id] = true;
+                }
+            }
+
+            return newOpenProjects;
+        });
+    }, [threadId, activeThreadProjectId]);
 
     useEffect(() => {
         if (!projectWithThreads) return;
 
         const normalizedQuery = searchQuery?.toLowerCase().trim() || "";
-        const isSearchEmpty = !normalizedQuery;
-        const newOpenProjects: Record<string, boolean> = {};
 
-        for (const project of projectWithThreads) {
-            const hasActiveThread =
-                threadId && typeof threadId === "string"
-                    ? project.threads.some((thread) => thread.id === threadId)
-                    : false;
+        if (normalizedQuery) {
+            setOpenProjects((prevOpenProjects) => {
+                const newOpenProjects: Record<string, boolean> = {};
 
-            if (isSearchEmpty) {
-                newOpenProjects[project.id] = hasActiveThread;
-            } else {
-                const hasMatchingThread = project.threads.some((thread) =>
-                    thread.title?.toLowerCase().includes(normalizedQuery)
-                );
-                if (hasMatchingThread) {
-                    newOpenProjects[project.id] = true;
+                for (const project of projectWithThreads) {
+                    const hasMatchingThread = project.threads.some((thread) =>
+                        thread.title?.toLowerCase().includes(normalizedQuery)
+                    );
+                    newOpenProjects[project.id] = hasMatchingThread;
                 }
-            }
-        }
 
-        setOpenProjects(newOpenProjects);
-    }, [threadId, projectWithThreads, searchQuery]);
+                return newOpenProjects;
+            });
+        } else {
+            setOpenProjects((prevOpenProjects) => {
+                const newOpenProjects: Record<string, boolean> = {};
+
+                for (const project of projectWithThreads) {
+                    const hasActiveThread = project.threads.some(
+                        (thread) => thread.id === threadId
+                    );
+                    const isActiveProject =
+                        project.id === activeThreadProjectId;
+                    const manualState = manuallyOpenedProjects[project.id];
+
+                    if (manualState !== undefined) {
+                        newOpenProjects[project.id] = manualState;
+                    } else {
+                        newOpenProjects[project.id] =
+                            hasActiveThread || isActiveProject;
+                    }
+                }
+
+                return newOpenProjects;
+            });
+        }
+    }, [searchQuery]);
 
     const getFilteredProjects = () => {
         if (!projectWithThreads) return [];
@@ -278,6 +324,9 @@ export function ProjectSection({
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem
                                                                 onSelect={() => {
+                                                                    setSelectedProjectId(
+                                                                        project.id
+                                                                    );
                                                                     setIsAlertDialogOpen(
                                                                         true
                                                                     );
@@ -313,13 +362,16 @@ export function ProjectSection({
                                                     }
                                                     key={thread.id}
                                                     thread={thread}
-                                                    isActive={
-                                                        thread.id === threadId
-                                                    }
+                                                    isActive={isThreadActive(
+                                                        thread
+                                                    )}
                                                     setOpenMobile={
                                                         setOpenMobile
                                                     }
                                                     isProjectItem={true}
+                                                    onThreadSelect={
+                                                        onThreadSelect
+                                                    }
                                                 />
                                             ))}
                                         </div>
@@ -331,138 +383,16 @@ export function ProjectSection({
                 </SidebarGroup>
             </Collapsible>
 
-            <CreateNewProjectDailog
+            <CreateNewProjectDialog
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
             />
-            <DeleteProjectAlertDailog
+            <DeleteProjectAlertDialog
                 projectId={selectedProjectId}
-                isAlertDialogOpen={isAlertDailogOpen}
+                isAlertDialogOpen={isAlertDialogOpen}
                 setIsAlertDialogOpen={setIsAlertDialogOpen}
                 projectWithThreads={projectWithThreads}
             />
         </>
-    );
-}
-
-function CreateNewProjectDailog({
-    isDialogOpen,
-    setIsDialogOpen,
-}: {
-    isDialogOpen: boolean;
-    setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-}) {
-    const [newProjectTitle, setNewProjectTitle] = useState("");
-    const utils = api.useUtils();
-    const projectMutation = api.project.createProject.useMutation({
-        onSuccess: async () => {
-            await utils.project.getAllProjects.invalidate();
-            await utils.thread.getInfiniteThreads.invalidate();
-            setIsDialogOpen(false);
-            setNewProjectTitle("");
-        },
-    });
-
-    const handleCreateProject = async () => {
-        if (newProjectTitle.trim()) {
-            await projectMutation.mutateAsync({
-                title: newProjectTitle.trim(),
-            });
-        }
-    };
-
-    return (
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Create New Project</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-4">
-                    <Input
-                        placeholder="Project title"
-                        value={newProjectTitle}
-                        onChange={(e) => setNewProjectTitle(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleCreateProject();
-                            }
-                        }}
-                    />
-                    <Button
-                        onClick={handleCreateProject}
-                        disabled={projectMutation.isPending}
-                    >
-                        {projectMutation.isPending ? "Creating..." : "Create"}
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
-function DeleteProjectAlertDailog({
-    projectId,
-    isAlertDialogOpen,
-    setIsAlertDialogOpen,
-    projectWithThreads,
-}: {
-    projectId: string | null;
-    isAlertDialogOpen: boolean;
-    setIsAlertDialogOpen: Dispatch<SetStateAction<boolean>>;
-    projectWithThreads: ProjectWithThreads[];
-}) {
-    const utils = api.useUtils();
-    const router = useRouter();
-    const { threadId } = useParams();
-    const project = projectWithThreads.find((p) => p.id === projectId);
-    const deleteMutation = api.project.deleteProject.useMutation({
-        onSuccess: async () => {
-            await utils.project.getAllProjects.invalidate();
-            await utils.thread.getInfiniteThreads.invalidate();
-
-            const deletedThreadIds = project?.threads.map((t) => t.id) ?? [];
-
-            if (
-                typeof threadId === "string" &&
-                deletedThreadIds.includes(threadId)
-            ) {
-                router.push("/chat");
-            }
-        },
-    });
-    const handleDelete = async () => {
-        if (projectId) {
-            await deleteMutation.mutateAsync({ projectId });
-            setIsAlertDialogOpen(false);
-        }
-    };
-    return (
-        <AlertDialog
-            open={isAlertDialogOpen}
-            onOpenChange={setIsAlertDialogOpen}
-        >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>
-                        Are you absolutely sure?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete{" "}
-                        <span className="font-extrabold">
-                            "{project?.title}"
-                        </span>{" "}
-                        project and all its threads and messages.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction type="button" onClick={handleDelete}>
-                        Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
     );
 }

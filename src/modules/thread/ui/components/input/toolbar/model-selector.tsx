@@ -31,10 +31,6 @@ export function ModelSelector({
     const [searchQuery, setSearchQuery] = useState("");
     const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-    useEffect(() => {
-        setHighlightedIndex(0);
-    }, [searchQuery]);
-
     const currentModel =
         AVAILABLE_MODELS.find((m) => m.id === selectedModel) ||
         AVAILABLE_MODELS[0];
@@ -50,6 +46,26 @@ export function ModelSelector({
                 model.model.toLowerCase().includes(query)
         );
     }, [searchQuery]);
+
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            const currentIndex = AVAILABLE_MODELS.findIndex(
+                (model) => model.id === selectedModel
+            );
+            setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
+        } else {
+            setHighlightedIndex(0);
+        }
+    }, [searchQuery, selectedModel]);
+
+    useEffect(() => {
+        if (isOpen && !searchQuery.trim()) {
+            const currentIndex = AVAILABLE_MODELS.findIndex(
+                (model) => model.id === selectedModel
+            );
+            setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
+        }
+    }, [isOpen, selectedModel]);
 
     const handleModelSelect = (model: ModelInfo) => {
         onModelChange(model.id);

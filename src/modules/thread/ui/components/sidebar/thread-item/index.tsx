@@ -142,7 +142,7 @@ const PureThreadItem = ({
         <SidebarMenuButton
             asChild
             isActive={isActive}
-            className="hover:bg-transparent data-[active=true]:bg-sidebar-accent transition-colors duration-200"
+            className="transition-colors duration-200 hover:bg-transparent data-[active=true]:bg-sidebar-accent"
         >
             {!isEditing ? (
                 <div className="group/link relative flex w-full items-center overflow-hidden">
@@ -151,10 +151,12 @@ const PureThreadItem = ({
                         onClick={handleLinkClick}
                         className="min-w-0 flex-1 text-left transition-all duration-200"
                         // Prevent default Link behavior when using custom navigation
-                        {...(onThreadSelect && { 'data-prevent-default': true })}
+                        {...(onThreadSelect && {
+                            "data-prevent-default": true,
+                        })}
                     >
                         <span
-                            className="block overflow-hidden truncate px-1 py-1 text-sm hover:cursor-pointer transition-colors duration-200"
+                            className="block overflow-hidden truncate px-1 py-1 text-sm transition-colors duration-200 hover:cursor-pointer"
                             title={thread.title}
                             onDoubleClick={handleTitleClick}
                         >

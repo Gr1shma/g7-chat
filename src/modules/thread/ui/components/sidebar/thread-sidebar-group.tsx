@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo, useTransition } from "react";
+import { useEffect, useState, useMemo, useTransition, Suspense } from "react";
 import { Folder } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -28,7 +28,8 @@ import { api } from "~/trpc/react";
 import { groupThreadsByDate } from "./thread-sidebar.utils";
 import { useSession } from "next-auth/react";
 import { type DB_PROJECT_TYPE, type DB_THREAD_TYPE } from "~/server/db/schema";
-import { ProjectSection } from "./project/project-section";
+import { ProjectSection } from "./project";
+import { ErrorBoundary } from "react-error-boundary";
 
 export type ProjectWithThreads = DB_PROJECT_TYPE & {
     threads: DB_THREAD_TYPE[];
@@ -67,40 +68,40 @@ export interface SidebarHistoryProps {
 }
 
 export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
+    return (
+        <Suspense fallback={<ThreadSidebarItemsSkeleton />}>
+            <ErrorBoundary fallback={<p>Error</p>}>
+                <SidebarHistory searchQuery={searchQuery} />
+            </ErrorBoundary>
+        </Suspense>
+    );
+}
+
+export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const session = useSession();
     const { setOpenMobile } = useSidebar();
     const params = useParams();
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
-    // Add state to track the currently navigating thread
     const [navigatingToId, setNavigatingToId] = useState<string | null>(null);
 
     const threadId = Array.isArray(params.threadId)
         ? params.threadId[0]
         : params.threadId || undefined;
 
-    // Clear navigating state when params change
     useEffect(() => {
         if (threadId && navigatingToId === threadId) {
             setNavigatingToId(null);
         }
     }, [threadId, navigatingToId]);
 
-    const { data: fetchedProjects = [], isLoading: projectsLoading } =
-        api.project.getAllProjects.useQuery();
-
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isLoading,
-        isError,
-        isFetchingNextPage,
-    } = api.thread.getInfiniteThreads.useInfiniteQuery(
-        { limit: 20 },
-        { getNextPageParam: (lastPage) => lastPage.nextCursor }
-    );
+    const [fetchedProjects] = api.project.getAllProjects.useSuspenseQuery();
+    const [data, query] =
+        api.thread.getInfiniteThreads.useSuspenseInfiniteQuery(
+            { limit: 20 },
+            { getNextPageParam: (lastPage) => lastPage.nextCursor }
+        );
 
     const [openCommand, setOpenCommand] = useState(false);
     const [commandSearch, setCommandSearch] = useState("");
@@ -149,31 +150,24 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
         });
     }, [commandSearch, searchableThreads]);
 
-    // Enhanced thread selection with optimistic navigation
     const handleThreadSelect = (thread: DB_THREAD_TYPE) => {
         setOpenCommand(false);
         setOpenMobile(false);
-        
-        // Set optimistic state immediately
+
         setNavigatingToId(thread.id);
-        
-        // Use transition for smoother navigation
+
         startTransition(() => {
             router.push(`/chat/${thread.id}`);
         });
     };
 
-    // Function to determine if a thread should appear active
     const isThreadActive = (thread: DB_THREAD_TYPE): boolean => {
-        // If we're navigating to this thread, show it as active immediately
         if (navigatingToId === thread.id) {
             return true;
         }
-        // If we're navigating to a different thread, don't show current as active
         if (navigatingToId && navigatingToId !== thread.id) {
             return false;
         }
-        // Default behavior
         return thread.id === threadId;
     };
 
@@ -201,7 +195,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
         );
     }
 
-    if (isLoading) {
+    if (query.isLoading) {
         return (
             <SidebarGroup>
                 <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
@@ -214,7 +208,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
         );
     }
 
-    if (isError) {
+    if (query.isError) {
         return (
             <SidebarGroup>
                 <SidebarGroupContent>
@@ -242,6 +236,9 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     );
 
     const unassignedThreads = allThreads.filter((thread) => !thread.projectId);
+
+    const activeThread = allThreads.find((thread) => thread.id === threadId);
+    const activeThreadProjectId = activeThread?.projectId || null;
 
     if (allThreads.length === 0) {
         return (
@@ -280,6 +277,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
             <>
                 <ProjectSection
                     projectWithThreads={projectsWithThreads}
+                    activeThreadProjectId={activeThreadProjectId}
                     threadId={threadId}
                     searchQuery={searchQuery}
                     navigatingToId={navigatingToId}
@@ -314,6 +312,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
     return (
         <>
             <ProjectSection
+                activeThreadProjectId={activeThreadProjectId}
                 projectWithThreads={projectsWithThreads}
                 threadId={threadId}
                 searchQuery={searchQuery}
@@ -351,11 +350,15 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                                                             }
                                                             key={thread.id}
                                                             thread={thread}
-                                                            isActive={isThreadActive(thread)}
+                                                            isActive={isThreadActive(
+                                                                thread
+                                                            )}
                                                             setOpenMobile={
                                                                 setOpenMobile
                                                             }
-                                                            onThreadSelect={handleThreadSelect}
+                                                            onThreadSelect={
+                                                                handleThreadSelect
+                                                            }
                                                         />
                                                     </SidebarMenuItem>
                                                 ))}
@@ -366,9 +369,9 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                             </div>
                         </SidebarMenu>
                         <InfinitScroll
-                            hasNextPage={hasNextPage}
-                            isFetchingNextPage={isFetchingNextPage}
-                            fetchNextPage={fetchNextPage}
+                            hasNextPage={query.hasNextPage}
+                            isFetchingNextPage={query.isFetchingNextPage}
+                            fetchNextPage={query.fetchNextPage}
                         />
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -383,7 +386,7 @@ export function SidebarSection({ searchQuery }: SidebarHistoryProps) {
                     <DialogTitle>Search Threads</DialogTitle>
                 </VisuallyHidden>
                 <CommandList className="max-h-[400px] overflow-y-auto">
-                    {isLoading ? (
+                    {query.isLoading ? (
                         <div className="space-y-2 p-2">
                             {Array.from({ length: 8 }).map((_, i) => (
                                 <div
