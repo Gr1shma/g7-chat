@@ -143,6 +143,7 @@ export const threads_table = createTable("threads", {
     lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
     title: text("title").notNull(),
     isPinned: boolean("is_pinned").default(false),
+    isBranched: boolean("is_branched").default(false),
     userId: varchar("user_id", { length: 255 })
         .notNull()
         .references(() => users.id),

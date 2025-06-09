@@ -26,7 +26,6 @@ export const messageRouter = createTRPCRouter({
                 });
             }
         }),
-
     getMessageById: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {

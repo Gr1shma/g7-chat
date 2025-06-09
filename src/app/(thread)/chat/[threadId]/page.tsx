@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { convertToUIMessages } from "~/lib/utils";
 
 import { ThreadViewSection } from "~/modules/thread/ui/views/thread-view";
 import { auth } from "~/server/auth";
@@ -47,11 +48,15 @@ export default async function Page({
         }
     }
 
-    void api.message.getMessagesByThreadId.prefetch(threadId);
+    const initialInpureMessage =
+        await api.message.getMessagesByThreadId(threadId);
 
     return (
         <HydrateClient>
-            <ThreadViewSection threadId={thread.id} />
+            <ThreadViewSection
+                threadId={thread.id}
+                initialMessages={convertToUIMessages(initialInpureMessage)}
+            />
         </HydrateClient>
     );
 }

@@ -57,7 +57,7 @@ export function ThreadMessages({
     }, [latestUserIndex]);
 
     return (
-        <div className="pt-safe-offset-10 mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 pb-10">
+        <div className="pt-safe-offset-10 mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 pb-10 pt-10">
             {messages.map((m, index) => (
                 <MessageItem
                     key={m.id}

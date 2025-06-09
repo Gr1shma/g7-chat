@@ -39,6 +39,7 @@ export function MessageItem({
     if (message.role === "user") {
         return (
             <UserMessageItem
+                messages={messages}
                 userRef={userRef}
                 isLatestUser={isLatestUser}
                 append={append}
@@ -49,6 +50,7 @@ export function MessageItem({
             />
         );
     }
+
     return (
         <>
             <div
@@ -77,6 +79,7 @@ export function MessageItem({
 
 export interface UserMessageItemProps {
     message: Message;
+    messages: Message[];
     isLatestUser: boolean;
     isNotFirstUserMessage: boolean;
     showAssistantSpace: boolean;
@@ -87,6 +90,7 @@ export interface UserMessageItemProps {
 
 function UserMessageItem({
     message,
+    messages,
     userRef,
     isLatestUser,
     isNotFirstUserMessage,
@@ -127,6 +131,17 @@ function UserMessageItem({
                     />
                 </div>
             </div>
+            {isNotFirstUserMessage === false && messages.length === 1 && (
+                <div className="mb-10 w-full" aria-hidden="true">
+                    <div className="rounded-2xl px-4 py-2">
+                        <div className="flex items-center space-x-2">
+                            <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40 [animation-delay:-0.3s]" />
+                            <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40 [animation-delay:-0.15s]" />
+                            <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40" />
+                        </div>
+                    </div>
+                </div>
+            )}
             {isLatestUser && showAssistantSpace && isNotFirstUserMessage && (
                 <AnimationAndSpace assistantSpaceRef={assistantSpaceRef} />
             )}
@@ -229,16 +244,30 @@ function ControlUserMessage({
     isEditing?: boolean;
 }) {
     const { toast } = useToast();
+    const [isHidden, setIsHidden] = useState(false);
 
     const handleResend = () => {
+        setIsHidden(true);
         append({
             role: "user",
             content: message.content,
         });
+        setTimeout(() => setIsHidden(false), 300);
     };
 
     const handleEdit = () => {
+        setIsHidden(true);
         onEdit();
+        setTimeout(() => setIsHidden(false), 300);
+    };
+
+    const handleCopy = () => {
+        setIsHidden(true);
+        navigator.clipboard.writeText(message.content);
+        toast({
+            description: "Copied to clipboard",
+        });
+        setTimeout(() => setIsHidden(false), 300);
     };
 
     if (isEditing) {
@@ -246,7 +275,13 @@ function ControlUserMessage({
     }
 
     return (
-        <div className="absolute right-0 mt-5 flex items-center gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 group-focus:opacity-100">
+        <div
+            className={`absolute right-0 mt-5 flex items-center gap-1 transition-opacity ${
+                isHidden
+                    ? "opacity-0"
+                    : "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 group-focus:opacity-100"
+            }`}
+        >
             <Button
                 className="h-8 w-8 rounded-lg p-0 text-xs"
                 variant="ghost"
@@ -264,12 +299,7 @@ function ControlUserMessage({
             <Button
                 className="h-8 w-8 rounded-lg p-0 text-xs"
                 variant="ghost"
-                onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                    toast({
-                        description: "Copied to clipboard",
-                    });
-                }}
+                onClick={handleCopy}
             >
                 <Copy className="size-4" />
             </Button>
@@ -287,18 +317,35 @@ function ControlAssistantMessage({
     userMessage: Message | undefined;
 }) {
     const { toast } = useToast();
+    const [isHidden, setIsHidden] = useState(false);
+
     let handleResend;
     if (userMessage) {
         handleResend = () => {
+            setIsHidden(true);
             append({
                 role: "user",
                 content: userMessage.content,
             });
+            setTimeout(() => setIsHidden(false), 300);
         };
     }
 
+    const handleCopy = () => {
+        setIsHidden(true);
+        navigator.clipboard.writeText(message.content);
+        toast({
+            description: "Copied to clipboard",
+        });
+        setTimeout(() => setIsHidden(false), 300);
+    };
+
     return (
-        <>
+        <div
+            className={`flex items-center gap-1 transition-opacity ${
+                isHidden ? "opacity-0" : ""
+            }`}
+        >
             <Button
                 className="h-8 w-8 rounded-lg p-0 text-xs"
                 variant="ghost"
@@ -309,15 +356,10 @@ function ControlAssistantMessage({
             <Button
                 className="h-8 w-8 rounded-lg p-0 text-xs"
                 variant="ghost"
-                onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                    toast({
-                        description: "Copied to clipboard",
-                    });
-                }}
+                onClick={handleCopy}
             >
                 <Copy className="size-4" />
             </Button>
-        </>
+        </div>
     );
 }
