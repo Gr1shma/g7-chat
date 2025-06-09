@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { memo, useState, useRef, useEffect } from "react";
-import { CheckIcon, XIcon } from "lucide-react";
+import { CheckIcon, GitBranch, XIcon } from "lucide-react";
 
 import { SidebarMenuButton } from "~/components/ui/sidebar";
 import { Input } from "~/components/ui/input";
@@ -12,6 +12,7 @@ import { ThreadDropDownButton } from "./thread-dropdown-button";
 import { Button } from "~/components/ui/button";
 import { type DB_THREAD_TYPE } from "~/server/db/schema";
 import { type ProjectWithThreads } from "../thread-sidebar-group";
+import { cn } from "~/lib/utils";
 
 export interface ThreadItemProps {
     thread: DB_THREAD_TYPE;
@@ -85,12 +86,6 @@ const PureThreadItem = ({
         }
     }, [isEditing]);
 
-    const handleTitleClick = (e: React.MouseEvent) => {
-        if (!isActive) return;
-        e.preventDefault();
-        setIsEditing(true);
-    };
-
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
     };
@@ -128,7 +123,6 @@ const PureThreadItem = ({
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // Enhanced click handler that uses the custom navigation function
     const handleLinkClick = (e: React.MouseEvent) => {
         if (onThreadSelect) {
             e.preventDefault();
@@ -145,47 +139,36 @@ const PureThreadItem = ({
             className="transition-colors duration-200 hover:bg-transparent data-[active=true]:bg-sidebar-accent"
         >
             {!isEditing ? (
-                <div className="group/link relative flex w-full items-center overflow-hidden">
+                <div
+                    className={`group/link relative flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-1 text-sm transition-colors hover:bg-muted ${isActive ? "bg-accent text-accent-foreground" : ""} `}
+                >
                     <Link
                         href={`/chat/${thread.id}`}
                         onClick={handleLinkClick}
-                        className="min-w-0 flex-1 text-left transition-all duration-200"
-                        // Prevent default Link behavior when using custom navigation
-                        {...(onThreadSelect && {
-                            "data-prevent-default": true,
-                        })}
+                        className="flex min-w-0 flex-1 items-center gap-1"
                     >
-                        <span
-                            className="block overflow-hidden truncate px-1 py-1 text-sm transition-colors duration-200 hover:cursor-pointer"
-                            title={thread.title}
-                            onDoubleClick={handleTitleClick}
-                        >
-                            {title}
-                        </span>
+                        {thread.isBranched && (
+                            <GitBranch className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="truncate">{thread.title}</span>
                     </Link>
+
+                    {/* Right side: buttons */}
                     <div
-                        className={`flex-shrink-0 transition-all duration-200 ${
+                        className={cn(
+                            "ml-2 flex items-center gap-1 transition-all duration-200",
                             isActive || isDropdownOpen
-                                ? "w-16 opacity-100"
-                                : "w-0 opacity-0 group-hover/link:w-16 group-hover/link:opacity-100"
-                        }`}
+                                ? "opacity-100"
+                                : "opacity-0 group-hover/link:opacity-100"
+                        )}
                     >
-                        <div className="relative flex h-full items-center justify-end pr-1 text-muted-foreground">
-                            <div
-                                className={`pointer-events-none absolute bottom-0 right-full top-0 w-8 bg-gradient-to-l from-sidebar-accent to-transparent transition-opacity duration-200 ${
-                                    isActive ? "opacity-100" : "opacity-0"
-                                }`}
-                            />
-                            {isProjectItem ? null : (
-                                <PinThreadButton thread={thread} />
-                            )}
-                            <ThreadDropDownButton
-                                thread={thread}
-                                onOpenChange={setIsDropdownOpen}
-                                isActive={isActive}
-                                projectWithThreads={projectWithThreads}
-                            />
-                        </div>
+                        {!isProjectItem && <PinThreadButton thread={thread} />}
+                        <ThreadDropDownButton
+                            thread={thread}
+                            onOpenChange={setIsDropdownOpen}
+                            isActive={isActive}
+                            projectWithThreads={projectWithThreads}
+                        />
                     </div>
                 </div>
             ) : (

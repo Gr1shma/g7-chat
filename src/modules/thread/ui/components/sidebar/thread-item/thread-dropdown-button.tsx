@@ -80,8 +80,7 @@ export function ThreadDropDownButton({
                 isActive={isActive}
             />
             <MoveToProjectCommand
-                threadId={thread.id}
-                projectWithThreads={projectWithThreads}
+                thread={thread}
                 setShowMoveProjectCommand={setShowMoveProjectCommand}
                 showMoveProjectCommand={showMoveProjectCommand}
             />

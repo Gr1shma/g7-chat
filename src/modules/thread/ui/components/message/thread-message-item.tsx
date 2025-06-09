@@ -1,12 +1,21 @@
-import { Copy, RefreshCcw, SquarePen } from "lucide-react";
+import { Copy, GitBranch, Loader2, RefreshCcw, SquarePen } from "lucide-react";
 import { useState, useCallback, type KeyboardEvent, useEffect } from "react";
 import { type Message } from "ai";
 import { type UseChatHelpers } from "ai/react";
 
 import { Markdown } from "~/components/markdown";
 import { Button } from "~/components/ui/button";
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "~/components/ui/dialog";
 import { useToast } from "~/hooks/use-toast";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
+import { api } from "~/trpc/react";
 
 interface MessageItemProps {
     message: Message;
@@ -307,7 +316,7 @@ function ControlUserMessage({
     );
 }
 
-function ControlAssistantMessage({
+export function ControlAssistantMessage({
     message,
     append,
     userMessage,
@@ -318,18 +327,34 @@ function ControlAssistantMessage({
 }) {
     const { toast } = useToast();
     const [isHidden, setIsHidden] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    let handleResend;
-    if (userMessage) {
-        handleResend = () => {
-            setIsHidden(true);
-            append({
-                role: "user",
-                content: userMessage.content,
+    const branchMutation = api.thread.branchOfByMessageId.useMutation({
+        onSuccess: (data) => {
+            toast({
+                description: "Branched to a new thread.",
             });
-            setTimeout(() => setIsHidden(false), 300);
-        };
-    }
+            setIsDialogOpen(false);
+            // You can optionally navigate to the new thread here
+            // router.push(`/threads/${data.newThreadId}`);
+        },
+        onError: () => {
+            toast({
+                variant: "destructive",
+                description: "Failed to branch the thread.",
+            });
+        },
+    });
+
+    const handleResend = () => {
+        if (!userMessage) return;
+        setIsHidden(true);
+        append({
+            role: "user",
+            content: userMessage.content,
+        });
+        setTimeout(() => setIsHidden(false), 300);
+    };
 
     const handleCopy = () => {
         setIsHidden(true);
@@ -340,26 +365,71 @@ function ControlAssistantMessage({
         setTimeout(() => setIsHidden(false), 300);
     };
 
+    const handleConfirmBranch = () => {
+        branchMutation.mutate({ messageId: message.id });
+    };
+
     return (
-        <div
-            className={`flex items-center gap-1 transition-opacity ${
-                isHidden ? "opacity-0" : ""
-            }`}
-        >
-            <Button
-                className="h-8 w-8 rounded-lg p-0 text-xs"
-                variant="ghost"
-                onClick={handleResend}
+        <>
+            <div
+                className={`flex items-center gap-1 transition-opacity ${
+                    isHidden ? "opacity-0" : ""
+                }`}
             >
-                <RefreshCcw className="size-4" />
-            </Button>
-            <Button
-                className="h-8 w-8 rounded-lg p-0 text-xs"
-                variant="ghost"
-                onClick={handleCopy}
-            >
-                <Copy className="size-4" />
-            </Button>
-        </div>
+                <Button
+                    className="h-8 w-8 rounded-lg p-0 text-xs"
+                    variant="ghost"
+                    onClick={handleResend}
+                    disabled={!userMessage}
+                >
+                    <RefreshCcw className="size-4" />
+                </Button>
+
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button
+                            className="h-8 w-8 rounded-lg p-0 text-xs"
+                            variant="ghost"
+                        >
+                            <GitBranch className="size-4" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Branch Thread?</DialogTitle>
+                        </DialogHeader>
+                        <p className="text-sm text-muted-foreground">
+                            Are you sure you want to create a new branch from
+                            this message?
+                        </p>
+                        <DialogFooter className="mt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsDialogOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleConfirmBranch}
+                                disabled={branchMutation.isPending}
+                            >
+                                {branchMutation.isPending ? (
+                                    <Loader2 className="mr-2 size-4 animate-spin" />
+                                ) : null}
+                                Confirm
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Button
+                    className="h-8 w-8 rounded-lg p-0 text-xs"
+                    variant="ghost"
+                    onClick={handleCopy}
+                >
+                    <Copy className="size-4" />
+                </Button>
+            </div>
+        </>
     );
 }

@@ -134,7 +134,7 @@ export function ProjectSection({
         const normalizedQuery = searchQuery?.toLowerCase().trim() || "";
 
         if (normalizedQuery) {
-            setOpenProjects((prevOpenProjects) => {
+            setOpenProjects(() => {
                 const newOpenProjects: Record<string, boolean> = {};
 
                 for (const project of projectWithThreads) {
@@ -147,7 +147,7 @@ export function ProjectSection({
                 return newOpenProjects;
             });
         } else {
-            setOpenProjects((prevOpenProjects) => {
+            setOpenProjects(() => {
                 const newOpenProjects: Record<string, boolean> = {};
 
                 for (const project of projectWithThreads) {

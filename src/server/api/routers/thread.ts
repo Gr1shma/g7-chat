@@ -111,6 +111,74 @@ export const threadRouter = createTRPCRouter({
                 });
             }
         }),
+    branchOfByMessageId: protectedProcedure
+        .input(
+            z.object({
+                messageId: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { db, session } = ctx;
+            const { messageId } = input;
+
+            try {
+                const message = await db.query.messages_table.findFirst({
+                    where: (m, { eq }) => eq(m.id, messageId),
+                });
+                if (!message) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Message not found",
+                    });
+                }
+
+                const thread = await db.query.threads_table.findFirst({
+                    where: (t, { eq }) => eq(t.id, message.threadId),
+                });
+                if (!thread) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Thread not found",
+                    });
+                }
+
+                const messages = await db.query.messages_table.findMany({
+                    where: (m, { and, eq, lte }) =>
+                        and(
+                            eq(m.threadId, thread.id),
+                            lte(m.createdAt, message.createdAt)
+                        ),
+                    orderBy: (m, { asc }) => [asc(m.createdAt)],
+                });
+
+                const newThreadId = crypto.randomUUID();
+                await db.insert(threads_table).values({
+                    id: newThreadId,
+                    title: thread.title,
+                    userId: session.user.id,
+                    visibility: thread.visibility,
+                    projectId: thread.projectId,
+                    isPinned: false,
+                    isBranched: true,
+                });
+
+                for (const msg of messages) {
+                    await db.insert(messages_table).values({
+                        id: crypto.randomUUID(),
+                        threadId: newThreadId,
+                        role: msg.role,
+                        content: msg.content,
+                        createdAt: msg.createdAt,
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to create branch",
+                });
+            }
+        }),
     changeThreadTitle: protectedProcedure
         .input(
             z.object({
