@@ -1,13 +1,13 @@
 "use client";
 
 import { type Message, useChat } from "ai/react";
-import { useRef, useEffect, Suspense } from "react";
+import { useRef, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { ThreadMessages } from "../components/message/thread-messages";
 import { useScrollToBottomButton } from "~/hooks/use-scroll-button";
 import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
 import { ThreadInputForm } from "../components/input/thread-input-form";
-import { useAPIKeyStore } from "~/lib/ai/store";
+import { useAPIKeyStore } from "~/lib/ai/api-keys-store";
 import { useModelStore } from "~/lib/ai/model-store";
 import APIKeyForm from "~/modules/setting/ui/components/tabs/api-keys-tab";
 
@@ -31,6 +31,9 @@ export function ThreadViewSection({
     const { getKey } = useAPIKeyStore();
     const selectedModel = useModelStore((state) => state.selectedModel);
     const modelConfig = useModelStore((state) => state.getModelConfig());
+    const headers = modelConfig
+        ? { [modelConfig.headerKey]: getKey(modelConfig.provider) || "" }
+        : {};
 
     const {
         input,
@@ -50,9 +53,7 @@ export function ThreadViewSection({
         body: {
             model: selectedModel,
         },
-        headers: {
-            [modelConfig.headerKey]: getKey(modelConfig.provider) || "",
-        },
+        headers,
         onFinish: async () => {
             await utils.thread.invalidate();
         },

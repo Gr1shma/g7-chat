@@ -1,67 +1,133 @@
 import { type Provider } from "./store";
 
-export const AI_MODELS = [
-    "Deepseek R1 0528",
-    "Deepseek V3",
-    "Gemini 2.5 Flash",
-    "Gemini 1.5 Flash",
-    "LLaMA 3.1 8B Instant",
-    "Deepseek R1 Distill LLaMA 70B",
-    "GPT-4o",
-    "GPT-4.1-mini",
-] as const;
+export const PROVIDER_MODELS = {
+    google: [
+        {
+            id: "gemini-2.0-flash-001",
+            displayName: "Gemini 2.0 Flash",
+            description: "Latest multimodal model with enhanced speed and capabilities"
+        },
+        {
+            id: "gemini-1.5-flash",
+            displayName: "Gemini 1.5 Flash",
+            description: "Fast and efficient model for general-purpose tasks"
+        },
+    ],
+    groq: [
+        {
+            id: "llama-3.1-8b-instant",
+            displayName: "Llama 3.1 8B Instant",
+            description: "Ultra-fast inference with Llama 3.1 8B parameters"
+        },
+        {
+            id: "deepseek-r1-distill-llama-70b",
+            displayName: "DeepSeek R1 Distill 70B",
+            description: "Distilled version of DeepSeek R1 with 70B parameters"
+        },
+    ],
+    openrouter: [
+        {
+            id: "deepseek/deepseek-r1-0528:free",
+            displayName: "DeepSeek R1 (Free)",
+            description: "Free tier access to DeepSeek R1 reasoning model"
+        },
+        {
+            id: "deepseek/deepseek-chat-v3-0324:free",
+            displayName: "DeepSeek Chat v3 (Free)",
+            description: "Free tier conversational AI model"
+        }
+    ],
+    openai: [
+        {
+            id: "gpt-4o",
+            displayName: "GPT-4o",
+            description: "OpenAI's flagship omni-modal model"
+        },
+        {
+            id: "gpt-4.1-mini",
+            displayName: "GPT-4.1 Mini",
+            description: "Compact version of GPT-4.1 for efficient tasks"
+        },
+    ]
+} as const;
 
-export type AIModel = (typeof AI_MODELS)[number];
+export type ProviderName = keyof typeof PROVIDER_MODELS;
+
+export type ModelInfo = {
+    id: string;
+    displayName: string;
+    description?: string;
+};
+
+export type ValidModelString = typeof PROVIDER_MODELS[Provider][number]["id"];
+
+export type ValidModelWithProvider = {
+    [P in Provider]: `${P}:${typeof PROVIDER_MODELS[P][number]["id"]}`
+}[Provider];
+
+export const ALL_MODELS: string[] = (Object.entries(PROVIDER_MODELS) as [Provider, readonly ModelInfo[]][])
+    .flatMap(([provider, models]) => models.map(m => `${provider}:${m.id}`));
 
 export type ModelConfig = {
     modelId: string;
-    provider: Provider;
+    provider: ProviderName;
     headerKey: string;
+    displayName: string;
+    description?: string;
 };
 
-export const MODEL_CONFIGS = {
-    "Deepseek R1 0528": {
-        modelId: "deepseek/deepseek-r1-0528:free",
-        provider: "openrouter",
-        headerKey: "X-OpenRouter-API-Key",
-    },
-    "Deepseek V3": {
-        modelId: "deepseek/deepseek-chat-v3-0324:free",
-        provider: "openrouter",
-        headerKey: "X-OpenRouter-API-Key",
-    },
-    "Gemini 2.5 Flash": {
-        modelId: "gemini-2.5-flash-preview-04-17",
-        provider: "google",
-        headerKey: "X-Google-API-Key",
-    },
-    "Gemini 1.5 Flash": {
-        modelId: "gemini-1.5-flash",
-        provider: "google",
-        headerKey: "X-Google-API-Key",
-    },
-    "LLaMA 3.1 8B Instant": {
-        modelId: "llama-3.1-8b-instant",
-        provider: "groq",
-        headerKey: "Authorization",
-    },
-    "Deepseek R1 Distill LLaMA 70B": {
-        modelId: "deepseek-r1-distill-llama-70b",
-        provider: "groq",
-        headerKey: "Authorization",
-    },
-    "GPT-4o": {
-        modelId: "gpt-4o",
-        provider: "openai",
-        headerKey: "X-OpenAI-API-Key",
-    },
-    "GPT-4.1-mini": {
-        modelId: "gpt-4.1-mini",
-        provider: "openai",
-        headerKey: "X-OpenAI-API-Key",
-    },
-} as const satisfies Record<AIModel, ModelConfig>;
+const PROVIDER_HEADER_KEYS: Record<Provider, string> = {
+    google: "X-Google-API-Key",
+    groq: "Authorization",
+    openrouter: "X-OpenRouter-API-Key",
+    openai: "X-OpenAI-API-Key",
+} as const;
 
-export const getModelConfig = (modelName: AIModel): ModelConfig => {
-    return MODEL_CONFIGS[modelName];
-};
+export const MODEL_CONFIGS: Record<ProviderName, ModelConfig[]> = Object.fromEntries(
+    (Object.keys(PROVIDER_MODELS) as ProviderName[]).map((provider) => [
+        provider,
+        PROVIDER_MODELS[provider].map((model) => ({
+            modelId: model.id,
+            provider,
+            headerKey: PROVIDER_HEADER_KEYS[provider],
+            displayName: model.displayName,
+            description: model.description,
+        })),
+    ])
+) as Record<ProviderName, ModelConfig[]>;
+
+export function getModelConfigByKey(
+    key: ValidModelWithProvider
+): ModelConfig {
+    const [provider, ...rest] = key.split(":") as [ProviderName, ...string[]];
+    const modelId = rest.join(":");
+    const configs = MODEL_CONFIGS[provider];
+
+    if (!configs) {
+        return MODEL_CONFIGS.google.find(
+            (config) => config.modelId === "gemini-2.0-flash-001"
+        )!;
+    }
+
+    const found = configs.find((config) => config.modelId === modelId);
+    if (!found) {
+        return MODEL_CONFIGS.google.find(
+            (config) => config.modelId === "gemini-2.0-flash-001"
+        )!;
+    }
+
+    return found;
+}
+
+export function getAllModelsWithInfo(): (ModelConfig & { providerKey: string })[] {
+    return Object.entries(MODEL_CONFIGS).flatMap(([provider, configs]) =>
+        configs.map(config => ({
+            ...config,
+            providerKey: `${provider}:${config.modelId}`
+        }))
+    );
+}
+
+export function getModelsByProvider(provider: ProviderName): ModelConfig[] {
+    return MODEL_CONFIGS[provider] || [];
+}

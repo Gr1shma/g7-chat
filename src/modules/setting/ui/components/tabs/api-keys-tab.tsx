@@ -13,21 +13,25 @@ import {
     FormLabel,
     FormControl,
     FormDescription,
+    FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 
-import { useAPIKeyStore } from "~/lib/ai/store";
+import { useAPIKeyStore } from "~/lib/ai/api-keys-store";
 import Link from "next/link";
 
 const formSchema = z.object({
-    google: z
-        .string()
-        .trim()
-        .min(1, { message: "Google API key is required for Title Generation" }),
+    google: z.string().trim().optional(),
     groq: z.string().trim().optional(),
     openrouter: z.string().trim().optional(),
     openai: z.string().trim().optional(),
+}).refine((data) => {
+    const hasAtLeastOneKey = Object.values(data).some(value => value && value.length > 0);
+    return hasAtLeastOneKey;
+}, {
+    message: "At least one API key is required",
+    path: ["root"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -36,14 +40,12 @@ const apiKeyFields: {
     id: keyof FormValues;
     label: string;
     placeholder: string;
-    required?: boolean;
     linkUrl: string;
 }[] = [
     {
         id: "google",
         label: "Google API Key",
         placeholder: "AIza...",
-        required: true,
         linkUrl: "https://aistudio.google.com/apikey",
     },
     {
@@ -87,10 +89,9 @@ export default function APIKeyForm() {
         <>
             <h2 className="text-2xl font-bold">API Key Settings</h2>
             <span className="text-sm text-muted-foreground">
-                All the keys are stored locally in your browser. Fill the keys
+                All the keys are stored locally in your browser. Fill at least one key
                 to use g7-chat.
-            </span>
-            <span className="text-sm text-muted-foreground">
+                <br/>
                 Signing out will clear the keys too.
             </span>
             <Form {...form}>
@@ -99,6 +100,12 @@ export default function APIKeyForm() {
                     className="space-y-8"
                     autoComplete="off"
                 >
+                    {form.formState.errors.root && (
+                        <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800">
+                            {form.formState.errors.root.message}
+                        </div>
+                    )}
+                    
                     {apiKeyFields.map((fieldConfig) => (
                         <FormField
                             key={fieldConfig.id}
@@ -107,18 +114,11 @@ export default function APIKeyForm() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-base text-foreground">
-                                        {fieldConfig.label}{" "}
-                                        {fieldConfig.required && (
-                                            <span className="text-muted-foreground">
-                                                *
-                                            </span>
-                                        )}
+                                        {fieldConfig.label}
                                     </FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder={
-                                                fieldConfig.placeholder
-                                            }
+                                            placeholder={fieldConfig.placeholder}
                                             {...field}
                                         />
                                     </FormControl>
@@ -131,6 +131,7 @@ export default function APIKeyForm() {
                                             Create {fieldConfig.label}
                                         </Link>
                                     </FormDescription>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />

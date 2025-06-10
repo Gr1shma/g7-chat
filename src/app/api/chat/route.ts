@@ -2,13 +2,13 @@ import {
     type LanguageModelV1,
     type Message,
     createDataStreamResponse,
+    generateText,
     smoothStream,
     streamText,
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
-import { generateTitleFromUserMessage } from "~/app/(thread)/actions";
 import { auth } from "~/server/auth";
 import {
     getMostRecentUserMessage,
@@ -19,11 +19,80 @@ import { db } from "~/server/db";
 import { messages_table, threads_table } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { type AIModel, getModelConfig } from "~/lib/ai/models";
+import { getModelConfigByKey, ModelConfig, ValidModelWithProvider } from "~/lib/ai/models";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createGroq, groq } from "@ai-sdk/groq";
+import { createGroq } from "@ai-sdk/groq";
 
 export const maxDuration = 60;
+
+function jsonResponse(
+    data: object,
+    status: number
+): Response {
+    return new Response(JSON.stringify(data), {
+        status,
+        headers: { "Content-Type": "application/json" },
+    });
+}
+
+async function validateRequest(
+    model?: string,
+    headersList?: Headers
+): Promise<{ modelConfig: ModelConfig; apiKey: string } | Response> {
+    if (!model) {
+        return jsonResponse({ error: "Model is required" }, 400);
+    }
+
+    const modelConfig = getModelConfigByKey(model as ValidModelWithProvider);
+
+    if (!modelConfig) {
+        return jsonResponse({ error: "Invalid model specified" }, 400);
+    }
+
+    if (!headersList) {
+        return jsonResponse({ error: "Headers missing" }, 400);
+    }
+
+    const apiKey = headersList.get(modelConfig.headerKey);
+
+    if (!apiKey) {
+        return jsonResponse(
+            { error: `API key missing for provider ${modelConfig.provider}` },
+            401
+        );
+    }
+
+    return { modelConfig, apiKey };
+}
+
+function createAIModel(
+    modelConfig: ModelConfig,
+    apiKey: string
+): LanguageModelV1 | Response {
+    switch (modelConfig.provider) {
+        case "google": {
+            const google = createGoogleGenerativeAI({ apiKey });
+            return google(modelConfig.modelId);
+        }
+        case "openai": {
+            const openai = createOpenAI({ apiKey });
+            return openai(modelConfig.modelId) as LanguageModelV1;
+        }
+        case "openrouter": {
+            const openrouter = createOpenRouter({ apiKey });
+            return openrouter(modelConfig.modelId) as LanguageModelV1;
+        }
+        case "groq": {
+            const groqrouter = createGroq({ apiKey });
+            return groqrouter(modelConfig.modelId) as LanguageModelV1;
+        }
+        default:
+            return jsonResponse(
+                { error: "Unsupported model provider" },
+                400
+            );
+    }
+}
 
 export async function POST(request: Request) {
     const {
@@ -45,41 +114,24 @@ export async function POST(request: Request) {
         return new Response("No user message found", { status: 400 });
     }
 
+
     const headersList = await headers();
 
-    const modelConfig = getModelConfig(model as AIModel);
+    const validationResult = await validateRequest(model, headersList);
 
-    const apiKey = headersList.get(modelConfig.headerKey)!;
-
-    let aiModel: LanguageModelV1;
-    switch (modelConfig.provider) {
-        case "google":
-            const google = createGoogleGenerativeAI({ apiKey });
-            aiModel = google(modelConfig.modelId);
-            break;
-
-        case "openai":
-            const openai = createOpenAI({ apiKey });
-            aiModel = openai(modelConfig.modelId) as LanguageModelV1;
-            break;
-
-        case "openrouter":
-            const openrouter = createOpenRouter({ apiKey });
-            aiModel = openrouter(modelConfig.modelId) as LanguageModelV1;
-            break;
-        case "groq":
-            const groqrouter = createGroq({ apiKey });
-            aiModel = groqrouter(modelConfig.modelId) as LanguageModelV1;
-            break;
-        default:
-            return new Response(
-                JSON.stringify({ error: "Unsupported model provider" }),
-                {
-                    status: 400,
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
+    if (validationResult instanceof Response) {
+        return validationResult;
     }
+
+    const { modelConfig, apiKey } = validationResult;
+
+    const aiModelOrResponse = createAIModel(modelConfig, apiKey);
+
+    if (aiModelOrResponse instanceof Response) {
+        return aiModelOrResponse;
+    }
+
+    const aiModel = aiModelOrResponse;
 
     const caller = appRouter.createCaller({
         session,
@@ -88,9 +140,16 @@ export async function POST(request: Request) {
     });
 
     if (messages.length === 1) {
-        const title = await generateTitleFromUserMessage({
-            message: userMessage,
+        const { text: title } = await generateText({
+            model: aiModel,
+            system: `\n
+    - you will generate a short title based on the first message a user begins a conversation with
+    - ensure it is not more than 15 characters long
+    - the title should be a summary of the user's message
+    - do not use quotes or colons`,
+            prompt: JSON.stringify(userMessage),
         });
+
         await caller.thread.saveThread({
             projectId: null,
             threadId: id,
@@ -113,16 +172,16 @@ export async function POST(request: Request) {
         if (!customization) return prompt;
         const { name, whatDoYouDo, chatTraits, keepInMind } = customization;
         if (name.trim()) {
-            prompt += ` The user's name is ${name}.`;
+            prompt += `The user's name is ${name}.`;
         }
         if (whatDoYouDo.trim()) {
-            prompt += ` The user is a ${whatDoYouDo}. Tailor your responses to be relevant, professional, and considerate of this background.`;
+            prompt += `The user is a ${whatDoYouDo}. Tailor your responses to be relevant, professional, and considerate of this background.`;
         }
         if (chatTraits.trim()) {
-            prompt += ` The user prefers these conversational traits: ${chatTraits}.`;
+            prompt += `The user prefers these conversational traits: ${chatTraits}.`;
         }
         if (keepInMind.trim()) {
-            prompt += ` Keep in mind: ${keepInMind}.`;
+            prompt += `Keep in mind: ${keepInMind}.`;
         }
         return prompt;
     })();

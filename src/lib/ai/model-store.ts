@@ -1,20 +1,20 @@
 import { create, type Mutate, type StoreApi } from "zustand";
 import { persist } from "zustand/middleware";
 import {
-    type AIModel,
-    getModelConfig,
+    type ValidModelWithProvider,
+    getModelConfigByKey,
     type ModelConfig,
 } from "~/lib/ai/models";
 
 type ModelStore = {
-    selectedModel: AIModel;
-    setModel: (model: AIModel) => void;
-    getModelConfig: () => ModelConfig;
+    selectedModel: ValidModelWithProvider;
+    setModel: (model: ValidModelWithProvider) => void;
+    getModelConfig: () => ModelConfig | undefined;
 };
 
 type StoreWithPersist = Mutate<
     StoreApi<ModelStore>,
-    [["zustand/persist", { selectedModel: AIModel }]]
+    [["zustand/persist", { selectedModel: ValidModelWithProvider }]]
 >;
 
 export const withStorageDOMEvents = (store: StoreWithPersist) => {
@@ -34,7 +34,7 @@ export const withStorageDOMEvents = (store: StoreWithPersist) => {
 export const useModelStore = create<ModelStore>()(
     persist(
         (set, get) => ({
-            selectedModel: "Gemini 2.5 Flash",
+            selectedModel: "google:gemini-2.0-flash-001",
 
             setModel: (model) => {
                 set({ selectedModel: model });
@@ -42,7 +42,7 @@ export const useModelStore = create<ModelStore>()(
 
             getModelConfig: () => {
                 const { selectedModel } = get();
-                return getModelConfig(selectedModel);
+                return getModelConfigByKey(selectedModel);
             },
         }),
         {

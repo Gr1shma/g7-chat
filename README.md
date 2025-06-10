@@ -183,7 +183,6 @@ Edit `.env` and provide values for:
 * `AUTH_SECRET` (random secure string)
 * Google OAuth credentials: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
 * `DATABASE_URL` (your PostgreSQL connection string)
-* `GOOGLE_GENERATIVE_AI_API_KEY` (API key for AI SDK from Vercel)
 
 4. **Run the development server**
 
@@ -229,10 +228,8 @@ g7-chat requires several environment variables to run properly, especially for a
 | ------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `AUTH_SECRET`                  | A secret string used to encrypt session data and cookies for authentication. | Generate a strong random string (e.g., `openssl rand -hex 32`)                                    |
 | `AUTH_GOOGLE_ID`               | Client ID for Google OAuth provider, used for user login via Google.         | Obtain from [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials) |
-| `AUTH_GOOGLE_SECRET`           | Client Secret for Google OAuth provider.                                     | Obtain from Google Cloud Console alongside the client ID                                          |
+| `AUTH_GOOGLE_SECRET`           | Client Secret for Google OAuth provider.                                     | Obtain from [Google Cloud Console](https://console.cloud.google.com/apis/credentials) alongside the client ID                                          |
 | `DATABASE_URL`                 | Connection string to your PostgreSQL database instance.                      | Format: `postgresql://username:password@host:port/database`                                       |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | API key for accessing Google provider in Vercel’s AI SDK   | Obtain from [Google Ai Studio](https://aistudio.google.com/apikey)       |
-| `GROQ_API_KEY` | API key for accessing Groq provider in Vercel’s AI SDK, enabling AI-powered chat features.    | Obtain from [Groq](https://groq.com/)       |
 
 ### Example `.env`
 
@@ -241,8 +238,6 @@ AUTH_SECRET="your-random-secret-string"
 AUTH_GOOGLE_ID="your-google-client-id"
 AUTH_GOOGLE_SECRET="your-google-client-secret"
 DATABASE_URL="postgresql://postgres:password@localhost:5432/g7-chat"
-GOOGLE_GENERATIVE_AI_API_KEY="your-google-generative-ai-api-key"
-GROQ_API_KEY="your-groq-api-key"
 ```
 
 ### How to generate auth secret 

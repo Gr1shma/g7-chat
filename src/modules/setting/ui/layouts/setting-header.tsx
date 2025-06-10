@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Button } from "~/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useAPIKeyStore } from "~/lib/ai/store";
+import { useAPIKeyStore } from "~/lib/ai/api-keys-store";
 import { serverSignOut } from "./sign-out";
 
 export default function SettingHeader() {

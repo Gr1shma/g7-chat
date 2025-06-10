@@ -24,9 +24,7 @@ export const withStorageDOMEvents = (store: StoreWithPersist) => {
             store.persist.rehydrate();
         }
     };
-
     window.addEventListener("storage", storageEventCallback);
-
     return () => {
         window.removeEventListener("storage", storageEventCallback);
     };
@@ -41,20 +39,18 @@ export const useAPIKeyStore = create<APIKeyStore>()(
                 openai: "",
                 groq: "",
             },
-
             setKeys: (newKeys) => {
                 set((state) => ({
                     keys: { ...state.keys, ...newKeys },
                 }));
             },
-
             hasRequiredKeys: () => {
-                return !!get().keys.google;
+                const keys = get().keys;
+                return Object.values(keys).some(key => key && key.trim().length > 0);
             },
-
             getKey: (provider) => {
                 const key = get().keys[provider];
-                return key ? key : null;
+                return key && key.trim().length > 0 ? key : null;
             },
         }),
         {
