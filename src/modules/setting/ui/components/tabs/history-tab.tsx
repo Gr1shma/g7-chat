@@ -216,67 +216,74 @@ export function HistoryTabSuspense() {
     const selectedCount = selectedIds.length;
 
     return (
-        <div>
-            <div className="border-y">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={
-                                        selectedThreadIds[row.original.id]
-                                            ? "selected"
-                                            : undefined
-                                    }
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
+        <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Message History</h2>
+
+            <div className="space-y-6">
+                <p className="text-muted-foreground/80">
+                    Save your history as JSON
+                </p>
+                <div className="max-h-96 overflow-auto rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-                {query.hasNextPage && (
-                    <InfinitScroll
-                        hasNextPage={query.hasNextPage}
-                        isFetchingNextPage={query.isFetchingNextPage}
-                        fetchNextPage={query.fetchNextPage}
-                    />
-                )}
-                <div className="flex items-center justify-between p-4">
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={
+                                            selectedThreadIds[row.original.id]
+                                                ? "selected"
+                                                : undefined
+                                        }
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="h-24 text-center"
+                                    >
+                                        No results.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                    {query.hasNextPage && (
+                        <InfinitScroll
+                            hasNextPage={query.hasNextPage}
+                            isFetchingNextPage={query.isFetchingNextPage}
+                            fetchNextPage={query.fetchNextPage}
+                        />
+                    )}
+                </div>
+                <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
                         {selectedCount} of {allThreads.length} thread(s)
                         selected
