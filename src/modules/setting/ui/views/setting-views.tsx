@@ -5,6 +5,7 @@ import AccountTab from "../components/tabs/account-tab";
 import CustomizationTab from "../components/tabs/customization-tab";
 import AboutMeTab from "../components/tabs/about-me";
 import { HistorySection } from "../components/tabs/history-tab";
+import APIKeyForm from "../components/tabs/api-keys-tab";
 
 export type SettingTab = {
     value: string;
@@ -27,6 +28,11 @@ const tabList: SettingTab[] = [
         value: "history",
         name: "History",
         component: <HistorySection />,
+    },
+    {
+        value: "api-keys",
+        name: "Api Keys",
+        component: <APIKeyForm />,
     },
     {
         value: "about-me",

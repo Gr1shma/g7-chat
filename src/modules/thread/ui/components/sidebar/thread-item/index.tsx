@@ -79,6 +79,11 @@ const PureThreadItem = ({
         },
     });
 
+    const handleTitleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsEditing(true);
+    };
+
     useEffect(() => {
         if (isEditing && inputRef.current) {
             inputRef.current.focus();
@@ -126,6 +131,7 @@ const PureThreadItem = ({
     const handleLinkClick = (e: React.MouseEvent) => {
         if (onThreadSelect) {
             e.preventDefault();
+            setOpenMobile(false);
             onThreadSelect(thread);
         } else {
             setOpenMobile(false);
@@ -145,6 +151,7 @@ const PureThreadItem = ({
                     <Link
                         href={`/chat/${thread.id}`}
                         onClick={handleLinkClick}
+                        onDoubleClick={handleTitleClick}
                         className="flex min-w-0 flex-1 items-center gap-1"
                     >
                         {thread.isBranched && (
@@ -153,7 +160,6 @@ const PureThreadItem = ({
                         <span className="truncate">{thread.title}</span>
                     </Link>
 
-                    {/* Right side: buttons */}
                     <div
                         className={cn(
                             "ml-2 flex items-center gap-1 transition-all duration-200",

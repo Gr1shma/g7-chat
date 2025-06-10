@@ -1,23 +1,14 @@
 import { SendButton } from "~/components/send-button";
-import { ModelSelector } from "./model-selector";
+import { ChatModelDropdown } from "./model-selector";
 import { type UseChatHelpers } from "ai/react";
-import { type ValidModelString } from "~/lib/ai/providers";
 
 interface InputToolbarProps {
     input: UseChatHelpers["input"];
     status: UseChatHelpers["status"];
     submitForm: () => void;
-    selectedModel: ValidModelString;
-    onModelChange: (modelId: ValidModelString) => void;
 }
 
-export function InputToolbar({
-    input,
-    status,
-    submitForm,
-    onModelChange,
-    selectedModel,
-}: InputToolbarProps) {
+export function InputToolbar({ input, status, submitForm }: InputToolbarProps) {
     return (
         <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
             <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2">
@@ -29,10 +20,7 @@ export function InputToolbar({
             </div>
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
                 <div className="ml-[-7px] flex items-center gap-1">
-                    <ModelSelector
-                        selectedModel={selectedModel}
-                        onModelChange={onModelChange}
-                    />
+                    <ChatModelDropdown />
                 </div>
             </div>
         </div>

@@ -6,7 +6,6 @@ import { ThreadInputTextarea } from "./thread-input-text-area";
 import { useLocalStorage } from "usehooks-ts";
 import { InputToolbar } from "./toolbar";
 import { type UseChatHelpers } from "ai/react";
-import { type ValidModelString } from "~/lib/ai/providers";
 
 interface ThreadInputProps {
     threadId: UseChatHelpers["id"];
@@ -17,8 +16,6 @@ interface ThreadInputProps {
     handleSubmit: UseChatHelpers["handleSubmit"];
     status: UseChatHelpers["status"];
     setMessages: UseChatHelpers["setMessages"];
-    selectedModel: ValidModelString;
-    onModelChange: (modelId: ValidModelString) => void;
 }
 
 function PureThreadInput({
@@ -28,8 +25,6 @@ function PureThreadInput({
     isLoading,
     handleSubmit,
     status,
-    selectedModel,
-    onModelChange,
 }: ThreadInputProps) {
     const { textareaRef, adjustHeight, resetHeight } =
         useTextareaAutosize(input);
@@ -75,8 +70,6 @@ function PureThreadInput({
                         input={input}
                         status={status}
                         submitForm={submitForm}
-                        onModelChange={onModelChange}
-                        selectedModel={selectedModel}
                     />
                 </div>
             </form>

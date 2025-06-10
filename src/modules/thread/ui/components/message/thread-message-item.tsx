@@ -329,14 +329,15 @@ export function ControlAssistantMessage({
     const [isHidden, setIsHidden] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+    const utils = api.useUtils();
     const branchMutation = api.thread.branchOfByMessageId.useMutation({
-        onSuccess: (data) => {
+        onSuccess: async () => {
+            await utils.thread.getInfiniteThreads.invalidate();
+            await utils.project.getAllProjects.invalidate();
             toast({
                 description: "Branched to a new thread.",
             });
             setIsDialogOpen(false);
-            // You can optionally navigate to the new thread here
-            // router.push(`/threads/${data.newThreadId}`);
         },
         onError: () => {
             toast({

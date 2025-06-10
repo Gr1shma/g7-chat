@@ -7,11 +7,9 @@ import { ThreadMessages } from "../components/message/thread-messages";
 import { useScrollToBottomButton } from "~/hooks/use-scroll-button";
 import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
 import { ThreadInputForm } from "../components/input/thread-input-form";
-import {
-    getDefaultModelString,
-    type ValidModelString,
-} from "~/lib/ai/providers";
-import { useLocalStorage } from "~/hooks/use-local-storage";
+import { useAPIKeyStore } from "~/lib/ai/store";
+import { useModelStore } from "~/lib/ai/model-store";
+import APIKeyForm from "~/modules/setting/ui/components/tabs/api-keys-tab";
 
 interface ThreadViewProps {
     threadId: string;
@@ -30,10 +28,9 @@ export function ThreadViewSection({
 
     const utils = api.useUtils();
 
-    const [selectedModel, setSelectedModel] = useLocalStorage<ValidModelString>(
-        "selected-model",
-        getDefaultModelString()
-    );
+    const { getKey } = useAPIKeyStore();
+    const selectedModel = useModelStore((state) => state.selectedModel);
+    const modelConfig = useModelStore((state) => state.getModelConfig());
 
     const {
         input,
@@ -53,6 +50,9 @@ export function ThreadViewSection({
         body: {
             model: selectedModel,
         },
+        headers: {
+            [modelConfig.headerKey]: getKey(modelConfig.provider) || "",
+        },
         onFinish: async () => {
             await utils.thread.invalidate();
         },
@@ -61,6 +61,20 @@ export function ThreadViewSection({
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "auto" });
     }, []);
+
+    const hasRequiredKeys = useAPIKeyStore((state) => state.hasRequiredKeys());
+
+    const isAPIKeysHydrated = useAPIKeyStore.persist?.hasHydrated();
+    const isModelStoreHydrated = useModelStore.persist?.hasHydrated();
+
+    if (!isAPIKeysHydrated || !isModelStoreHydrated) return null;
+
+    if (!hasRequiredKeys)
+        return (
+            <div className="flex min-h-screen flex-col justify-center pr-10">
+                <APIKeyForm />
+            </div>
+        );
 
     return (
         <>
@@ -85,8 +99,6 @@ export function ThreadViewSection({
                         handleSubmit={handleSubmit}
                         stop={stop}
                         status={status}
-                        selectedModel={selectedModel}
-                        onModelChange={setSelectedModel}
                     />
                 </div>
             </div>

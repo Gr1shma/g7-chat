@@ -1,9 +1,7 @@
-import { auth, signOut } from "~/server/auth";
+import { auth } from "~/server/auth";
 import { redirect } from "next/navigation";
-import { Button } from "~/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import AccountDetails from "../components/account/account-details";
+import SettingHeader from "./setting-header";
 
 export async function SettingLayout({
     children,
@@ -24,30 +22,5 @@ export async function SettingLayout({
                 </div>
             </div>
         </div>
-    );
-}
-
-function SettingHeader() {
-    return (
-        <header className="flex items-center justify-between pb-8">
-            <Button variant="ghost" asChild>
-                <Link href="/chat">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Chat
-                </Link>
-            </Button>
-            <div className="flex flex-row items-center gap-2">
-                <form
-                    action={async () => {
-                        "use server";
-                        await signOut({ redirectTo: "/" });
-                    }}
-                >
-                    <Button variant="ghost" type="submit">
-                        Sign out
-                    </Button>
-                </form>
-            </div>
-        </header>
     );
 }

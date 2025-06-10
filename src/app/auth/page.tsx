@@ -29,7 +29,7 @@ export default async function Page() {
                                 await signIn(provider.id);
                             } catch (error) {
                                 if (error instanceof AuthError) {
-                                    return redirect("/");
+                                    return redirect("/setting");
                                 }
                                 throw error;
                             }
