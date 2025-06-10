@@ -19,16 +19,17 @@ import { db } from "~/server/db";
 import { messages_table, threads_table } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { getModelConfigByKey, ModelConfig, ValidModelWithProvider } from "~/lib/ai/models";
+import {
+    getModelConfigByKey,
+    type ModelConfig,
+    type ValidModelWithProvider,
+} from "~/lib/ai/models";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createGroq } from "@ai-sdk/groq";
 
 export const maxDuration = 60;
 
-function jsonResponse(
-    data: object,
-    status: number
-): Response {
+function jsonResponse(data: object, status: number): Response {
     return new Response(JSON.stringify(data), {
         status,
         headers: { "Content-Type": "application/json" },
@@ -87,10 +88,7 @@ function createAIModel(
             return groqrouter(modelConfig.modelId) as LanguageModelV1;
         }
         default:
-            return jsonResponse(
-                { error: "Unsupported model provider" },
-                400
-            );
+            return jsonResponse({ error: "Unsupported model provider" }, 400);
     }
 }
 
@@ -113,7 +111,6 @@ export async function POST(request: Request) {
     if (!userMessage) {
         return new Response("No user message found", { status: 400 });
     }
-
 
     const headersList = await headers();
 

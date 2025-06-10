@@ -46,7 +46,9 @@ export const useAPIKeyStore = create<APIKeyStore>()(
             },
             hasRequiredKeys: () => {
                 const keys = get().keys;
-                return Object.values(keys).some(key => key && key.trim().length > 0);
+                return Object.values(keys).some(
+                    (key) => key && key.trim().length > 0
+                );
             },
             getKey: (provider) => {
                 const key = get().keys[provider];

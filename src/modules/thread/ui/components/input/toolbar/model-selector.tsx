@@ -37,23 +37,38 @@ export function ChatModelDropdown() {
         [getKey]
     );
 
-    const getModelDisplayName = useCallback((modelKey: string) => {
-        const model = allModelsWithInfo.find(m => m.providerKey === modelKey);
-        return model?.displayName || modelKey;
-    }, [allModelsWithInfo]);
+    const getModelDisplayName = useCallback(
+        (modelKey: string) => {
+            const model = allModelsWithInfo.find(
+                (m) => m.providerKey === modelKey
+            );
+            return model?.displayName || modelKey;
+        },
+        [allModelsWithInfo]
+    );
 
     useEffect(() => {
         if (!isModelEnabled(selectedModel)) {
-            const fallback = allModelsWithInfo.find((m) => isModelEnabled(m.providerKey));
-            setModel(fallback?.providerKey as ValidModelWithProvider ?? "google:gemini-2.0-flash-001");
+            const fallback = allModelsWithInfo.find((m) =>
+                isModelEnabled(m.providerKey)
+            );
+            setModel(
+                (fallback?.providerKey as ValidModelWithProvider) ??
+                    "google:gemini-2.0-flash-001"
+            );
         }
     }, [selectedModel, isModelEnabled, allModelsWithInfo, setModel]);
 
     const filteredModels = useMemo(() => {
-        return allModelsWithInfo.filter((model) =>
-            model.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            model.modelId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            model.provider.toLowerCase().includes(searchQuery.toLowerCase())
+        return allModelsWithInfo.filter(
+            (model) =>
+                model.displayName
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                model.modelId
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                model.provider.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [allModelsWithInfo, searchQuery]);
 
@@ -69,10 +84,13 @@ export function ChatModelDropdown() {
     }, [filteredModels]);
 
     const selectedModelIndex = useMemo(() => {
-        return filteredModels.findIndex((model) => model.providerKey === selectedModel);
+        return filteredModels.findIndex(
+            (model) => model.providerKey === selectedModel
+        );
     }, [filteredModels, selectedModel]);
 
-    const [highlightedIndex, setHighlightedIndex] = useState(selectedModelIndex);
+    const [highlightedIndex, setHighlightedIndex] =
+        useState(selectedModelIndex);
 
     const handleModelSelect = (providerKey: string) => {
         setModel(providerKey as ValidModelWithProvider);
@@ -116,14 +134,23 @@ export function ChatModelDropdown() {
                     className="relative -mb-2 h-8 gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                 >
                     <Cpu size={16} />
-                    <span className="font-medium">{getModelDisplayName(selectedModel)}</span>
+                    <span className="font-medium">
+                        {getModelDisplayName(selectedModel)}
+                    </span>
                     <ChevronDown
                         size={16}
-                        className={cn("transition-transform", isOpen && "rotate-180")}
+                        className={cn(
+                            "transition-transform",
+                            isOpen && "rotate-180"
+                        )}
                     />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 bg-muted p-0" align="end" sideOffset={4}>
+            <PopoverContent
+                className="w-96 bg-muted p-0"
+                align="end"
+                sideOffset={4}
+            >
                 <div className="flex flex-col">
                     <div className="flex items-center border-b px-3 py-2">
                         <Search size={16} className="mr-2 text-gray-400" />
@@ -142,53 +169,80 @@ export function ChatModelDropdown() {
                     <div className="max-h-64 overflow-y-auto">
                         {Object.keys(groupedModels).length > 0 ? (
                             <div className="p-1">
-                                {Object.entries(groupedModels).map(([provider, models]) => (
-                                    <div key={provider}>
-                                        <div className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
-                                            {provider}
-                                        </div>
-                                        {models.map((model) => {
-                                            const globalIndex = filteredModels.findIndex(m => m.providerKey === model.providerKey);
-                                            const enabled = isModelEnabled(model.providerKey);
-                                            return (
-                                                <Button
-                                                    key={model.providerKey}
-                                                    variant="ghost"
-                                                    disabled={!enabled}
-                                                    onClick={() => enabled && handleModelSelect(model.providerKey)}
-                                                    className={cn(
-                                                        "h-auto flex w-full flex-col items-start justify-start rounded-md px-3 py-2 text-left",
-                                                        globalIndex === highlightedIndex &&
-                                                        "bg-accent text-accent-foreground",
-                                                        !enabled && "cursor-not-allowed opacity-50"
-                                                    )}
-                                                    ref={
-                                                        globalIndex === highlightedIndex
-                                                            ? (el) =>
-                                                                el?.scrollIntoView({
-                                                                    block: "nearest",
-                                                                })
-                                                            : null
-                                                    }
-                                                >
-                                                    <div className="flex w-full items-start justify-between gap-3">
-                                                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                                                            <span className="text-sm font-medium truncate">
-                                                                {model.displayName}
-                                                            </span>
-                                                            <span className="text-xs text-muted-foreground truncate">
-                                                                {model.modelId}
-                                                            </span>
-                                                        </div>
-                                                        {selectedModel === model.providerKey && (
-                                                            <Check size={16} className="text-blue-500 flex-shrink-0" />
+                                {Object.entries(groupedModels).map(
+                                    ([provider, models]) => (
+                                        <div key={provider}>
+                                            <div className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                                                {provider}
+                                            </div>
+                                            {models.map((model) => {
+                                                const globalIndex =
+                                                    filteredModels.findIndex(
+                                                        (m) =>
+                                                            m.providerKey ===
+                                                            model.providerKey
+                                                    );
+                                                const enabled = isModelEnabled(
+                                                    model.providerKey
+                                                );
+                                                return (
+                                                    <Button
+                                                        key={model.providerKey}
+                                                        variant="ghost"
+                                                        disabled={!enabled}
+                                                        onClick={() =>
+                                                            enabled &&
+                                                            handleModelSelect(
+                                                                model.providerKey
+                                                            )
+                                                        }
+                                                        className={cn(
+                                                            "flex h-auto w-full flex-col items-start justify-start rounded-md px-3 py-2 text-left",
+                                                            globalIndex ===
+                                                                highlightedIndex &&
+                                                                "bg-accent text-accent-foreground",
+                                                            !enabled &&
+                                                                "cursor-not-allowed opacity-50"
                                                         )}
-                                                    </div>
-                                                </Button>
-                                            );
-                                        })}
-                                    </div>
-                                ))}
+                                                        ref={
+                                                            globalIndex ===
+                                                            highlightedIndex
+                                                                ? (el) =>
+                                                                      el?.scrollIntoView(
+                                                                          {
+                                                                              block: "nearest",
+                                                                          }
+                                                                      )
+                                                                : null
+                                                        }
+                                                    >
+                                                        <div className="flex w-full items-start justify-between gap-3">
+                                                            <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                                                <span className="truncate text-sm font-medium">
+                                                                    {
+                                                                        model.displayName
+                                                                    }
+                                                                </span>
+                                                                <span className="truncate text-xs text-muted-foreground">
+                                                                    {
+                                                                        model.modelId
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            {selectedModel ===
+                                                                model.providerKey && (
+                                                                <Check
+                                                                    size={16}
+                                                                    className="flex-shrink-0 text-blue-500"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+                                    )
+                                )}
                             </div>
                         ) : (
                             <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">

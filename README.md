@@ -87,13 +87,16 @@ g7-chat is built to be snappy and lightweight, with a focus on developer experie
         * Specify your **profession or role** to guide context-aware replies.
         * All preferences are used in a dynamic **system prompt**.
 
-* **📦 Model Selection**
+* **📦 Model Selection & API Key Management**
 
+    * Bring Your Own Keys (BYOK) - Use your own API keys for maximum privacy and control.
     * Choose from a range of available AI models:
-
-        * Use a searchable popover and selector powered by shadcn/ui.
-        * Models are grouped by provider with clean headings.
-        * Instantly switch between models.
+        * Use a searchable popover and selector powered by shadcn/ui
+        * Models are grouped by provider with clean headings
+        * Only models with configured API keys are enabled
+        * Instantly switch between available models
+    * All API keys are stored locally in your browser for privacy.
+    * At least one API key is required to use the chat functionality.
 
 * **🎨 Clean & Dynamic UI**
 
@@ -266,129 +269,160 @@ or refer [Auth.js Setup Environment](https://authjs.dev/getting-started/installa
 6. Save and copy the generated **Client ID** and **Client Secret** into your `.env` file as `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
 
 ---
-
 ## AI Model Providers 🧠
 
-g7-chat supports multiple AI model providers with a clean, type-safe integration using the [Vercel AI SDK](https://ai-sdk.dev/). You can switch between different models at runtime using a unified `provider:model` string format.
+g7-chat supports multiple AI model providers with a clean, type-safe integration using the [Vercel AI SDK](https://ai-sdk.dev/). The app uses a **Bring Your Own Keys (BYOK)** approach, where you provide your own API keys for maximum privacy and control. You can switch between different models at runtime using a unified `provider:model` string format.
 
 ### Supported Providers and Models ✅
 
-| Provider | Model Key                       | Description          |
-| -------- | ------------------------------- | -------------------- |
-| `google` | `gemini-2.0-flash-001`          | Gemini 2.0 Flash     |
-| `google` | `gemini-1.5-flash`              | Gemini 1.5 Flash     |
-| `groq`   | `llama-3.1-8b-instant`          | Llama 3.1 8B Instant |
-| `groq`   | `deepseek-r1-distill-llama-70b` | Deepseek R1 70B      |
+| Provider | Model Key | Display Name | Description |
+| -------- | --------- | ------------ | ----------- |
+| **Google** | `google:gemini-2.0-flash-001` | Gemini 2.0 Flash | Latest multimodal model with enhanced speed and capabilities |
+| | `google:gemini-1.5-flash` | Gemini 1.5 Flash | Fast and efficient model for general-purpose tasks |
+| **Groq** | `groq:llama-3.1-8b-instant` | Llama 3.1 8B Instant | Ultra-fast inference with Llama 3.1 8B parameters |
+| | `groq:deepseek-r1-distill-llama-70b` | DeepSeek R1 Distill 70B | Distilled version of DeepSeek R1 with 70B parameters |
+| **OpenRouter** | `openrouter:deepseek/deepseek-r1-0528:free` | DeepSeek R1 (Free) | Free tier access to DeepSeek R1 reasoning model |
+| | `openrouter:deepseek/deepseek-chat-v3-0324:free` | DeepSeek Chat v3 (Free) | Free tier conversational AI model |
+| **OpenAI** | `openai:gpt-4o` | GPT-4o | OpenAI's flagship omni-modal model |
+| | `openai:gpt-4.1-mini` | GPT-4.1 Mini | Compact version of GPT-4.1 for efficient tasks |
+
+### API Key Management 🔑
+
+All models require their respective API keys to function:
+
+- **Google**: Get your API key from [Google AI Studio](https://aistudio.google.com/apikey)
+- **Groq**: Get your API key from [Groq Console](https://console.groq.com/keys)
+- **OpenRouter**: Get your API key from [OpenRouter Keys](https://openrouter.ai/settings/keys)
+- **OpenAI**: Get your API key from [OpenAI Platform](https://platform.openai.com/settings/organization/api-keys)
+
+API keys are stored locally in your browser using Zustand persistence and are never sent to any server except the respective AI provider.
 
 ### How It Works 🧩
 
-All models are defined and accessed using a type-safe registry:
+The app uses a type-safe model registry defined in `src/lib/ai/models.ts`:
 
 ```ts
-const PROVIDER_MODELS = {
-    google: {
-        "gemini-2.0-flash-001": google("gemini-2.0-flash-001"),
-        "gemini-1.5-flash": google("gemini-1.5-flash"),
-    },
-    groq: {
-        "llama-3.1-8b-instant": groq("llama-3.1-8b-instant"),
-        "deepseek-r1-distill-llama-70b": groq("deepseek-r1-distill-llama-70b"),
-    },
-};
-```
-
-You can get a model instance with:
-
-```ts
-const model = AIProvider("google:gemini-2.0-flash-001");
-```
-
-If the input string is dynamic or user-provided, use the safe wrapper:
-
-```ts
-const model = AIProviderSafe(userInput); // returns null if invalid
-```
-
-### Default Model 🧾
-
-The default model used in the app is:
-
-```ts
-getDefaultModel(); // => Gemini 2.0 Flash
-```
-
-To change this, modify the `getDefaultModel()` function in `src/lib/ai/providers.ts`.
-
-## Adding More Models or Providers
-
-To add more models or providers (like `openai`, `anthropic`, etc.), follow these steps:
-
-### 1. Check Provider Support and Get API Keys
-
-You can view the list of supported providers and model identifiers, as well as how to obtain API keys, at:
-
-🔗 [AI SDK Providers and Models Documentation](https://ai-sdk.dev/docs/foundations/providers-and-models#ai-sdk-providers)
-
-### 2. Extend `PROVIDER_MODELS`
-
-To register a new provider and its models, update the `PROVIDER_MODELS` in `src/lib/ai/providers.ts` object:
-
-```ts
-import { openai } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
-
-const PROVIDER_MODELS = {
-    // Existing providers...
-
-    openai: {
-        "gpt-4": openai("gpt-4"),
-        "gpt-3.5-turbo": openai("gpt-3.5-turbo"),
-    },
-    anthropic: {
-        "claude-3-opus-20240229": anthropic("claude-3-opus-20240229"),
-        "claude-3-sonnet-20240229": anthropic("claude-3-sonnet-20240229"),
-    },
+export const PROVIDER_MODELS = {
+    google: [
+        {
+            id: "gemini-2.0-flash-001",
+            displayName: "Gemini 2.0 Flash",
+            description: "Latest multimodal model with enhanced speed and capabilities"
+        },
+        {
+            id: "gemini-1.5-flash",
+            displayName: "Gemini 1.5 Flash", 
+            description: "Fast and efficient model for general-purpose tasks"
+        },
+    ],
+    // ... other providers
 } as const;
 ```
 
-### 3. Update `VALID_MODELS` (Optional Constants)
-
-These constants are helpful for referencing models in a type-safe and readable way:
+You can get a model configuration with:
 
 ```ts
-export const VALID_MODELS = {
+const modelConfig = getModelConfigByKey("google:gemini-2.0-flash-001");
+```
+
+### State Management 📦
+
+The app uses two Zustand stores for managing models and API keys:
+
+**API Key Store** (`useAPIKeyStore`):
+- Stores API keys for all providers
+- Validates that at least one API key is provided
+- Persists keys locally in browser storage
+
+**Model Store** (`useModelStore`):
+- Tracks the currently selected model
+- Provides model configuration details
+- Automatically falls back to available models based on API keys
+
+### Default Model 🧾
+
+The default model is `google:gemini-2.0-flash-001` (Gemini 2.0 Flash). This can be changed in the model store configuration.
+
+### Model Selection UI 🎨
+
+The app includes a sophisticated model selector component that:
+- Groups models by provider with clean headings
+- Shows only models with configured API keys as enabled
+- Provides search functionality across model names and providers
+- Displays model descriptions and current selection status
+- Supports keyboard navigation (arrow keys, Enter)
+
+## Adding More Models or Providers
+
+To add new models or providers, follow these steps:
+
+### 1. Update the Model Registry
+
+Add your new provider and models to `PROVIDER_MODELS` in `src/lib/ai/models.ts`:
+
+```ts
+export const PROVIDER_MODELS = {
     // Existing providers...
-
-    OPENAI: {
-        GPT_4: "openai:gpt-4",
-        GPT_3_5_TURBO: "openai:gpt-3.5-turbo",
-    },
-    ANTHROPIC: {
-        CLAUDE_3_OPUS: "anthropic:claude-3-opus-20240229",
-        CLAUDE_3_SONNET: "anthropic:claude-3-sonnet-20240229",
-    },
-} as const satisfies Record<string, Record<string, ValidModelString>>;
+    anthropic: [
+        {
+            id: "claude-3-5-sonnet-20241022",
+            displayName: "Claude 3.5 Sonnet",
+            description: "Anthropic's most capable model"
+        }
+    ]
+} as const;
 ```
 
-### 4. Add Display Names for Models
+### 2. Update Provider Constants
 
-To show clean names in the UI or logs, extend the `formatModelDisplayName()` function:
+Add the new provider to the `PROVIDERS` array in `src/lib/ai/store.ts`:
 
 ```ts
-function formatModelDisplayName(model: string): string {
-    const nameMap: Readonly<Record<string, string>> = {
-        // Existing providers...
-
-        "gpt-4": "OpenAI GPT-4",
-        "gpt-3.5-turbo": "OpenAI GPT-3.5 Turbo",
-
-        "claude-3-opus-20240229": "Claude 3 Opus (2024-02)",
-        "claude-3-sonnet-20240229": "Claude 3 Sonnet (2024-02)",
-    } as const;
-
-    return nameMap[model] || model;
-}
+export const PROVIDERS = ["google", "openrouter", "openai", "groq", "anthropic"] as const;
 ```
+
+### 3. Add Header Configuration
+
+Update `PROVIDER_HEADER_KEYS` in `src/lib/ai/models.ts`:
+
+```ts
+const PROVIDER_HEADER_KEYS: Record<Provider, string> = {
+    // Existing providers...
+    anthropic: "X-Anthropic-API-Key",
+} as const;
+```
+
+### 4. Update API Key Form
+
+Add the new provider to `apiKeyFields` in your API key form component:
+
+```ts
+const apiKeyFields = [
+    // Existing fields...
+    {
+        id: "anthropic",
+        label: "Anthropic API Key",
+        placeholder: "sk-ant-...",
+        linkUrl: "https://console.anthropic.com/",
+    },
+];
+```
+
+### 5. Update Default Keys
+
+Add default empty key in `useAPIKeyStore`:
+
+```ts
+keys: {
+    google: "",
+    openrouter: "",
+    openai: "",
+    groq: "",
+    anthropic: "", // Add new provider
+},
+```
+
+The type system will automatically pick up your changes and ensure type safety across the entire application.
 
 ---
 
