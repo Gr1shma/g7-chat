@@ -224,7 +224,12 @@ export function ProjectSection({
         }
     }, [editingProjectId]);
 
-    if (!projectWithThreads || filteredProjects.length === 0) {
+    if (!projectWithThreads) {
+        return <></>;
+    }
+
+    const normalizedQuery = searchQuery?.toLowerCase().trim() || "";
+    if (normalizedQuery && filteredProjects.length === 0) {
         return <></>;
     }
 
