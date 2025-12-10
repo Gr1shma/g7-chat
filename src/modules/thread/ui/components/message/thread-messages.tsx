@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Message } from "ai";
 import { type UseChatHelpers } from "ai/react";
 
@@ -15,12 +15,16 @@ export interface ThreadMessagesProps {
     messages: Message[];
     initialMessageLength: number;
     append: UseChatHelpers["append"];
+    error?: Error | null;
+    onRetry?: () => void;
 }
 
 export function ThreadMessages({
     append,
     messages,
     initialMessageLength,
+    error,
+    onRetry,
 }: ThreadMessagesProps) {
     const latestUserIndex = getLatestUserMessageIndex(
         messages,
@@ -38,6 +42,12 @@ export function ThreadMessages({
     );
     const isNotFirstUserMessage =
         messages.filter((m) => m.role === "user").length > 1;
+
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     useEffect(() => {
         if (userRef.current) {
@@ -71,6 +81,8 @@ export function ThreadMessages({
                     showAssistantSpace={showAssistantSpace}
                     isNotFirstUserMessage={isNotFirstUserMessage}
                     append={append}
+                    error={isMounted ? error : null}
+                    onRetry={onRetry}
                 />
             ))}
         </div>

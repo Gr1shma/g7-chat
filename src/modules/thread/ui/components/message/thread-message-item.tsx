@@ -1,4 +1,11 @@
-import { Copy, GitBranch, Loader2, RefreshCcw, SquarePen } from "lucide-react";
+import {
+    AlertCircle,
+    Copy,
+    GitBranch,
+    Loader2,
+    RefreshCcw,
+    SquarePen,
+} from "lucide-react";
 import { useState, useCallback, type KeyboardEvent, useEffect } from "react";
 import { type Message } from "ai";
 import { type UseChatHelpers } from "ai/react";
@@ -28,6 +35,8 @@ interface MessageItemProps {
     userRef: React.RefObject<HTMLDivElement>;
     assistantSpaceRef: React.RefObject<HTMLDivElement>;
     append: UseChatHelpers["append"];
+    error?: Error | null;
+    onRetry?: () => void;
 }
 
 export function MessageItem({
@@ -41,6 +50,8 @@ export function MessageItem({
     showAssistantSpace,
     isNotFirstUserMessage,
     append,
+    error,
+    onRetry,
 }: MessageItemProps) {
     const isLatestUser = index === latestUserIndex;
     const isNextAssistant = index === nextAssistantIndex;
@@ -56,6 +67,8 @@ export function MessageItem({
                 isNotFirstUserMessage={isNotFirstUserMessage}
                 showAssistantSpace={showAssistantSpace}
                 assistantSpaceRef={assistantSpaceRef}
+                error={isLatestUser ? error : null}
+                onRetry={onRetry}
             />
         );
     }
@@ -95,6 +108,8 @@ export interface UserMessageItemProps {
     userRef: React.RefObject<HTMLDivElement>;
     assistantSpaceRef: React.RefObject<HTMLDivElement>;
     append: UseChatHelpers["append"];
+    error?: Error | null;
+    onRetry?: () => void;
 }
 
 function UserMessageItem({
@@ -106,8 +121,22 @@ function UserMessageItem({
     showAssistantSpace,
     assistantSpaceRef,
     append,
+    error,
+    onRetry,
 }: UserMessageItemProps) {
     const [isEditing, setIsEditing] = useState<string | null>(null);
+
+    // Parse error message
+    const getErrorMessage = (err: Error): string => {
+        try {
+            const parsed = JSON.parse(err.message) as { error?: string };
+            return parsed.error ?? err.message;
+        } catch {
+            return (
+                err.message || "An unexpected error occurred. Please try again."
+            );
+        }
+    };
 
     return (
         <>
@@ -122,7 +151,7 @@ function UserMessageItem({
                             initialContent={message.content}
                             onSave={(newContent) => {
                                 setIsEditing(null);
-                                append({
+                                void append({
                                     role: "user",
                                     content: newContent,
                                 });
@@ -140,19 +169,48 @@ function UserMessageItem({
                     />
                 </div>
             </div>
-            {isNotFirstUserMessage === false && messages.length === 1 && (
-                <div className="mb-10 w-full" aria-hidden="true">
-                    <div className="rounded-2xl px-4 py-2">
-                        <div className="flex items-center space-x-2">
-                            <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40 [animation-delay:-0.3s]" />
-                            <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40 [animation-delay:-0.15s]" />
-                            <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40" />
-                        </div>
+            {/* Show error message instead of loading animation when error occurs */}
+            {error ? (
+                <div className="flex items-start gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+                    <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+                    <div className="flex-1">
+                        <p className="font-medium text-red-500">Error</p>
+                        <p className="mt-1 text-sm text-red-400/90">
+                            {getErrorMessage(error)}
+                        </p>
+                        {onRetry && (
+                            <button
+                                onClick={onRetry}
+                                className="mt-3 inline-flex items-center gap-2 rounded-md bg-red-500/20 px-3 py-1.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30"
+                            >
+                                <RefreshCcw className="h-4 w-4" />
+                                Try again
+                            </button>
+                        )}
                     </div>
                 </div>
-            )}
-            {isLatestUser && showAssistantSpace && isNotFirstUserMessage && (
-                <AnimationAndSpace assistantSpaceRef={assistantSpaceRef} />
+            ) : (
+                <>
+                    {isNotFirstUserMessage === false &&
+                        messages.length === 1 && (
+                            <div className="mb-10 w-full" aria-hidden="true">
+                                <div className="rounded-2xl px-4 py-2">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40 [animation-delay:-0.3s]" />
+                                        <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40 [animation-delay:-0.15s]" />
+                                        <div className="h-2 w-2 animate-bounce rounded-full bg-secondary-foreground/40" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    {isLatestUser &&
+                        showAssistantSpace &&
+                        isNotFirstUserMessage && (
+                            <AnimationAndSpace
+                                assistantSpaceRef={assistantSpaceRef}
+                            />
+                        )}
+                </>
             )}
         </>
     );
@@ -257,7 +315,7 @@ function ControlUserMessage({
 
     const handleResend = () => {
         setIsHidden(true);
-        append({
+        void append({
             role: "user",
             content: message.content,
         });
@@ -272,7 +330,7 @@ function ControlUserMessage({
 
     const handleCopy = () => {
         setIsHidden(true);
-        navigator.clipboard.writeText(message.content);
+        void navigator.clipboard.writeText(message.content);
         toast({
             description: "Copied to clipboard",
         });
@@ -350,7 +408,7 @@ export function ControlAssistantMessage({
     const handleResend = () => {
         if (!userMessage) return;
         setIsHidden(true);
-        append({
+        void append({
             role: "user",
             content: userMessage.content,
         });
@@ -359,7 +417,7 @@ export function ControlAssistantMessage({
 
     const handleCopy = () => {
         setIsHidden(true);
-        navigator.clipboard.writeText(message.content);
+        void navigator.clipboard.writeText(message.content);
         toast({
             description: "Copied to clipboard",
         });

@@ -40,14 +40,15 @@ export default function AccountTab() {
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
-            userName: session.data?.user.name || "",
+            userName: session.data?.user.name ?? "",
         },
     });
 
     const userMutation = api.user.changeUserName.useMutation();
     function onSubmit(values: z.infer<typeof customizationFormSchema>) {
+        if (!session.data?.user.id) return;
         userMutation.mutate({
-            userId: session.data?.user.id!,
+            userId: session.data.user.id,
             userName: values.userName,
         });
         toast({
@@ -103,7 +104,7 @@ function DeleteAccountArea() {
     }
     const deleteMutations = api.user.deleteUserByuserId.useMutation({
         onSuccess() {
-            signOut();
+            void signOut();
         },
     });
 

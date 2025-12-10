@@ -241,8 +241,41 @@ export async function POST(request: Request) {
                 sendReasoning: true,
             });
         },
-        onError: () => {
-            return "Oops, an error occured!";
+        onError: (error: unknown) => {
+            if (error instanceof Error) {
+                const message = error.message.toLowerCase();
+
+                if (
+                    message.includes("api key") ||
+                    message.includes("unauthorized") ||
+                    message.includes("401")
+                ) {
+                    return "Invalid or expired API key. Please check your API key settings.";
+                }
+                if (message.includes("rate limit") || message.includes("429")) {
+                    return "Rate limit exceeded. Please wait a moment and try again.";
+                }
+                if (message.includes("quota") || message.includes("billing")) {
+                    return "API quota exceeded. Please check your billing settings.";
+                }
+                if (
+                    message.includes("network") ||
+                    message.includes("fetch") ||
+                    message.includes("timeout")
+                ) {
+                    return "Network error. Please check your internet connection and try again.";
+                }
+                if (
+                    message.includes("model") ||
+                    message.includes("not found")
+                ) {
+                    return "The selected model is not available. Please try a different model.";
+                }
+
+                return error.message;
+            }
+
+            return "Oops, an error occurred! Please try again.";
         },
     });
 }

@@ -132,7 +132,7 @@ export default function AboutMeTab() {
                     Suggestions or Feedback?
                 </h2>
                 <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-                    I'd love to hear from you! Feel free to{" "}
+                    I&apos;d love to hear from you! Feel free to{" "}
                     <a
                         href="mailto:contact@grishmadhakal.com.np"
                         className="inline-flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400"

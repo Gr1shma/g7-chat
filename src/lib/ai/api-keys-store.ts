@@ -19,6 +19,10 @@ type StoreWithPersist = Mutate<
 >;
 
 export const withStorageDOMEvents = (store: StoreWithPersist) => {
+    if (typeof window === "undefined") {
+        return () => {};
+    }
+
     const storageEventCallback = (e: StorageEvent) => {
         if (e.key === store.persist.getOptions().name && e.newValue) {
             store.persist.rehydrate();

@@ -2,6 +2,7 @@
 
 import { type Message, useChat } from "ai/react";
 import { useRef, useEffect } from "react";
+import { toast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 import { ThreadMessages } from "../components/message/thread-messages";
 import { useScrollToBottomButton } from "~/hooks/use-scroll-button";
@@ -32,7 +33,7 @@ export function ThreadViewSection({
     const selectedModel = useModelStore((state) => state.selectedModel);
     const modelConfig = useModelStore((state) => state.getModelConfig());
     const headers = modelConfig
-        ? { [modelConfig.headerKey]: getKey(modelConfig.provider) || "" }
+        ? { [modelConfig.headerKey]: getKey(modelConfig.provider) ?? "" }
         : {};
 
     const {
@@ -45,6 +46,7 @@ export function ThreadViewSection({
         stop,
         status,
         append,
+        error,
     } = useChat({
         id: threadId,
         initialMessages,
@@ -54,8 +56,29 @@ export function ThreadViewSection({
             model: selectedModel,
         },
         headers,
-        onFinish: async () => {
-            await utils.thread.invalidate();
+        onFinish: () => {
+            void utils.thread.invalidate();
+        },
+        onError: (error) => {
+            let errorMessage =
+                "An unexpected error occurred. Please try again.";
+
+            if (error.message) {
+                try {
+                    const parsed = JSON.parse(error.message) as {
+                        error?: string;
+                    };
+                    errorMessage = parsed.error ?? error.message;
+                } catch {
+                    errorMessage = error.message;
+                }
+            }
+
+            toast({
+                title: "Error",
+                description: errorMessage,
+                variant: "destructive",
+            });
         },
     });
 
@@ -114,6 +137,22 @@ export function ThreadViewSection({
                         messages={messages}
                         initialMessageLength={initialMessages.length}
                         append={append}
+                        error={error}
+                        onRetry={() => {
+                            // Get the last user message to retry
+                            const lastUserMessage = [...messages]
+                                .reverse()
+                                .find((m) => m.role === "user");
+                            if (
+                                lastUserMessage &&
+                                typeof lastUserMessage.content === "string"
+                            ) {
+                                void append({
+                                    role: "user",
+                                    content: lastUserMessage.content,
+                                });
+                            }
+                        }}
                     />
                     <div ref={bottomRef}></div>
                 </div>
