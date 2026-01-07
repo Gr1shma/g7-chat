@@ -54,7 +54,7 @@ export function ChatModelDropdown() {
             );
             setModel(
                 (fallback?.providerKey as ValidModelWithProvider) ??
-                    "google:gemini-2.0-flash-001"
+                "google:gemini-2.0-flash-001"
             );
         }
     }, [selectedModel, isModelEnabled, allModelsWithInfo, setModel]);
@@ -125,6 +125,16 @@ export function ChatModelDropdown() {
             setHighlightedIndex((i) => Math.max(i - 1, 0));
         }
     };
+
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null; // or a loading skeleton
+    }
 
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -199,20 +209,20 @@ export function ChatModelDropdown() {
                                                         className={cn(
                                                             "flex h-auto w-full flex-col items-start justify-start rounded-md px-3 py-2 text-left",
                                                             globalIndex ===
-                                                                highlightedIndex &&
-                                                                "bg-accent text-accent-foreground",
+                                                            highlightedIndex &&
+                                                            "bg-accent text-accent-foreground",
                                                             !enabled &&
-                                                                "cursor-not-allowed opacity-50"
+                                                            "cursor-not-allowed opacity-50"
                                                         )}
                                                         ref={
                                                             globalIndex ===
-                                                            highlightedIndex
+                                                                highlightedIndex
                                                                 ? (el) =>
-                                                                      el?.scrollIntoView(
-                                                                          {
-                                                                              block: "nearest",
-                                                                          }
-                                                                      )
+                                                                    el?.scrollIntoView(
+                                                                        {
+                                                                            block: "nearest",
+                                                                        }
+                                                                    )
                                                                 : null
                                                         }
                                                     >
@@ -231,11 +241,11 @@ export function ChatModelDropdown() {
                                                             </div>
                                                             {selectedModel ===
                                                                 model.providerKey && (
-                                                                <Check
-                                                                    size={16}
-                                                                    className="flex-shrink-0 text-blue-500"
-                                                                />
-                                                            )}
+                                                                    <Check
+                                                                        size={16}
+                                                                        className="flex-shrink-0 text-blue-500"
+                                                                    />
+                                                                )}
                                                         </div>
                                                     </Button>
                                                 );

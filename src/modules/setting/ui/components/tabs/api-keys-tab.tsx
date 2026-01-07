@@ -39,39 +39,46 @@ const apiKeyFields: {
     required?: boolean;
     linkUrl: string;
 }[] = [
-    {
-        id: "google",
-        label: "Google API Key",
-        placeholder: "AIza...",
-        required: true,
-        linkUrl: "https://aistudio.google.com/apikey",
-    },
-    {
-        id: "groq",
-        label: "Groq Api Key",
-        placeholder: "gsk_...",
-        linkUrl: "https://console.groq.com/keys",
-    },
-    {
-        id: "openrouter",
-        label: "OpenRouter API Key",
-        placeholder: "sk-or-...",
-        linkUrl: "https://openrouter.ai/settings/keys",
-    },
-    {
-        id: "openai",
-        label: "OpenAI API Key",
-        placeholder: "sk-...",
-        linkUrl: "https://platform.openai.com/settings/organization/api-keys",
-    },
-];
+        {
+            id: "google",
+            label: "Google API Key",
+            placeholder: "AIza...",
+            required: true,
+            linkUrl: "https://aistudio.google.com/apikey",
+        },
+        {
+            id: "groq",
+            label: "Groq Api Key",
+            placeholder: "gsk_...",
+            linkUrl: "https://console.groq.com/keys",
+        },
+        {
+            id: "openrouter",
+            label: "OpenRouter API Key",
+            placeholder: "sk-or-...",
+            linkUrl: "https://openrouter.ai/settings/keys",
+        },
+        {
+            id: "openai",
+            label: "OpenAI API Key",
+            placeholder: "sk-...",
+            linkUrl: "https://platform.openai.com/settings/organization/api-keys",
+        },
+    ];
 
 export default function APIKeyForm() {
     const { keys, setKeys } = useAPIKeyStore();
 
+    const defaultKeys = {
+        google: "",
+        groq: "",
+        openrouter: "",
+        openai: "",
+    };
+
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: keys,
+        defaultValues: defaultKeys,
     });
 
     useEffect(() => {

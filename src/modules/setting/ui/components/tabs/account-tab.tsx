@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,9 +40,17 @@ export default function AccountTab() {
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
-            userName: session.data?.user.name ?? "",
+            userName: "",
         },
     });
+
+    useEffect(() => {
+        if (session.data?.user.name) {
+            form.reset({
+                userName: session.data.user.name,
+            });
+        }
+    }, [session.data]);
 
     const userMutation = api.user.changeUserName.useMutation();
     function onSubmit(values: z.infer<typeof customizationFormSchema>) {
@@ -100,7 +108,7 @@ export default function AccountTab() {
 function DeleteAccountArea() {
     const { data: session } = useSession();
     if (!session) {
-        redirect("/auth");
+        return null;
     }
     const deleteMutations = api.user.deleteUserByuserId.useMutation({
         onSuccess() {

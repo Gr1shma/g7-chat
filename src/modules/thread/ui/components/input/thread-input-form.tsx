@@ -3,7 +3,7 @@
 import { memo, useCallback, useEffect } from "react";
 import { useTextareaAutosize } from "~/hooks/use-textarea-autosize";
 import { ThreadInputTextarea } from "./thread-input-text-area";
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "~/hooks/use-local-storage";
 import { InputToolbar } from "./toolbar";
 import { type UseChatHelpers } from "ai/react";
 

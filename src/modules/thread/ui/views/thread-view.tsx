@@ -1,7 +1,7 @@
 "use client";
 
 import { type Message, useChat } from "ai/react";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { toast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 import { ThreadMessages } from "../components/message/thread-messages";
@@ -88,10 +88,13 @@ export function ThreadViewSection({
 
     const hasRequiredKeys = useAPIKeyStore((state) => state.hasRequiredKeys());
 
-    const isAPIKeysHydrated = useAPIKeyStore.persist?.hasHydrated();
-    const isModelStoreHydrated = useModelStore.persist?.hasHydrated();
+    const [isMounted, setIsMounted] = useState(false);
 
-    if (!isAPIKeysHydrated || !isModelStoreHydrated) return null;
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) return null;
 
     if (!hasRequiredKeys)
         return (

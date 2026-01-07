@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -32,12 +34,23 @@ export default function CustomizationTab() {
     const form = useForm<z.infer<typeof customizationFormSchema>>({
         resolver: zodResolver(customizationFormSchema),
         defaultValues: {
-            name: session.data?.user.customization.name,
-            whatDoYouDo: session.data?.user.customization.whatDoYouDo,
-            chatTraits: session.data?.user.customization.chatTraits,
-            keepInMind: session.data?.user.customization.keepInMind,
+            name: "",
+            whatDoYouDo: "",
+            chatTraits: "",
+            keepInMind: "",
         },
     });
+
+    useEffect(() => {
+        if (session.data?.user.customization) {
+            form.reset({
+                name: session.data.user.customization.name,
+                whatDoYouDo: session.data.user.customization.whatDoYouDo,
+                chatTraits: session.data.user.customization.chatTraits,
+                keepInMind: session.data.user.customization.keepInMind,
+            });
+        }
+    }, [session.data]);
 
     const userMutation = api.user.addCustomization.useMutation({
         onSuccess: session.update,
