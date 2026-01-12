@@ -173,7 +173,11 @@ export function HistoryTabSuspense() {
 
                     try {
                         if (date instanceof Date) {
-                            return <span suppressHydrationWarning>{date.toLocaleDateString()}</span>;
+                            return (
+                                <span suppressHydrationWarning>
+                                    {date.toLocaleDateString()}
+                                </span>
+                            );
                         }
 
                         const parsedDate = new Date(date as string | number);
@@ -182,7 +186,11 @@ export function HistoryTabSuspense() {
                             return "";
                         }
 
-                        return <span suppressHydrationWarning>{parsedDate.toLocaleDateString()}</span>;
+                        return (
+                            <span suppressHydrationWarning>
+                                {parsedDate.toLocaleDateString()}
+                            </span>
+                        );
                     } catch {
                         console.warn("Invalid date format:", date);
                         return "";
@@ -233,10 +241,10 @@ export function HistoryTabSuspense() {
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                    header.column.columnDef
-                                                        .header,
-                                                    header.getContext()
-                                                )}
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
                                         </TableHead>
                                     ))}
                                 </TableRow>

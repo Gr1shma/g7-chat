@@ -88,7 +88,7 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
 
     const threadId = Array.isArray(params.threadId)
         ? params.threadId[0]
-        : params.threadId ?? undefined;
+        : (params.threadId ?? undefined);
 
     useEffect(() => {
         if (threadId && navigatingToId === threadId) {
@@ -259,8 +259,8 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const filteredUnassignedThreads = isSearchEmpty
         ? unassignedThreads
         : unassignedThreads.filter((thread) =>
-            thread.title?.toLowerCase().includes(normalizedQuery)
-        );
+              thread.title?.toLowerCase().includes(normalizedQuery)
+          );
 
     const hasProjectMatches =
         !isSearchEmpty &&
@@ -333,7 +333,7 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                                                 <SidebarGroupLabel>
                                                     {
                                                         labelMap[
-                                                        label as keyof typeof groupedThreads
+                                                            label as keyof typeof groupedThreads
                                                         ]
                                                     }
                                                 </SidebarGroupLabel>

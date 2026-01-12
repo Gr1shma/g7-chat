@@ -154,14 +154,14 @@ export function ModelSelector({
                                         className={cn(
                                             "h-13 flex w-full items-center gap-3 rounded-md px-3 text-left text-sm",
                                             index === highlightedIndex &&
-                                            "bg-accent text-accent-foreground"
+                                                "bg-accent text-accent-foreground"
                                         )}
                                         ref={
                                             index === highlightedIndex
                                                 ? (el) =>
-                                                    el?.scrollIntoView({
-                                                        block: "nearest",
-                                                    })
+                                                      el?.scrollIntoView({
+                                                          block: "nearest",
+                                                      })
                                                 : null
                                         }
                                     >
@@ -189,7 +189,8 @@ export function ModelSelector({
                             </div>
                         ) : (
                             <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No models found matching &quot;{searchQuery}&quot;
+                                No models found matching &quot;{searchQuery}
+                                &quot;
                             </div>
                         )}
                     </div>

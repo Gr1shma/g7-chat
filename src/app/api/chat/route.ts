@@ -93,11 +93,11 @@ function createAIModel(
 }
 
 export async function POST(request: Request) {
-    const {
-        id,
-        messages,
-        model,
-    } = (await request.json()) as { id: string; messages: Array<Message>; model?: string };
+    const { id, messages, model } = (await request.json()) as {
+        id: string;
+        messages: Array<Message>;
+        model?: string;
+    };
 
     const session = await auth();
 

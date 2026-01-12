@@ -350,10 +350,11 @@ export function ProjectSection({
                                                     </DropdownMenu>
                                                 ) : (
                                                     <ChevronDown
-                                                        className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen
-                                                            ? "rotate-180"
-                                                            : ""
-                                                            }`}
+                                                        className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                                            isOpen
+                                                                ? "rotate-180"
+                                                                : ""
+                                                        }`}
                                                     />
                                                 )}
                                             </div>

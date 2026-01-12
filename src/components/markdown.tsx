@@ -208,9 +208,12 @@ const NonMemoizedMarkdown = ({ children }: MarkdownProps) => {
     const processContent = (content: string) => {
         return content
             .replace(/\\n/g, "\n")
-            .replace(/<think>\n?([\s\S]*?)\n?<\/think>/g, (_match, thinkContent: string) => {
-                return `:::think\n${thinkContent.trim()}\n:::`;
-            });
+            .replace(
+                /<think>\n?([\s\S]*?)\n?<\/think>/g,
+                (_match, thinkContent: string) => {
+                    return `:::think\n${thinkContent.trim()}\n:::`;
+                }
+            );
     };
 
     return (
