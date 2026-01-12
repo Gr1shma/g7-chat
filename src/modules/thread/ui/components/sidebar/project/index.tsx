@@ -126,6 +126,7 @@ export function ProjectSection({
 
             return newOpenProjects;
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [threadId, activeThreadProjectId]);
 
     useEffect(() => {
@@ -169,6 +170,7 @@ export function ProjectSection({
                 return newOpenProjects;
             });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery]);
 
     const getFilteredProjects = () => {
@@ -249,7 +251,7 @@ export function ProjectSection({
 
                     <SidebarGroupContent className="flex flex-col gap-1 px-1 py-2">
                         {filteredProjects.map((project) => {
-                            const isOpen = openProjects[project.id] || false;
+                            const isOpen = openProjects[project.id] ?? false;
 
                             return (
                                 <div key={project.id}>
@@ -264,13 +266,13 @@ export function ProjectSection({
                                                     )
                                                 }
                                                 onBlur={() =>
-                                                    handleProjectTitleSave(
+                                                    void handleProjectTitleSave(
                                                         project.id
                                                     )
                                                 }
                                                 onKeyDown={(e) => {
                                                     if (e.key === "Enter")
-                                                        handleProjectTitleSave(
+                                                        void handleProjectTitleSave(
                                                             project.id
                                                         );
                                                     if (e.key === "Escape")
@@ -348,11 +350,10 @@ export function ProjectSection({
                                                     </DropdownMenu>
                                                 ) : (
                                                     <ChevronDown
-                                                        className={`h-4 w-4 text-muted-foreground transition-transform ${
-                                                            isOpen
-                                                                ? "rotate-180"
-                                                                : ""
-                                                        }`}
+                                                        className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen
+                                                            ? "rotate-180"
+                                                            : ""
+                                                            }`}
                                                     />
                                                 )}
                                             </div>

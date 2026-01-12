@@ -20,12 +20,13 @@ type StoreWithPersist = Mutate<
 
 export const withStorageDOMEvents = (store: StoreWithPersist) => {
     if (typeof window === "undefined") {
-        return () => {};
+        // noop for SSR
+        return () => { /* noop */ };
     }
 
     const storageEventCallback = (e: StorageEvent) => {
         if (e.key === store.persist.getOptions().name && e.newValue) {
-            store.persist.rehydrate();
+            void store.persist.rehydrate();
         }
     };
     window.addEventListener("storage", storageEventCallback);

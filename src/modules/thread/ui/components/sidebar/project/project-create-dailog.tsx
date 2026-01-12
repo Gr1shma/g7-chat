@@ -54,7 +54,7 @@ export function CreateNewProjectDialog({
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 e.preventDefault();
-                                handleCreateProject();
+                                void handleCreateProject();
                             }
                         }}
                     />

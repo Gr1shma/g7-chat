@@ -68,15 +68,15 @@ export function convertToUIMessages(
         if (typeof message.content === "string") {
             textContent = message.content;
         } else if (Array.isArray(message.content)) {
-            for (const content of message.content) {
+            for (const content of message.content as Array<{ type: string; text?: string; toolCallId?: string; toolName?: string; args?: unknown; reasoning?: string }>) {
                 if (content.type === "text") {
-                    textContent += content.text;
+                    textContent += content.text ?? "";
                 } else if (content.type === "tool-call") {
                     toolInvocations.push({
                         state: "call",
-                        toolCallId: content.toolCallId,
-                        toolName: content.toolName,
-                        args: content.args,
+                        toolCallId: content.toolCallId ?? "",
+                        toolName: content.toolName ?? "",
+                        args: content.args as Record<string, unknown>,
                     });
                 } else if (content.type === "reasoning") {
                     reasoning = content.reasoning;
@@ -125,8 +125,8 @@ export function sanitizeResponseMessages({
             content.type === "tool-call"
                 ? toolResultIds.includes(content.toolCallId)
                 : content.type === "text"
-                  ? content.text.length > 0
-                  : true
+                    ? content.text.length > 0
+                    : true
         );
 
         return {

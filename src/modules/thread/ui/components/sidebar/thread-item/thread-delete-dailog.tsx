@@ -59,7 +59,7 @@ export function ThreadDeleteDailog({
             }
         },
         onSettled: () => {
-            utils.thread.getInfiniteThreads.invalidate(input);
+            void utils.thread.getInfiniteThreads.invalidate(input);
         },
     });
     const handleDelete = async () => {

@@ -70,7 +70,7 @@ export function DeleteProjectAlertDialog({
                         This action cannot be undone. This will permanently
                         delete{" "}
                         <span className="font-extrabold">
-                            "{project?.title}"
+                            &quot;{project?.title}&quot;
                         </span>{" "}
                         project and all its threads and messages.
                     </AlertDialogDescription>

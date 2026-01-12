@@ -140,7 +140,7 @@ export function HistoryTabSuspense() {
                     <div className="flex items-center justify-center">
                         <Checkbox
                             checked={!!selectedThreadIds[row.original.id]}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(_checked) => {
                                 toggleThreadSelection(row.original.id);
                             }}
                             onClick={(e) => e.stopPropagation()}
@@ -183,7 +183,7 @@ export function HistoryTabSuspense() {
                         }
 
                         return <span suppressHydrationWarning>{parsedDate.toLocaleDateString()}</span>;
-                    } catch (error) {
+                    } catch {
                         console.warn("Invalid date format:", date);
                         return "";
                     }

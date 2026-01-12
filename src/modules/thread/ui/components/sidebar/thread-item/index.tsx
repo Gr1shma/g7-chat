@@ -75,7 +75,7 @@ const PureThreadItem = ({
             }
         },
         onSettled: () => {
-            utils.thread.getInfiniteThreads.invalidate(input);
+            void utils.thread.getInfiniteThreads.invalidate(input);
         },
     });
 
@@ -111,7 +111,7 @@ const PureThreadItem = ({
                 threadId: thread.id,
                 title: trimmedTitle,
             });
-        } catch (error) {
+        } catch {
             setTitle(thread.title);
         }
         setIsEditing(false);
@@ -119,7 +119,7 @@ const PureThreadItem = ({
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
-            handleTitleSave();
+            void handleTitleSave();
         } else if (e.key === "Escape") {
             setTitle(thread.title);
             setIsEditing(false);

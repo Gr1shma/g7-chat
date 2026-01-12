@@ -52,7 +52,7 @@ export function AIProvider<T extends ValidModelString>(
     modelString: T
 ): LanguageModel {
     if (!isValidModelString(modelString)) {
-        throw new Error(`Invalid model string: ${modelString}`);
+        throw new Error(`Invalid model string: ${modelString as string}`);
     }
 
     const [provider, model] = modelString.split(":") as [
@@ -129,7 +129,7 @@ function formatModelDisplayName(model: string): string {
         "deepseek-r1-distill-llama-70b": "Deepseek R1 70B",
     } as const;
 
-    return nameMap[model] || model;
+    return nameMap[model] ?? model;
 }
 
 /**

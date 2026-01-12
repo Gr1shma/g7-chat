@@ -19,13 +19,13 @@ export function SidebarUserNav() {
             >
                 <div className="flex flex-row items-center gap-3">
                     <UserAvatar
-                        imageUrl={session.data?.user.image || ""}
+                        imageUrl={session.data?.user.image ?? ""}
                         size="default"
-                        name={session.data?.user.name || ""}
+                        name={session.data?.user.name ?? ""}
                     />
                     <div className="flex text-foreground">
                         <span className="text-sm font-medium">
-                            {session.data?.user.name || ""}
+                            {session.data?.user.name ?? ""}
                         </span>
                     </div>
                 </div>

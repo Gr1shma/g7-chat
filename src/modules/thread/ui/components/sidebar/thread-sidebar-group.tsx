@@ -82,13 +82,13 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const { setOpenMobile } = useSidebar();
     const params = useParams();
     const router = useRouter();
-    const [isPending, startTransition] = useTransition();
+    const [, startTransition] = useTransition();
 
     const [navigatingToId, setNavigatingToId] = useState<string | null>(null);
 
     const threadId = Array.isArray(params.threadId)
         ? params.threadId[0]
-        : params.threadId || undefined;
+        : params.threadId ?? undefined;
 
     useEffect(() => {
         if (threadId && navigatingToId === threadId) {
@@ -143,8 +143,8 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
 
         const query = commandSearch.toLowerCase().trim();
         return searchableThreads.filter(({ thread, project }) => {
-            const threadTitle = thread.title?.toLowerCase() || "";
-            const projectName = project?.title?.toLowerCase() || "";
+            const threadTitle = thread.title?.toLowerCase() ?? "";
+            const projectName = project?.title?.toLowerCase() ?? "";
 
             return threadTitle.includes(query) || projectName.includes(query);
         });
@@ -238,7 +238,7 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const unassignedThreads = allThreads.filter((thread) => !thread.projectId);
 
     const activeThread = allThreads.find((thread) => thread.id === threadId);
-    const activeThreadProjectId = activeThread?.projectId || null;
+    const activeThreadProjectId = activeThread?.projectId ?? null;
 
     if (allThreads.length === 0) {
         return (
@@ -259,8 +259,8 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
     const filteredUnassignedThreads = isSearchEmpty
         ? unassignedThreads
         : unassignedThreads.filter((thread) =>
-              thread.title?.toLowerCase().includes(normalizedQuery)
-          );
+            thread.title?.toLowerCase().includes(normalizedQuery)
+        );
 
     const hasProjectMatches =
         !isSearchEmpty &&
@@ -333,7 +333,7 @@ export function SidebarHistory({ searchQuery }: SidebarHistoryProps) {
                                                 <SidebarGroupLabel>
                                                     {
                                                         labelMap[
-                                                            label as keyof typeof groupedThreads
+                                                        label as keyof typeof groupedThreads
                                                         ]
                                                     }
                                                 </SidebarGroupLabel>

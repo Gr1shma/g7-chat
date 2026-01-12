@@ -3,13 +3,14 @@
 import { createContext, useContext } from "react";
 import ShikiHighlighter from "react-shiki";
 import { Copy } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { useToast } from "~/hooks/use-toast";
 
 interface CodeComponentProps {
-    children: any;
+    children: ReactNode;
     className?: string;
 }
 
@@ -26,7 +27,7 @@ function Codebar({ lang = "plain", codeString }: CodebarProps) {
     const { toast } = useToast();
 
     const onCopy = () => {
-        navigator.clipboard.writeText(codeString);
+        void navigator.clipboard.writeText(codeString);
         toast({
             description: "Code copied to clipboard",
             duration: 2000,
@@ -55,13 +56,13 @@ export function CodeBlock({
     ...props
 }: CodeComponentProps) {
     const size = useContext(MarkdownSizeContext);
-    const match = /language-(\w+)/.exec(className || "");
+    const match = /language-(\w+)/.exec(className ?? "");
 
     if (match) {
         const lang = match[1];
         return (
             <div className="my-6 rounded-lg border bg-muted shadow-sm">
-                <Codebar lang={lang} codeString={String(children)} />
+                <Codebar lang={lang} codeString={children as string} />
                 <ShikiHighlighter
                     language={lang}
                     theme={"material-theme-darker"}
@@ -72,7 +73,7 @@ export function CodeBlock({
                     )}
                     showLanguage={false}
                 >
-                    {String(children)}
+                    {children as string}
                 </ShikiHighlighter>
             </div>
         );

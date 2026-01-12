@@ -41,7 +41,7 @@ export function PinThreadButton({ thread }: { thread: DB_THREAD_TYPE }) {
             }
         },
         onSettled: () => {
-            utils.thread.getInfiniteThreads.invalidate(input);
+            void utils.thread.getInfiniteThreads.invalidate(input);
         },
     });
     return (

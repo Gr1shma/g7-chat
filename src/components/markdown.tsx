@@ -53,9 +53,19 @@ const Think = ({ children }: { children: ReactNode }) => {
     );
 };
 
+interface DirectiveNode {
+    type: string;
+    name?: string;
+    data?: {
+        hName?: string;
+        hProperties?: Record<string, unknown>;
+    };
+    attributes?: Record<string, unknown>;
+}
+
 const remarkThinkBlock = () => {
-    return (tree: any) => {
-        visit(tree, (node: any) => {
+    return (tree: { type: string }) => {
+        visit(tree, (node: DirectiveNode) => {
             if (
                 node.type === "textDirective" ||
                 node.type === "leafDirective" ||
@@ -63,49 +73,49 @@ const remarkThinkBlock = () => {
             ) {
                 if (node.name !== "think") return;
 
-                const data = node.data || (node.data = {});
+                const data = node.data ?? (node.data = {});
                 data.hName = "think";
-                data.hProperties = node.attributes || {};
+                data.hProperties = node.attributes ?? {};
             }
         });
     };
 };
 
 const components: Partial<Components> = {
-    // @ts-expect-error
+    // @ts-expect-error - CodeBlock has custom props that differ from react-markdown's code component
     code: CodeBlock,
     pre: ({ children }) => <>{children}</>,
-    ol: ({ node, children, ...props }) => {
+    ol: ({ children, ...props }) => {
         return (
             <ol className="ml-4 list-outside list-decimal" {...props}>
                 {children}
             </ol>
         );
     },
-    li: ({ node, children, ...props }) => {
+    li: ({ children, ...props }) => {
         return (
             <li className="py-1" {...props}>
                 {children}
             </li>
         );
     },
-    ul: ({ node, children, ...props }) => {
+    ul: ({ children, ...props }) => {
         return (
             <ul className="ml-4 list-outside list-decimal" {...props}>
                 {children}
             </ul>
         );
     },
-    strong: ({ node, children, ...props }) => {
+    strong: ({ children, ...props }) => {
         return (
             <span className="font-semibold" {...props}>
                 {children}
             </span>
         );
     },
-    a: ({ node, children, ...props }) => {
+    a: ({ children, ...props }) => {
         return (
-            // @ts-expect-error
+            // @ts-expect-error - Link component accepts href from props spread
             <Link
                 className="text-blue-500 hover:underline"
                 target="_blank"
@@ -116,42 +126,42 @@ const components: Partial<Components> = {
             </Link>
         );
     },
-    h1: ({ node, children, ...props }) => {
+    h1: ({ children, ...props }) => {
         return (
             <h1 className="mb-2 mt-6 text-3xl font-semibold" {...props}>
                 {children}
             </h1>
         );
     },
-    h2: ({ node, children, ...props }) => {
+    h2: ({ children, ...props }) => {
         return (
             <h2 className="mb-2 mt-6 text-2xl font-semibold" {...props}>
                 {children}
             </h2>
         );
     },
-    h3: ({ node, children, ...props }) => {
+    h3: ({ children, ...props }) => {
         return (
             <h3 className="mb-2 mt-6 text-xl font-semibold" {...props}>
                 {children}
             </h3>
         );
     },
-    h4: ({ node, children, ...props }) => {
+    h4: ({ children, ...props }) => {
         return (
             <h4 className="mb-2 mt-6 text-lg font-semibold" {...props}>
                 {children}
             </h4>
         );
     },
-    h5: ({ node, children, ...props }) => {
+    h5: ({ children, ...props }) => {
         return (
             <h5 className="mb-2 mt-6 text-base font-semibold" {...props}>
                 {children}
             </h5>
         );
     },
-    h6: ({ node, children, ...props }) => {
+    h6: ({ children, ...props }) => {
         return (
             <h6 className="mb-2 mt-6 text-sm font-semibold" {...props}>
                 {children}
@@ -198,7 +208,7 @@ const NonMemoizedMarkdown = ({ children }: MarkdownProps) => {
     const processContent = (content: string) => {
         return content
             .replace(/\\n/g, "\n")
-            .replace(/<think>\n?([\s\S]*?)\n?<\/think>/g, (_, thinkContent) => {
+            .replace(/<think>\n?([\s\S]*?)\n?<\/think>/g, (_match, thinkContent: string) => {
                 return `:::think\n${thinkContent.trim()}\n:::`;
             });
     };

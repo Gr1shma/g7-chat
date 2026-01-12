@@ -12,7 +12,7 @@ export function useLocalStorage<T>(
         try {
             const item = window.localStorage.getItem(key);
             if (item) {
-                const parsed = JSON.parse(item);
+                const parsed = JSON.parse(item) as T;
                 setStoredValue(parsed);
             }
         } catch (error) {

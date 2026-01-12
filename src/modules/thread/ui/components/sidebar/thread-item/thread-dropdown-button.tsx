@@ -18,7 +18,7 @@ export function ThreadDropDownButton({
     thread,
     onOpenChange,
     isActive,
-    projectWithThreads,
+    projectWithThreads: _projectWithThreads,
 }: {
     thread: DB_THREAD_TYPE;
     onOpenChange: Dispatch<SetStateAction<boolean>>;

@@ -15,7 +15,6 @@ import {
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { signOut, useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,7 +49,7 @@ export default function AccountTab() {
                 userName: session.data.user.name,
             });
         }
-    }, [session.data]);
+    }, [session.data, form]);
 
     const userMutation = api.user.changeUserName.useMutation();
     function onSubmit(values: z.infer<typeof customizationFormSchema>) {
@@ -107,16 +106,17 @@ export default function AccountTab() {
 
 function DeleteAccountArea() {
     const { data: session } = useSession();
-    if (!session) {
-        return null;
-    }
+    const [open, setOpen] = useState(false);
+
     const deleteMutations = api.user.deleteUserByuserId.useMutation({
         onSuccess() {
             void signOut();
         },
     });
 
-    const [open, setOpen] = useState(false);
+    if (!session) {
+        return null;
+    }
 
     return (
         <div className="w-fit space-y-2 border-0 border-muted-foreground/10">

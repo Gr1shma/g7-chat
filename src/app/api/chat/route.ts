@@ -97,8 +97,7 @@ export async function POST(request: Request) {
         id,
         messages,
         model,
-    }: { id: string; messages: Array<Message>; model?: string } =
-        await request.json();
+    } = (await request.json()) as { id: string; messages: Array<Message>; model?: string };
 
     const session = await auth();
 
@@ -191,7 +190,7 @@ export async function POST(request: Request) {
                 messages,
                 maxSteps: 5,
                 experimental_transform: smoothStream({ chunking: "word" }),
-                experimental_generateMessageId: crypto.randomUUID,
+                experimental_generateMessageId: () => crypto.randomUUID(),
                 onFinish: async ({ response }) => {
                     if (session.user?.id) {
                         try {

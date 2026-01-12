@@ -42,7 +42,7 @@ export function ChatModelDropdown() {
             const model = allModelsWithInfo.find(
                 (m) => m.providerKey === modelKey
             );
-            return model?.displayName || modelKey;
+            return model?.displayName ?? modelKey;
         },
         [allModelsWithInfo]
     );
@@ -256,7 +256,7 @@ export function ChatModelDropdown() {
                             </div>
                         ) : (
                             <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No models found matching "{searchQuery}"
+                                No models found matching &quot;{searchQuery}&quot;
                             </div>
                         )}
                     </div>

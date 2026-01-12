@@ -32,7 +32,7 @@ export function ModelSelector({
     const [highlightedIndex, setHighlightedIndex] = useState(0);
 
     const currentModel =
-        AVAILABLE_MODELS.find((m) => m.id === selectedModel) ||
+        AVAILABLE_MODELS.find((m) => m.id === selectedModel) ??
         AVAILABLE_MODELS[0];
 
     const filteredModels = useMemo(() => {
@@ -65,6 +65,7 @@ export function ModelSelector({
             );
             setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, selectedModel]);
 
     const handleModelSelect = (model: ModelInfo) => {
@@ -153,14 +154,14 @@ export function ModelSelector({
                                         className={cn(
                                             "h-13 flex w-full items-center gap-3 rounded-md px-3 text-left text-sm",
                                             index === highlightedIndex &&
-                                                "bg-accent text-accent-foreground"
+                                            "bg-accent text-accent-foreground"
                                         )}
                                         ref={
                                             index === highlightedIndex
                                                 ? (el) =>
-                                                      el?.scrollIntoView({
-                                                          block: "nearest",
-                                                      })
+                                                    el?.scrollIntoView({
+                                                        block: "nearest",
+                                                    })
                                                 : null
                                         }
                                     >
@@ -188,7 +189,7 @@ export function ModelSelector({
                             </div>
                         ) : (
                             <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No models found matching "{searchQuery}"
+                                No models found matching &quot;{searchQuery}&quot;
                             </div>
                         )}
                     </div>

@@ -50,7 +50,7 @@ export default function CustomizationTab() {
                 keepInMind: session.data.user.customization.keepInMind,
             });
         }
-    }, [session.data]);
+    }, [session.data, form]);
 
     const userMutation = api.user.addCustomization.useMutation({
         onSuccess: session.update,
