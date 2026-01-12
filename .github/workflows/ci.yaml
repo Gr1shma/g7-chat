@@ -91,59 +91,59 @@ jobs:
         run: pnpm build
 
   e2e:
-  runs-on: ubuntu-latest
-  needs: build
-  env:
-    SKIP_ENV_VALIDATION: true
-    AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-    - name: Get pnpm store directory
-      shell: bash
-      run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-    - name: Setup pnpm cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
-    - name: Install dependencies
-      run: pnpm install
-    - name: Copy .env.example files
-      shell: bash
-      run: find . -type f -name ".env.example" -exec sh -c 'cp "$1" "${1%.*}"' _ {} \;
-    - name: Generate AUTH_SECRET for testing
-      shell: bash
-      run: |
-        if [ -z "$AUTH_SECRET" ]; then
-          echo "AUTH_SECRET=$(openssl rand -base64 32)" >> $GITHUB_ENV
-        fi
-    - name: Add AUTH_SECRET to .env files
-      shell: bash
-      run: |
-        find . -type f -name ".env" -exec sh -c '
-          if grep -q "^AUTH_SECRET=" "$1"; then
-            sed -i "s|^AUTH_SECRET=.*|AUTH_SECRET=${{ env.AUTH_SECRET }}|" "$1"
-          else
-            echo "AUTH_SECRET=${{ env.AUTH_SECRET }}" >> "$1"
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      SKIP_ENV_VALIDATION: true
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: pnpm install
+      - name: Copy .env.example files
+        shell: bash
+        run: find . -type f -name ".env.example" -exec sh -c 'cp "$1" "${1%.*}"' _ {} \;
+      - name: Generate AUTH_SECRET for testing
+        shell: bash
+        run: |
+          if [ -z "$AUTH_SECRET" ]; then
+            echo "AUTH_SECRET=$(openssl rand -base64 32)" >> $GITHUB_ENV
           fi
-        ' _ {} \;
-    - name: Install Playwright Browsers
-      run: pnpm exec playwright install --with-deps
-    - name: Run Playwright tests
-      run: pnpm exec playwright test
-    - name: Upload Playwright Report
-      uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - name: Add AUTH_SECRET to .env files
+        shell: bash
+        run: |
+          find . -type f -name ".env" -exec sh -c '
+            if grep -q "^AUTH_SECRET=" "$1"; then
+              sed -i "s|^AUTH_SECRET=.*|AUTH_SECRET=${{ env.AUTH_SECRET }}|" "$1"
+            else
+              echo "AUTH_SECRET=${{ env.AUTH_SECRET }}" >> "$1"
+            fi
+          ' _ {} \;
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
