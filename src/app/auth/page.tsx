@@ -12,7 +12,10 @@ export default async function Page() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-8">
+        <div
+            data-testid="auth-page"
+            className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-8"
+        >
             <div className="mb-8 text-center">
                 <h1 className="mb-2 text-3xl font-bold text-white">
                     Welcome to G7 Chat
