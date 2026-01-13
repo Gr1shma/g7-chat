@@ -21,7 +21,7 @@ export const users = createTable("user", {
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name", { length: 255 }),
-    email: varchar("email", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }),
     emailVerified: timestamp("email_verified", {
         mode: "date",
         withTimezone: true,

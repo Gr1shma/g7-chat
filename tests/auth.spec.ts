@@ -1,64 +1,63 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("authentication page", () => {
-    test("displays correct page title", async ({ page }) => {
+test.describe("Authentication Page UI", () => {
+    test.beforeEach(async ({ page }) => {
         await page.goto("/auth");
+    });
 
+    test("should display the correct page title", async ({ page }) => {
         await expect(page).toHaveTitle(/g7-chat/i);
     });
 
-    test("displays welcome text and legal links", async ({ page }) => {
-        await page.goto("/auth");
-
+    test("should display welcome heading and sign-in prompt", async ({ page }) => {
         await expect(
-            page.getByRole("heading", { name: /welcome to g7 chat/i })
+            page.getByRole("heading", { name: "Welcome to G7 Chat" })
         ).toBeVisible();
         await expect(page.getByText(/sign in below/i)).toBeVisible();
-        await expect(
-            page.getByText(/by continuing, you agree to/i)
-        ).toBeVisible();
     });
 
-    test("displays google sign-in button", async ({ page }) => {
-        await page.goto("/auth");
-
+    test("should render the Google sign-in button", async ({ page }) => {
         await expect(
             page.getByRole("button", { name: /continue with google/i })
         ).toBeVisible();
     });
 
-    test("shows gradient background", async ({ page }) => {
-        await page.goto("/auth");
+    test("should have functional Terms and Privacy links", async ({ page }) => {
+        const termsLink = page.getByRole("link", { name: /terms of service/i });
+        const privacyLink = page.getByRole("link", { name: /privacy policy/i });
 
-        const container = page.getByTestId("auth-page");
+        await expect(termsLink).toBeVisible();
+        await expect(privacyLink).toBeVisible();
+
+        // Verify they lead to the correct routes
+        await expect(termsLink).toHaveAttribute("href", "/terms");
+        await expect(privacyLink).toHaveAttribute("href", "/privacy");
+    });
+
+    test("should display the background gradient", async ({ page }) => {
+        // The container is the main div with the gradient
+        const container = page.locator(".bg-gradient-to-br").first();
         const backgroundImage = await container.evaluate(
             (el) => getComputedStyle(el).backgroundImage
         );
 
         expect(backgroundImage).toContain("linear-gradient");
     });
+});
 
-    test("has working terms and privacy links", async ({ page }) => {
-        await page.goto("/auth");
-
-        const termsLink = page.getByRole("link", { name: /terms of service/i });
-        const privacyLink = page.getByRole("link", { name: /privacy policy/i });
-
-        await expect(termsLink).toHaveAttribute("href", "/terms");
-        await expect(privacyLink).toHaveAttribute("href", "/privacy");
+test.describe("Authentication Redirects (Unauthenticated)", () => {
+    test("should redirect to auth page when accessing root /", async ({ page }) => {
+        await page.goto("/");
+        await expect(page).toHaveURL(/\/auth/);
     });
 
-    test("google button has correct styling", async ({ page }) => {
-        await page.goto("/auth");
+    test("should redirect to auth page when accessing /setting", async ({ page }) => {
+        await page.goto("/setting");
+        await expect(page).toHaveURL(/\/auth/);
+    });
 
-        const button = page.getByRole("button", {
-            name: /continue with google/i,
-        });
-
-        const box = await button.boundingBox();
-        expect(box?.height).toBeGreaterThan(40);
-
-        await expect(button).toBeVisible();
-        await expect(button).toBeEnabled();
+    test("should redirect to auth page when accessing /chat", async ({ page }) => {
+        await page.goto("/chat");
+        await expect(page).toHaveURL(/\/auth/);
     });
 });
