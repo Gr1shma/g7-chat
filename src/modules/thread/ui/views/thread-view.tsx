@@ -35,10 +35,8 @@ export function ThreadViewSection({
     const selectedModel = useModelStore((state) => state.selectedModel);
     const modelConfig = useModelStore((state) => state.getModelConfig());
 
-
     const { data: session } = useSession();
     const isGuest = session?.user?.isGuest ?? false;
-
 
     const { getRemainingMessages, incrementMessageCount } =
         useGuestRateLimitStore();
