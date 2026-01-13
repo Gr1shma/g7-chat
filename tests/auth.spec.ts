@@ -9,7 +9,9 @@ test.describe("Authentication Page UI", () => {
         await expect(page).toHaveTitle(/g7-chat/i);
     });
 
-    test("should display welcome heading and sign-in prompt", async ({ page }) => {
+    test("should display welcome heading and sign-in prompt", async ({
+        page,
+    }) => {
         await expect(
             page.getByRole("heading", { name: "Welcome to G7 Chat" })
         ).toBeVisible();
@@ -46,17 +48,23 @@ test.describe("Authentication Page UI", () => {
 });
 
 test.describe("Authentication Redirects (Unauthenticated)", () => {
-    test("should redirect to auth page when accessing root /", async ({ page }) => {
+    test("should redirect to auth page when accessing root /", async ({
+        page,
+    }) => {
         await page.goto("/");
         await expect(page).toHaveURL(/\/auth/);
     });
 
-    test("should redirect to auth page when accessing /setting", async ({ page }) => {
+    test("should redirect to auth page when accessing /setting", async ({
+        page,
+    }) => {
         await page.goto("/setting");
         await expect(page).toHaveURL(/\/auth/);
     });
 
-    test("should redirect to auth page when accessing /chat", async ({ page }) => {
+    test("should redirect to auth page when accessing /chat", async ({
+        page,
+    }) => {
         await page.goto("/chat");
         await expect(page).toHaveURL(/\/auth/);
     });

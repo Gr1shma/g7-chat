@@ -144,9 +144,7 @@ export const threads_table = createTable("threads", {
     title: text("title").notNull(),
     isPinned: boolean("is_pinned").default(false),
     isBranched: boolean("is_branched").default(false),
-    userId: varchar("user_id", { length: 255 })
-        .notNull()
-        .references(() => users.id),
+    userId: varchar("user_id", { length: 255 }).notNull(),
     visibility: varchar("visibility", { enum: ["public", "private"] })
         .notNull()
         .default("private"),

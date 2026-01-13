@@ -32,7 +32,7 @@ export function ChatModelDropdown() {
     const isModelEnabled = useCallback(
         (providerKey: string) => {
             const provider = providerKey.split(":")[0] as ProviderName;
-            return !!getKey(provider);
+            return provider === "groq" || !!getKey(provider);
         },
         [getKey]
     );

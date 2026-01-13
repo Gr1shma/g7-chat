@@ -104,7 +104,8 @@ export const threadRouter = createTRPCRouter({
                     title: input.title,
                     projectId: input.projectId,
                 });
-            } catch {
+            } catch (err) {
+                console.error("Failed to save thread:", err);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to save thread",

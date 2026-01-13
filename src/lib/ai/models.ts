@@ -1,6 +1,18 @@
 import { type Provider } from "./api-keys-store";
 
 export const PROVIDER_MODELS = {
+    groq: [
+        {
+            id: "llama-3.1-8b-instant",
+            displayName: "Llama 3.1 8B Instant",
+            description: "Ultra-fast inference with Llama 3.1 8B parameters",
+        },
+        {
+            id: "deepseek-r1-distill-llama-70b",
+            displayName: "DeepSeek R1 Distill 70B",
+            description: "Distilled version of DeepSeek R1 with 70B parameters",
+        },
+    ],
     google: [
         {
             id: "gemini-2.0-flash-001",
@@ -12,18 +24,6 @@ export const PROVIDER_MODELS = {
             id: "gemini-1.5-flash",
             displayName: "Gemini 1.5 Flash",
             description: "Fast and efficient model for general-purpose tasks",
-        },
-    ],
-    groq: [
-        {
-            id: "llama-3.1-8b-instant",
-            displayName: "Llama 3.1 8B Instant",
-            description: "Ultra-fast inference with Llama 3.1 8B parameters",
-        },
-        {
-            id: "deepseek-r1-distill-llama-70b",
-            displayName: "DeepSeek R1 Distill 70B",
-            description: "Distilled version of DeepSeek R1 with 70B parameters",
         },
     ],
     openrouter: [
@@ -105,15 +105,15 @@ export function getModelConfigByKey(key: ValidModelWithProvider): ModelConfig {
     const configs = MODEL_CONFIGS[provider];
 
     if (!configs) {
-        return MODEL_CONFIGS.google.find(
-            (config) => config.modelId === "gemini-2.0-flash-001"
+        return MODEL_CONFIGS.groq.find(
+            (config) => config.modelId === "llama-3.1-8b-instant"
         )!;
     }
 
     const found = configs.find((config) => config.modelId === modelId);
     if (!found) {
-        return MODEL_CONFIGS.google.find(
-            (config) => config.modelId === "gemini-2.0-flash-001"
+        return MODEL_CONFIGS.groq.find(
+            (config) => config.modelId === "llama-3.1-8b-instant"
         )!;
     }
 

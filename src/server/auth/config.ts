@@ -34,7 +34,6 @@ export const authConfig = {
             name: "Guest",
             credentials: {},
             async authorize() {
-                // Create a guest user session without database storage
                 return {
                     id: `guest-${crypto.randomUUID()}`,
                     email: null,
@@ -52,28 +51,23 @@ export const authConfig = {
         verificationTokensTable: verificationTokens,
     }),
     session: {
-        strategy: "jwt", // Switch to JWT instead of database sessions
-        maxAge: 30 * 24 * 60 * 60, // 30 days
+        strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60,
     },
     callbacks: {
         async jwt({ token, user, trigger, session }) {
-            // Initial sign in
             if (user) {
                 token.id = user.id;
                 token.isGuest = user.isGuest;
                 token.customization = user.customization;
             }
 
-            // Handle session updates (e.g., when customization changes)
             if (trigger === "update" && session) {
-                if (session.customization) {
-                    token.customization = session.customization;
-
-                    // Optionally persist to database for non-guest users
-                    if (!token.isGuest) {
-                        // You can add database update logic here if needed
-                        // await db.update(users).set({ customization: session.customization }).where(eq(users.id, token.id))
-                    }
+                const updatedSession = session as {
+                    customization?: CustomizationFomSchema;
+                };
+                if (updatedSession.customization) {
+                    token.customization = updatedSession.customization;
                 }
             }
 

@@ -70,6 +70,60 @@ export default async function Page() {
                         </Button>
                     </form>
                 ))}
+
+                <div className="relative my-2">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-neutral-700" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-neutral-900 px-2 text-neutral-500">
+                            or
+                        </span>
+                    </div>
+                </div>
+
+                <form
+                    action={async () => {
+                        "use server";
+                        try {
+                            await signIn("guest");
+                        } catch (error) {
+                            if (error instanceof AuthError) {
+                                return redirect("/setting");
+                            }
+                            throw error;
+                        }
+                    }}
+                >
+                    <Button
+                        variant="outline"
+                        type="submit"
+                        className="h-14 w-full border-neutral-700 bg-white/5 px-4 py-2 text-lg text-white backdrop-blur-sm transition-all hover:bg-white/10 hover:text-neutral-100 hover:shadow-lg"
+                    >
+                        <svg
+                            className="mr-3 h-6 w-6"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                            <path
+                                d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                        Continue as Guest
+                    </Button>
+                </form>
             </div>
             <div className="mt-6 space-y-4 text-center text-sm text-neutral-500">
                 <p>

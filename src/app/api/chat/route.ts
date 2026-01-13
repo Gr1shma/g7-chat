@@ -23,9 +23,16 @@ import {
     getModelConfigByKey,
     type ModelConfig,
     type ValidModelWithProvider,
+    MODEL_CONFIGS,
 } from "~/lib/ai/models";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createGroq } from "@ai-sdk/groq";
+import { env } from "~/env";
+import {
+    canGuestSendMessage,
+    incrementGuestUsage,
+    getRemainingMessages,
+} from "~/server/api/guest-rate-limit";
 
 export const maxDuration = 60;
 
@@ -36,15 +43,21 @@ function jsonResponse(data: object, status: number): Response {
     });
 }
 
-async function validateRequest(
-    model?: string,
-    headersList?: Headers
-): Promise<{ modelConfig: ModelConfig; apiKey: string } | Response> {
-    if (!model) {
-        return jsonResponse({ error: "Model is required" }, 400);
-    }
+interface ValidatedRequest {
+    modelConfig: ModelConfig;
+    apiKey: string;
+    usingServerKey: boolean;
+}
 
-    const modelConfig = getModelConfigByKey(model as ValidModelWithProvider);
+async function validateRequest(
+    model: string | undefined,
+    headersList: Headers | undefined,
+    isGuest: boolean
+): Promise<ValidatedRequest | Response> {
+    const effectiveModel = model ?? "groq:llama-3.1-8b-instant";
+    const modelConfig = getModelConfigByKey(
+        effectiveModel as ValidModelWithProvider
+    );
 
     if (!modelConfig) {
         return jsonResponse({ error: "Invalid model specified" }, 400);
@@ -54,16 +67,25 @@ async function validateRequest(
         return jsonResponse({ error: "Headers missing" }, 400);
     }
 
-    const apiKey = headersList.get(modelConfig.headerKey);
+    const userApiKey = headersList.get(modelConfig.headerKey);
 
-    if (!apiKey) {
-        return jsonResponse(
-            { error: `API key missing for provider ${modelConfig.provider}` },
-            401
-        );
+    if (userApiKey && userApiKey.trim().length > 0) {
+        return { modelConfig, apiKey: userApiKey, usingServerKey: false };
     }
 
-    return { modelConfig, apiKey };
+    if (isGuest && env.GROQ_API_KEY) {
+        const groqModelConfig = MODEL_CONFIGS.groq[0]!;
+        return {
+            modelConfig: groqModelConfig,
+            apiKey: env.GROQ_API_KEY,
+            usingServerKey: true,
+        };
+    }
+
+    return jsonResponse(
+        { error: `API key missing for provider ${modelConfig.provider}` },
+        401
+    );
 }
 
 function createAIModel(
@@ -105,6 +127,8 @@ export async function POST(request: Request) {
         return new Response("Unauthorized", { status: 401 });
     }
 
+    const isGuest = session.user.isGuest ?? false;
+
     const userMessage = getMostRecentUserMessage(messages);
 
     if (!userMessage) {
@@ -113,13 +137,28 @@ export async function POST(request: Request) {
 
     const headersList = await headers();
 
-    const validationResult = await validateRequest(model, headersList);
+    const validationResult = await validateRequest(model, headersList, isGuest);
 
     if (validationResult instanceof Response) {
         return validationResult;
     }
 
-    const { modelConfig, apiKey } = validationResult;
+    const { modelConfig, apiKey, usingServerKey } = validationResult;
+
+    if (isGuest && usingServerKey) {
+        if (!canGuestSendMessage(session.user.id)) {
+            const remaining = getRemainingMessages(session.user.id);
+            return jsonResponse(
+                {
+                    error: `Daily message limit reached (${env.GUEST_MESSAGE_LIMIT} messages/day). Add your own API key or sign in to continue.`,
+                    remainingMessages: remaining,
+                    limitReached: true,
+                },
+                429
+            );
+        }
+        incrementGuestUsage(session.user.id);
+    }
 
     const aiModelOrResponse = createAIModel(modelConfig, apiKey);
 
@@ -136,8 +175,14 @@ export async function POST(request: Request) {
     });
 
     if (messages.length === 1) {
+        const titleModel = env.GROQ_API_KEY
+            ? (createGroq({ apiKey: env.GROQ_API_KEY })(
+                  "llama-3.1-8b-instant"
+              ) as LanguageModelV1)
+            : aiModel;
+
         const { text: title } = await generateText({
-            model: aiModel,
+            model: titleModel,
             system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 15 characters long

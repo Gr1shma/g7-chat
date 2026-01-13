@@ -21,10 +21,7 @@ import { useAPIKeyStore } from "~/lib/ai/api-keys-store";
 import Link from "next/link";
 
 const formSchema = z.object({
-    google: z
-        .string()
-        .trim()
-        .min(1, { message: "Google API key is required for Title Generation" }),
+    google: z.string().trim().optional(),
     groq: z.string().trim().optional(),
     openrouter: z.string().trim().optional(),
     openai: z.string().trim().optional(),
@@ -43,7 +40,6 @@ const apiKeyFields: {
         id: "google",
         label: "Google API Key",
         placeholder: "AIza...",
-        required: true,
         linkUrl: "https://aistudio.google.com/apikey",
     },
     {

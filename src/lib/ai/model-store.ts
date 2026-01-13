@@ -41,7 +41,7 @@ export const withStorageDOMEvents = (store: StoreWithPersist) => {
 export const useModelStore = create<ModelStore>()(
     persist(
         (set, get) => ({
-            selectedModel: "google:gemini-2.0-flash-001",
+            selectedModel: "groq:llama-3.1-8b-instant",
 
             setModel: (model) => {
                 set({ selectedModel: model });

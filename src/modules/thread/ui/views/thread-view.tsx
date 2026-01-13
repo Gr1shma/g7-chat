@@ -10,7 +10,8 @@ import { ScrollToBottomButton } from "~/components/scroll-to-bottom-button";
 import { ThreadInputForm } from "../components/input/thread-input-form";
 import { useAPIKeyStore } from "~/lib/ai/api-keys-store";
 import { useModelStore } from "~/lib/ai/model-store";
-import APIKeyForm from "~/modules/setting/ui/components/tabs/api-keys-tab";
+import { useSession } from "next-auth/react";
+import { useGuestRateLimitStore } from "~/stores/guest-limit-store";
 
 interface ThreadViewProps {
     threadId: string;
@@ -30,8 +31,18 @@ export function ThreadViewSection({
     const utils = api.useUtils();
 
     const { getKey } = useAPIKeyStore();
+    const hasAnyApiKey = useAPIKeyStore((state) => state.hasRequiredKeys());
     const selectedModel = useModelStore((state) => state.selectedModel);
     const modelConfig = useModelStore((state) => state.getModelConfig());
+
+
+    const { data: session } = useSession();
+    const isGuest = session?.user?.isGuest ?? false;
+
+
+    const { getRemainingMessages, incrementMessageCount } =
+        useGuestRateLimitStore();
+
     const headers = modelConfig
         ? { [modelConfig.headerKey]: getKey(modelConfig.provider) ?? "" }
         : {};
@@ -58,6 +69,9 @@ export function ThreadViewSection({
         headers,
         onFinish: () => {
             void utils.thread.invalidate();
+            if (isGuest && !hasAnyApiKey) {
+                incrementMessageCount();
+            }
         },
         onError: (error) => {
             let errorMessage =
@@ -67,8 +81,18 @@ export function ThreadViewSection({
                 try {
                     const parsed = JSON.parse(error.message) as {
                         error?: string;
+                        limitReached?: boolean;
                     };
                     errorMessage = parsed.error ?? error.message;
+
+                    if (parsed.limitReached) {
+                        toast({
+                            title: "Daily Limit Reached",
+                            description: errorMessage,
+                            variant: "destructive",
+                        });
+                        return;
+                    }
                 } catch {
                     errorMessage = error.message;
                 }
@@ -86,8 +110,6 @@ export function ThreadViewSection({
         bottomRef.current?.scrollIntoView({ behavior: "auto" });
     }, []);
 
-    const hasRequiredKeys = useAPIKeyStore((state) => state.hasRequiredKeys());
-
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -96,12 +118,8 @@ export function ThreadViewSection({
 
     if (!isMounted) return null;
 
-    if (!hasRequiredKeys)
-        return (
-            <div className="flex min-h-screen flex-col justify-center pr-10">
-                <APIKeyForm />
-            </div>
-        );
+    const guestRemainingMessages =
+        isGuest && !hasAnyApiKey ? getRemainingMessages() : null;
 
     return (
         <>
@@ -117,6 +135,30 @@ export function ThreadViewSection({
                             }
                         />
                     </div>
+                    {guestRemainingMessages !== null && (
+                        <div className="mb-2 text-center text-xs text-neutral-500">
+                            {guestRemainingMessages > 0 ? (
+                                <span>
+                                    Guest mode:{" "}
+                                    <span
+                                        className={
+                                            guestRemainingMessages <= 3
+                                                ? "text-amber-500"
+                                                : "text-green-500"
+                                        }
+                                    >
+                                        {guestRemainingMessages}
+                                    </span>{" "}
+                                    messages remaining today
+                                </span>
+                            ) : (
+                                <span className="text-red-400">
+                                    Daily limit reached. Add API keys or sign in
+                                    to continue.
+                                </span>
+                            )}
+                        </div>
+                    )}
                     <ThreadInputForm
                         setMessages={setMessages}
                         isLoading={isLoading}
@@ -142,7 +184,6 @@ export function ThreadViewSection({
                         append={append}
                         error={error}
                         onRetry={() => {
-                            // Get the last user message to retry
                             const lastUserMessage = [...messages]
                                 .reverse()
                                 .find((m) => m.role === "user");
