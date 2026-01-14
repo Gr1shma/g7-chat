@@ -24,6 +24,19 @@ test.describe("Authentication Page UI", () => {
         ).toBeVisible();
     });
 
+    test("should render the Guest sign-in button", async ({ page }) => {
+        await expect(
+            page.getByRole("button", { name: /continue as guest/i })
+        ).toBeVisible();
+    });
+
+    test("should redirect to home page when clicking Guest sign-in", async ({
+        page,
+    }) => {
+        await page.getByRole("button", { name: /continue as guest/i }).click();
+        await expect(page).toHaveURL(/\//);
+    });
+
     test("should have functional Terms and Privacy links", async ({ page }) => {
         const termsLink = page.getByRole("link", { name: /terms of service/i });
         const privacyLink = page.getByRole("link", { name: /privacy policy/i });
@@ -31,13 +44,11 @@ test.describe("Authentication Page UI", () => {
         await expect(termsLink).toBeVisible();
         await expect(privacyLink).toBeVisible();
 
-        // Verify they lead to the correct routes
         await expect(termsLink).toHaveAttribute("href", "/terms");
         await expect(privacyLink).toHaveAttribute("href", "/privacy");
     });
 
     test("should display the background gradient", async ({ page }) => {
-        // The container is the main div with the gradient
         const container = page.locator(".bg-gradient-to-br").first();
         const backgroundImage = await container.evaluate(
             (el) => getComputedStyle(el).backgroundImage
