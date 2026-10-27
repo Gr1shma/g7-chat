@@ -4,7 +4,7 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
 
 # Table of Contents
 
-* [Demo](#demo)
+* [Preview](#preview)
 * [What It Does](#what-it-does)
 * [Tech Stack 🛠️](#tech-stack)
 * [Features ✨](#features-)
@@ -26,11 +26,8 @@ g7-chat is a fast, minimalist AI chat interface built for power users who value 
 * [Acknowledgements 🌟](#acknowledgements-)
 * [License 📄](#license-)
 
-## Demo
 
-**🔗 Live Demo:** [https://g7-chat.vercel.app](https://g7-chat.vercel.app)
-
-**Preview:**
+## Preview
 
 ![g7-chat preview](./assets/preview.png)
 
